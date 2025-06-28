@@ -1,0 +1,26 @@
+🔁 Flow Summary
+Checkout (Customer):
+
+Validate stock.
+
+Deduct stock.
+
+Create Order and OrderItems.
+
+Save to DB.
+
+Notify sellers by email.
+
+Seller Approves/Rejects:
+
+Update OrderItem status.
+
+If rejected: refund amount to customer’s wallet.
+
+After all items are approved/rejected:
+
+If all approved: send "Order Approved" email with ETA.
+
+If all rejected: send "Order Rejected" email with item list.
+
+If mixed: send "Partial Approval" email with refund summary.

@@ -1,0 +1,10 @@
+(1) built timer trigger to remove all the revoked refresh token from the db
+(2) use Queue implementation when sending email and sms
+**(3) fix the common response and api interceptor in backend and frontend respectively. Follow a proper codoing standard
+(4) fix statuses in all the modules (admin, seller and customer)
+(5) create a timer trigger that will revoke all the refresh token if their expiry time is reached
+**(6) always use requestDTO to get the request from the client
+(7) send sms implementation, using otpChannel field
+-----(8) create a error log where you will log all the error occured while executing the DataAccessLayer methods and WebApi endpoints
+**(9) fix the refresh token functionality in frontend
+(10) fix issue related to sending email to the user when the all the ordeItems are approved or rejected

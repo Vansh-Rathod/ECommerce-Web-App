@@ -1,0 +1,947 @@
+2025-06-13 18:45:28 - [Info] - Service Started
+2025-06-13 18:45:28 - [Info] - Service Stopped
+2025-06-13 18:47:41 - [Info] - Service Started
+2025-06-13 18:47:41 - [Info] - Service Stopped
+2025-06-13 18:58:06 - [Info] - Service Started
+2025-06-13 18:59:35 - [Info] - Service Stopped
+2025-06-13 18:59:45 - [Info] - Service Started
+2025-06-13 19:05:25 - [Error] - Backup failed: Cannot open database "ECommerceWebApp" requested by the login. The login failed.
+Login failed for user 'NT AUTHORITY\SYSTEM'.
+2025-06-13 19:05:27 - [Info] - Service Stopped
+2025-06-13 19:18:00 - [Info] - Service Started
+2025-06-13 19:18:13 - [Info] - Service Stopped
+2025-06-13 19:25:00 - [Info] - Service Started
+2025-06-13 19:27:00 - [Error] - Backup failed: Cannot open backup device 'C:\Users\himan\OneDrive\Desktop\Satva Docs\Trainee2025\Satva Tasks\ECommerce\DbBackup\ECommerceWebApp_13-06-2025 19:27:00.bak'. Operating system error 123(The filename, directory name, or volume label syntax is incorrect.).
+BACKUP DATABASE is terminating abnormally.
+2025-06-13 19:27:02 - [Info] - Service Stopped
+2025-06-13 19:32:19 - [Info] - Service Started
+2025-06-13 19:33:19 - [Error] - Backup failed: Cannot open backup device 'C:\Users\himan\OneDrive\Desktop\Satva Docs\Trainee2025\Satva Tasks\ECommerce\DbBackup\ECommerceWebApp_13-06-2025_19-33-19.bak'. Operating system error 5(Access is denied.).
+BACKUP DATABASE is terminating abnormally.
+2025-06-13 19:33:20 - [Info] - Service Stopped
+2025-06-13 19:38:43 - [Info] - Service Started
+2025-06-13 19:38:49 - [Info] - Service Stopped
+2025-06-13 19:39:19 - [Info] - Service Started
+2025-06-13 19:42:37 - [Info] - Service Stopped
+2025-06-13 19:42:52 - [Info] - Service Started
+2025-06-13 19:44:22 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_13-06-2025_19-44-22.bak
+2025-06-13 19:44:24 - [Info] - Service Stopped
+2025-06-17 11:03:32 - [Info] - Service Started
+2025-06-17 11:04:02 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-04-02.bak
+2025-06-17 11:04:04 - [Info] - Service Stopped
+2025-06-17 11:17:06 - [Info] - Service Started
+2025-06-17 11:18:06 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-06.bak
+2025-06-17 11:18:08 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:08 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-08.bak
+2025-06-17 11:18:08 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:08 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-08.bak
+2025-06-17 11:18:09 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:09 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-09.bak
+2025-06-17 11:18:10 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:10 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-10.bak
+2025-06-17 11:18:10 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:10 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-10.bak
+2025-06-17 11:18:11 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:11 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-11.bak
+2025-06-17 11:18:11 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:11 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-11.bak
+2025-06-17 11:18:12 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:12 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-12.bak
+2025-06-17 11:18:12 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:12 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-12.bak
+2025-06-17 11:18:13 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:13 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-13.bak
+2025-06-17 11:18:13 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:13 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-13.bak
+2025-06-17 11:18:14 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:14 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-14.bak
+2025-06-17 11:18:15 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:15 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-15.bak
+2025-06-17 11:18:15 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:15 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-15.bak
+2025-06-17 11:18:16 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:16 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-16.bak
+2025-06-17 11:18:16 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:16 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-16.bak
+2025-06-17 11:18:17 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:17 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-17.bak
+2025-06-17 11:18:17 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:17 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-17.bak
+2025-06-17 11:18:18 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:18 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-18.bak
+2025-06-17 11:18:19 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:19 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-19.bak
+2025-06-17 11:18:19 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:19 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-19.bak
+2025-06-17 11:18:20 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:20 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-20.bak
+2025-06-17 11:18:20 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:20 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-20.bak
+2025-06-17 11:18:21 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:21 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-21.bak
+2025-06-17 11:18:21 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:21 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-21.bak
+2025-06-17 11:18:22 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:22 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-22.bak
+2025-06-17 11:18:23 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:23 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-23.bak
+2025-06-17 11:18:23 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:23 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-23.bak
+2025-06-17 11:18:24 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:24 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-24.bak
+2025-06-17 11:18:24 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:24 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-24.bak
+2025-06-17 11:18:25 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:25 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-25.bak
+2025-06-17 11:18:25 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:25 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-25.bak
+2025-06-17 11:18:26 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:26 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-26.bak
+2025-06-17 11:18:26 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:26 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-26.bak
+2025-06-17 11:18:27 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:27 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-27.bak
+2025-06-17 11:18:28 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:28 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-28.bak
+2025-06-17 11:18:28 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:28 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-28.bak
+2025-06-17 11:18:29 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:29 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-29.bak
+2025-06-17 11:18:29 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:29 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-29.bak
+2025-06-17 11:18:30 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:30 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-30.bak
+2025-06-17 11:18:30 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:30 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-30.bak
+2025-06-17 11:18:31 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:31 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-31.bak
+2025-06-17 11:18:31 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:31 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-31.bak
+2025-06-17 11:18:32 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:32 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-32.bak
+2025-06-17 11:18:33 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:33 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-33.bak
+2025-06-17 11:18:33 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:33 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-33.bak
+2025-06-17 11:18:34 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:34 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-34.bak
+2025-06-17 11:18:34 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:34 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-34.bak
+2025-06-17 11:18:35 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:35 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-35.bak
+2025-06-17 11:18:35 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:35 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-35.bak
+2025-06-17 11:18:36 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:36 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-36.bak
+2025-06-17 11:18:37 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:37 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-37.bak
+2025-06-17 11:18:37 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:37 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-37.bak
+2025-06-17 11:18:38 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:38 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-38.bak
+2025-06-17 11:18:38 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:38 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-38.bak
+2025-06-17 11:18:39 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:39 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-39.bak
+2025-06-17 11:18:39 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:39 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-39.bak
+2025-06-17 11:18:40 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:40 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-40.bak
+2025-06-17 11:18:41 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:41 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-41.bak
+2025-06-17 11:18:41 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:41 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-41.bak
+2025-06-17 11:18:42 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:42 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-42.bak
+2025-06-17 11:18:43 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:43 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-43.bak
+2025-06-17 11:18:43 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:43 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-43.bak
+2025-06-17 11:18:44 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:44 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-44.bak
+2025-06-17 11:18:44 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:44 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-44.bak
+2025-06-17 11:18:45 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:45 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-45.bak
+2025-06-17 11:18:45 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:45 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-45.bak
+2025-06-17 11:18:46 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:46 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-46.bak
+2025-06-17 11:18:46 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:46 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-46.bak
+2025-06-17 11:18:47 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:47 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-47.bak
+2025-06-17 11:18:48 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:48 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-48.bak
+2025-06-17 11:18:48 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:48 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-48.bak
+2025-06-17 11:18:49 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:49 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-49.bak
+2025-06-17 11:18:49 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:49 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-49.bak
+2025-06-17 11:18:50 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:50 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-50.bak
+2025-06-17 11:18:51 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:51 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-51.bak
+2025-06-17 11:18:51 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:51 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-51.bak
+2025-06-17 11:18:52 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:52 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-52.bak
+2025-06-17 11:18:52 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:52 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-52.bak
+2025-06-17 11:18:53 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:53 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-53.bak
+2025-06-17 11:18:54 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:54 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-54.bak
+2025-06-17 11:18:54 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:54 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-54.bak
+2025-06-17 11:18:55 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:55 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-55.bak
+2025-06-17 11:18:55 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:55 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-55.bak
+2025-06-17 11:18:56 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:56 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-56.bak
+2025-06-17 11:18:56 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:56 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-56.bak
+2025-06-17 11:18:57 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:57 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-57.bak
+2025-06-17 11:18:57 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:57 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-57.bak
+2025-06-17 11:18:58 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:58 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-58.bak
+2025-06-17 11:18:59 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:59 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-59.bak
+2025-06-17 11:18:59 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:18:59 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-18-59.bak
+2025-06-17 11:19:00 - [Error] - Unhandled Exception: An error occurred while attempting to establish an SSL or TLS connection.
+
+When connecting to an SMTP service, port 587 is typically reserved for plain-text connections. If
+you intended to connect to SMTP on the SSL port, try connecting to port 465 instead. Otherwise,
+if you intended to use STARTTLS, make sure to use the following code:
+
+client.Connect ("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+
+2025-06-17 11:25:49 - [Info] - Service Stopped
+2025-06-17 11:25:49 - [Error] - Unhandled Exception: A task was canceled.
+2025-06-17 11:33:00 - [Info] - Service Started
+2025-06-17 11:35:57 - [Info] - Service Stopped
+2025-06-17 11:35:57 - [Error] - Unhandled Exception: A task was canceled.
+2025-06-17 11:36:21 - [Info] - Service Started
+2025-06-17 11:38:21 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-38-21.bak
+2025-06-17 11:38:21 - [Info] - Email Sent Successfully
+2025-06-17 11:41:01 - [Info] - Service Stopped
+2025-06-17 11:41:01 - [Error] - Unhandled Exception: A task was canceled.
+2025-06-17 11:42:13 - [Info] - Service Started
+2025-06-17 11:43:13 - [Error] - Backup failed: Database 'ECommerceWebApp1' does not exist. Make sure that the name is entered correctly.
+BACKUP DATABASE is terminating abnormally.
+2025-06-17 11:43:13 - [Info] - Email Sent Successfully
+2025-06-17 11:46:28 - [Info] - Service Stopped
+2025-06-17 11:46:28 - [Error] - Unhandled Exception: A task was canceled.
+2025-06-17 11:53:15 - [Info] - Service Started
+2025-06-17 11:54:15 - [Error] - Backup failed: Database 'ECommerceWebApp1' does not exist. Make sure that the name is entered correctly.
+BACKUP DATABASE is terminating abnormally.
+2025-06-17 11:54:15 - [Info] - Email Sent Successfully
+2025-06-17 11:55:19 - [Info] - Service Stopped
+2025-06-17 11:55:19 - [Error] - Unhandled Exception: A task was canceled.
+2025-06-17 11:55:23 - [Info] - Service Started
+2025-06-17 11:56:42 - [Info] - Service Stopped
+2025-06-17 11:56:42 - [Error] - Unhandled Exception: A task was canceled.
+2025-06-17 11:57:26 - [Info] - Service Started
+2025-06-17 11:58:26 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_11-58-26.bak
+2025-06-17 11:58:26 - [Info] - Email Sent Successfully
+2025-06-17 11:59:15 - [Info] - Service Stopped
+2025-06-17 11:59:15 - [Error] - Unhandled Exception: A task was canceled.
+2025-06-17 12:09:26 - [Info] - Service Started
+2025-06-17 12:09:31 - [Info] - Service Stopped
+2025-06-17 12:10:08 - [Info] - Service Started
+2025-06-17 12:13:00 - [Info] - Service Stopped
+2025-06-17 12:13:24 - [Info] - Service Started
+2025-06-17 12:14:24 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_12-14-24.bak
+2025-06-17 12:14:24 - [Info] - Email Sent Successfully
+2025-06-17 12:15:01 - [Info] - Service Stopped
+2025-06-17 12:37:05 - [Info] - Service Started
+2025-06-17 18:00:10 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_17-06-2025_18-00-10.bak
+2025-06-17 18:00:10 - [Info] - Email Sent Successfully
+2025-06-17 18:54:32 - [Info] - Service Stopped
+2025-06-17 18:54:50 - [Info] - Service Started
+2025-06-18 18:00:20 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_18-06-2025_18-00-20.bak
+2025-06-18 18:00:19 - [Info] - Email Sent Successfully
+2025-06-19 13:45:35 - [Info] - Service Stopped
+2025-06-19 13:46:14 - [Info] - Service Started
+2025-06-19 13:48:25 - [Info] - Service Stopped
+2025-06-19 13:49:26 - [Info] - Service Started
+2025-06-19 13:50:26 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_19-06-2025_13-50-26.bak
+2025-06-19 13:50:26 - [Info] - Email Sent Successfully
+2025-06-19 13:50:27 - [Info] - Latest backup successfully copied: C:\Users\himan\OneDrive\Desktop\Satva Docs\Trainee2025\Satva Tasks\ECommerce\DbBackup\ECommerceWebApp_19-06-2025_13-50-26.bak
+2025-06-19 13:51:33 - [Info] - Service Stopped
+2025-06-19 13:52:26 - [Info] - Service Started
+2025-06-19 14:03:18 - [Info] - Service Stopped
+2025-06-19 14:04:33 - [Info] - Service Started
+2025-07-01 15:05:18 - [Info] - Service Started
+2025-06-19 16:20:51 - [Info] - Service Stopped
+2025-06-19 16:21:23 - [Info] - Service Started
+2025-06-19 18:00:25 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_19-06-2025_18-00-25.bak
+2025-06-19 18:00:25 - [Info] - Email Sent Successfully
+2025-06-19 18:00:30 - [Info] - Latest backup successfully copied: C:\Users\himan\OneDrive\Desktop\Satva Docs\Trainee2025\Satva Tasks\ECommerce\DbBackup\ECommerceWebApp_19-06-2025_18-00-25.bak
+2025-06-19 19:18:08 - [Info] - Service Stopped
+2025-06-19 19:18:24 - [Info] - Service Started
+2025-06-20 18:00:29 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_20-06-2025_18-00-29.bak
+2025-06-20 18:00:29 - [Info] - Email Sent Successfully
+2025-06-20 18:00:37 - [Info] - Latest backup successfully copied: C:\Users\himan\OneDrive\Desktop\Satva Docs\Trainee2025\Satva Tasks\ECommerce\DbBackup\ECommerceWebApp_20-06-2025_18-00-29.bak
+2025-06-20 20:44:23 - [Info] - Service Stopped
+2025-06-20 20:44:38 - [Info] - Service Started
+2025-06-23 10:37:51 - [Info] - Service Started
+2025-06-23 11:24:04 - [Info] - Service Started
+2025-06-23 15:09:17 - [Info] - Service Started
+2025-06-23 18:00:20 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_23-06-2025_18-00-20.bak
+2025-06-23 18:00:20 - [Info] - Email Sent Successfully
+2025-06-23 18:00:27 - [Info] - Latest backup successfully copied: C:\Users\himan\OneDrive\Desktop\Satva Docs\Trainee2025\Satva Tasks\ECommerce\DbBackup\ECommerceWebApp_23-06-2025_18-00-20.bak
+2025-06-24 18:00:23 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_24-06-2025_18-00-23.bak
+2025-06-24 18:00:23 - [Info] - Email Sent Successfully
+2025-06-24 18:00:27 - [Info] - Latest backup successfully copied: C:\Users\himan\OneDrive\Desktop\Satva Docs\Trainee2025\Satva Tasks\ECommerce\DbBackup\ECommerceWebApp_24-06-2025_18-00-23.bak
+2025-06-24 18:32:22 - [Info] - Service Started
+2025-06-25 18:00:20 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_25-06-2025_18-00-20.bak
+2025-06-25 18:00:20 - [Info] - Email Sent Successfully
+2025-06-25 18:00:27 - [Info] - Latest backup successfully copied: C:\Users\himan\OneDrive\Desktop\Satva Docs\Trainee2025\Satva Tasks\ECommerce\DbBackup\ECommerceWebApp_25-06-2025_18-00-20.bak
+2025-06-25 18:27:10 - [Info] - Service Stopped
+2025-06-25 18:27:27 - [Info] - Service Started
+2025-06-26 16:12:34 - [Info] - Service Started
+2025-06-26 18:00:06 - [Success] - Backup successful: C:\Program Files\Microsoft SQL Server\MSSQL16.SQLEXPRESS01\MSSQL\Backup\ECommerceWebApp_26-06-2025_18-00-06.bak
+2025-06-26 18:00:06 - [Info] - Email Sent Successfully
+2025-06-26 18:00:12 - [Info] - Latest backup successfully copied: C:\Users\himan\OneDrive\Desktop\Satva Docs\Trainee2025\Satva Tasks\ECommerce\DbBackup\ECommerceWebApp_26-06-2025_18-00-06.bak
