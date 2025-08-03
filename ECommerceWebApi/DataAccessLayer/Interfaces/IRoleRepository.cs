@@ -1,4 +1,5 @@
-﻿using SharedReference.Entities;
+﻿using SharedReference;
+using SharedReference.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +10,12 @@ namespace DataAccessLayer.Interfaces
 {
     public interface IRoleRepository
     {
-        Task<List<Role>> GetAllRoles();
+        Task<CommonResponse<PagedResult<Role>>> GetAllRoles();
 
-        Task<Role> GetRoleByName(string roleName);
+        Task<CommonResponse<Role>> GetRoleByName(string roleName);
 
-        Task<List<Role>> GetRolesByNamesAsync(List<string> roleNames);
+        Task<CommonResponse<PagedResult<Role>>> GetRolesByNamesAsync(List<string> roleNames);
 
-        Task<Role> GetRoleById(Guid roleId);
+        Task<CommonResponse<Role>> GetRoleById(Guid roleId);
     }
 }

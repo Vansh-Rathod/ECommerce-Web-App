@@ -27,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GenericServices\GenericServices.csproj" />
     <ProjectReference Include="..\SharedReference\SharedReference.csproj" />
   </ItemGroup>
 

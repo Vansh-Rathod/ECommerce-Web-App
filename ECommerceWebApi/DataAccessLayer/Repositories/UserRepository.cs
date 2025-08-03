@@ -1,15 +1,9 @@
 ﻿using DataAccessLayer.Data;
 using DataAccessLayer.Interfaces;
+using GenericServices.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using SharedReference;
-using SharedReference.Entities;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataAccessLayer.Repositories
 {
@@ -18,13 +12,13 @@ namespace DataAccessLayer.Repositories
         private readonly ApplicationDbContext _dbContext;
         private readonly ILoggerRepository _loggerRepository;
 
-        public UserRepository(ApplicationDbContext dbContext, ILoggerRepository loggerRepository)
+        public UserRepository( ApplicationDbContext dbContext, ILoggerRepository loggerRepository )
         {
             _dbContext = dbContext;
             _loggerRepository = loggerRepository;
         }
 
-        public async Task<CommonResponse<PagedResult<User>>> GetUsersAsync(int pageNumber, int pageSize, string searchText, string sortField, string sortOrder)
+        public async Task<CommonResponse<PagedResult<User>>> GetUsersAsync( int pageNumber, int pageSize, string searchText, string sortField, string sortOrder, DateTime? fromDate = null, DateTime? toDate = null )
         {
             try
             {
@@ -33,17 +27,28 @@ namespace DataAccessLayer.Repositories
                         .ThenInclude(userRole => userRole.Role)
                     .Include(userObj => userObj.CustomerProfile)
                     .Include(userObj => userObj.SellerProfile)
+                    .AsNoTracking()
                     .AsQueryable();
 
                 // Filter by search text (FullName or Email)
-                if (!string.IsNullOrWhiteSpace(searchText))
+                if(!string.IsNullOrWhiteSpace(searchText))
                 {
                     query = query.Where(userObj =>
                         userObj.FullName.Contains(searchText) ||
                         userObj.Email.Contains(searchText));
                 }
 
-                int totalCount = await query.CountAsync();
+                if(fromDate.HasValue)
+                {
+                    query = query.Where(userObj => userObj.CreatedAt >= fromDate.Value.Date);
+                }
+
+                if(toDate.HasValue)
+                {
+                    query = query.Where(userObj => userObj.CreatedAt <= toDate.Value.Date.AddDays(1).AddTicks(-1));
+                }
+
+                int totalRecords = await query.CountAsync();
 
                 // Sorting
                 bool ascending = sortOrder?.ToLower() == "asc";
@@ -56,21 +61,23 @@ namespace DataAccessLayer.Repositories
                 };
 
                 // Pagination
-                var users = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+                var pagedUsers = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
 
                 var pagedResult = new PagedResult<User>
                 {
-                    TotalCount = totalCount,
-                    Items = users
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Items = pagedUsers,
+                    TotalRecords = totalRecords
                 };
 
                 return CommonResponse<PagedResult<User>>.SuccessResponse(
                    pagedResult,
                    "Users fetched successfully");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                await _loggerRepository.LogAsync($"Failed to fetch users.", SharedReference.Enums.Enum.LogLevel.Error, "UserRepository.GetUsersAsync()", ex, null, null, null);
+                await _loggerRepository.LogAsync($"Exception occurred while retrieving users.", SharedReference.Enums.Enum.LogLevel.Error, "UserRepository.GetUsersAsync()", ex, null, null, null);
                 return CommonResponse<PagedResult<User>>.FailureResponse(
                   new List<string> { $"Exception occurred while retrieving users." },
                   "Failed to fetch Users"
@@ -97,7 +104,7 @@ namespace DataAccessLayer.Repositories
         //    }
         //}
 
-        public async Task<CommonResponse<List<User>>> GetUnapprovedUsersAsync(int pageNumber, int pageSize, string searchText, string sortField, string sortOrder)
+        public async Task<CommonResponse<List<User>>> GetUnapprovedUsersAsync( int pageNumber, int pageSize, string searchText, string sortField, string sortOrder )
         {
             try
             {
@@ -113,9 +120,9 @@ namespace DataAccessLayer.Repositories
                     unapprovedUsers,
                     "Unapproved users fetched successfully");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                await _loggerRepository.LogAsync($"Failed to fetch unapproved users.", SharedReference.Enums.Enum.LogLevel.Error, "UserRepository.GetUnapprovedUsersAsync()", ex, null, null, null);
+                await _loggerRepository.LogAsync($"Exception occurred while retrieving unapproved users.", SharedReference.Enums.Enum.LogLevel.Error, "UserRepository.GetUnapprovedUsersAsync()", ex, null, null, null);
                 return CommonResponse<List<User>>.FailureResponse(
                   new List<string> { $"Exception occurred while retrieving unapproved users." },
                   "Failed to fetch Unapproved Users"
@@ -123,7 +130,7 @@ namespace DataAccessLayer.Repositories
             }
         }
 
-        public async Task<CommonResponse<User>> CreateUserInDBAsync(User user)
+        public async Task<CommonResponse<User>> CreateUserInDBAsync( User user )
         {
             try
             {
@@ -131,20 +138,19 @@ namespace DataAccessLayer.Repositories
 
                 var result = await _dbContext.SaveChangesAsync();
 
-                if (result > 0)
+                if(result > 0)
                 {
                     return CommonResponse<User>.SuccessResponse(
                     user,
                     "User created successfully");
                 }
 
-                await _loggerRepository.LogAsync($"Failed to create user in DB.", SharedReference.Enums.Enum.LogLevel.Critical, "UserRepository.CreateUserInDBAsync()", null, null, null, new Dictionary<string, object> { { "User", user } });
                 return CommonResponse<User>.FailureResponse(
                   new List<string> { $"Something went wrong while creating user in DB." },
                   "Cannot create user in DB"
               );
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 await _loggerRepository.LogAsync($"Exception occurred while creating user in DB.", SharedReference.Enums.Enum.LogLevel.Error, "UserRepository.CreateUserInDBAsync()", ex, null, null, new Dictionary<string, object> { { "User", user } });
                 return CommonResponse<User>.FailureResponse(
@@ -153,7 +159,7 @@ namespace DataAccessLayer.Repositories
             }
         }
 
-        public async Task<CommonResponse<User>> UpdateUserInDBAsync(User user)
+        public async Task<CommonResponse<User>> UpdateUserInDBAsync( User user )
         {
             try
             {
@@ -161,20 +167,19 @@ namespace DataAccessLayer.Repositories
 
                 var result = await _dbContext.SaveChangesAsync();
 
-                if (result > 0)
+                if(result > 0)
                 {
                     return CommonResponse<User>.SuccessResponse(
                     user,
                     "User updated successfully");
                 }
 
-                await _loggerRepository.LogAsync($"Failed to update user in DB.", SharedReference.Enums.Enum.LogLevel.Critical, "UserRepository.UpdateUserInDBAsync()", null, null, null, new Dictionary<string, object> { { "User", user } });
                 return CommonResponse<User>.FailureResponse(
                   new List<string> { $"Something went wrong while updating user in DB." },
                   "Cannot update user in DB"
               );
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 await _loggerRepository.LogAsync($"Exception occurred while updating user in DB.", SharedReference.Enums.Enum.LogLevel.Error, "UserRepository.UpdateUserInDBAsync()", ex, null, null, new Dictionary<string, object> { { "User", user } });
                 return CommonResponse<User>.FailureResponse(
@@ -184,11 +189,11 @@ namespace DataAccessLayer.Repositories
         }
 
 
-        public async Task<CommonResponse<User>> GetUserByEmailAsync(string email)
+        public async Task<CommonResponse<User>> GetUserByEmailAsync( string email )
         {
             try
             {
-                var user =  await _dbContext.Users
+                var user = await _dbContext.Users
                     .Include(userObj => userObj.Roles)
                         .ThenInclude(ur => ur.Role)
                     .Include(userObj => userObj.CustomerProfile)
@@ -201,13 +206,13 @@ namespace DataAccessLayer.Repositories
                         user,
                         "User fetched successfully");
                 }
-                    return CommonResponse<User>.FailureResponse(
-                        new List<string> { $"User not found by email: {email}." },
-                        "User not found");
-                }
-            catch (Exception ex)
+                return CommonResponse<User>.FailureResponse(
+                    new List<string> { $"User not found by email: {email}." },
+                    "User not found");
+            }
+            catch(Exception ex)
             {
-                await _loggerRepository.LogAsync($"Exception occurred while retrieving user by email.", SharedReference.Enums.Enum.LogLevel.Error, "UserRepository.GetUserByEmailAsync()", ex, null, null, new Dictionary<string, object> { { "Email", email} });
+                await _loggerRepository.LogAsync($"Exception occurred while retrieving user by email.", SharedReference.Enums.Enum.LogLevel.Error, "UserRepository.GetUserByEmailAsync()", ex, null, null, new Dictionary<string, object> { { "Email", email } });
                 return CommonResponse<User>.FailureResponse(
                        new List<string> { $"Exception occurred while retrieving user by email: {email}." },
                        "Failed to fetch user");
@@ -215,11 +220,11 @@ namespace DataAccessLayer.Repositories
         }
 
 
-        public async Task<CommonResponse<List<User>>> GetUsersByRoleAsync(string role)
+        public async Task<CommonResponse<List<User>>> GetUsersByRoleAsync( string role )
         {
             try
             {
-                var users =  await _dbContext.Users
+                var users = await _dbContext.Users
                         .Include(user => user.Roles)
                         .ThenInclude(userRole => userRole.Role)
                         .Include(user => user.CustomerProfile)
@@ -238,9 +243,9 @@ namespace DataAccessLayer.Repositories
                        new List<string> { $"Users not found by role: {role}." },
                        "Users not found");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                await _loggerRepository.LogAsync($"Exception occurred while retrieving users by role.", SharedReference.Enums.Enum.LogLevel.Error, "UserRepository.GetUsersByRoleAsync()", ex, null, null, new Dictionary<string, object> { { "Role", role} });
+                await _loggerRepository.LogAsync($"Exception occurred while retrieving users by role.", SharedReference.Enums.Enum.LogLevel.Error, "UserRepository.GetUsersByRoleAsync()", ex, null, null, new Dictionary<string, object> { { "Role", role } });
                 return CommonResponse<List<User>>.FailureResponse(
                        new List<string> { $"Exception occurred while retrieving users by role: {role}." },
                        "Failed to fetch users by role");
@@ -248,18 +253,18 @@ namespace DataAccessLayer.Repositories
         }
 
 
-        public async Task<CommonResponse<User>> GetUserByIdAsync(Guid userId)
+        public async Task<CommonResponse<User>> GetUserByIdAsync( Guid userId )
         {
             try
             {
-                var user =  await _dbContext.Users
+                var user = await _dbContext.Users
                         .Include(user => user.Roles)
                             .ThenInclude(userRole => userRole.Role)
                         .Include(user => user.CustomerProfile)
                         .Include(user => user.SellerProfile)
                         .FirstOrDefaultAsync(user => user.Id == userId);
 
-                if (user != null)
+                if(user != null)
                 {
                     return CommonResponse<User>.SuccessResponse(
                         user,
@@ -269,10 +274,8 @@ namespace DataAccessLayer.Repositories
                     new List<string> { $"User not found by User Id: {userId}." },
                     "User not found");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                Console.WriteLine("Exception occurred while retrieving user by id: " + ex.Message);
-
                 await _loggerRepository.LogAsync($"Exception occurred while retrieving users by role.", SharedReference.Enums.Enum.LogLevel.Error, "UserRepository.GetUserByIdAsync()", ex, null, null, new Dictionary<string, object> { { "UserId", userId } });
                 return CommonResponse<User>.FailureResponse(
                        new List<string> { $"Exception occurred while retrieving user by User Id: {userId}." },
@@ -281,7 +284,7 @@ namespace DataAccessLayer.Repositories
         }
 
 
-        public async Task<CommonResponse<User>> DeleteUserAsync(Guid userId)
+        public async Task<CommonResponse<User>> DeleteUserAsync( Guid userId )
         {
             try
             {
@@ -290,13 +293,13 @@ namespace DataAccessLayer.Repositories
                 .Include(userObj => userObj.SellerProfile)
                 .FirstOrDefaultAsync(userObj => userObj.Id == userId);
 
-                if (user == null)
+                if(user == null)
                 {
                     return CommonResponse<User>.FailureResponse(
                     new List<string> { $"User not found by User Id: {userId}." },
                     "User not found");
                 }
-                
+
 
                 _dbContext.Users.Remove(user);
                 await _dbContext.SaveChangesAsync();
@@ -304,7 +307,7 @@ namespace DataAccessLayer.Repositories
                         user,
                         "User Removed successfully");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 await _loggerRepository.LogAsync($"Exception occurred while deleting user.", SharedReference.Enums.Enum.LogLevel.Error, "UserRepository.DeleteUserAsync()", ex, null, null, new Dictionary<string, object> { { "UserId", userId } });
                 return CommonResponse<User>.FailureResponse(
@@ -314,7 +317,7 @@ namespace DataAccessLayer.Repositories
 
         }
 
-        public async Task<CommonResponse<User>> Change2FAStatus(Guid userId, bool status)
+        public async Task<CommonResponse<User>> Change2FAStatus( Guid userId, bool status )
         {
             try
             {
@@ -325,7 +328,7 @@ namespace DataAccessLayer.Repositories
                         .Include(user => user.SellerProfile)
                         .FirstOrDefaultAsync(user => user.Id == userId);
 
-                if (user == null)
+                if(user == null)
                 {
                     return CommonResponse<User>.FailureResponse(
                    new List<string> { $"User not found by User Id: {userId}." },
@@ -349,7 +352,7 @@ namespace DataAccessLayer.Repositories
                   new List<string> { $"Unable to update 2FA status." },
                   "Failed to update 2FA status");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 await _loggerRepository.LogAsync($"Exception occurred while changing 2FA Status.", SharedReference.Enums.Enum.LogLevel.Error, "UserRepository.Change2FAStatus()", ex, null, null, new Dictionary<string, object> { { "UserId", userId }, { "Status", status } });
                 return CommonResponse<User>.FailureResponse(

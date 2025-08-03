@@ -1,4 +1,4 @@
-﻿using DataAccessLayer.Interfaces;
+﻿using GenericServices.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataAccessLayer.Repositories
+namespace GenericServices.LoggerService
 {
     public class LoggerRepository : ILoggerRepository
     {

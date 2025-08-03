@@ -1,0 +1,75 @@
+// Auth Controller
+POST /api/auth/register // Register a new user (Customer or Seller)
+POST /api/auth/login // Login and return JWT token
+
+POST /api/auth/approve-user-by-approval-token
+POST /api/auth/reject-user-by-rejection-token
+
+
+// Admin Controller
+GET /api/admin/pending-approvals // Get all seller approval requests
+PUT /api/admin/approve/{userId} // Approve seller
+PUT /api/admin/reject/{userId} // Reject seller
+
+
+// User Controller
+GET /api/users/{id} // Get user details
+GET /api/users // Get all users (admin)
+PUT /api/users/{id} // Update user
+DELETE /api/users/{id} // Delete user (soft/hard)
+
+
+
+// Customer Controller
+GET /api/customer/customers // Get all customers
+GET /api/customer/{customerId} // Get customer details
+PUT /api/customer/inactive/{customerId} // Make customer inactive
+
+PUT /api/customer/active/{customerId} // Make customer active
+
+
+// Seller Controller
+GET /api/seller/sellers // Get all sellers
+GET /api/seller/{sellerId} // Get seller details
+POST /api/seller/approve-seller/{sellerId} // approve seller
+DELETE /api/seller/reject-seller/{sellerId} // reject seller
+PUT /api/seller/inactive/{sellerId} // Make seller inactive
+PUT /api/seller/active/{sellerId} // Make seller active
+
+
+// Product Controller
+POST /api/products // Add new product (Seller)
+GET /api/products // Get all active products (Customer view)
+GET /api/products/{productId} // Get product by ID
+PUT /api/products/{productId} // Update product (Seller)
+DELETE /api/products/{productId} // Delete product (Seller)
+PUT /api/products/active/{productId} // Mark product as active (Seller)
+PUT /api/products/inactive/{productId}// Mark product as inactive (Seller)
+
+
+
+// Order Controller
+POST /api/orders // Place an order (Customer)
+GET /api/orders // Get orders (for current user)
+GET /api/orders/{orderId} // Get order details
+
+
+
+// Cart Controller
+POST /api/cart/add // Add product to cart (Customer)
+DELETE /api/cart/remove/{productId} // Remove product from cart (Customer)
+GET /api/cart // Get all cart items for the user
+
+
+
+// Wallet Controller
+GET /api/wallet // Get current wallet balance
+GET /api/wallet/transactions // Get wallet transaction history
+POST /api/wallet/add-funds // Add money to wallet (Customer/Seller)
+POST /api/wallet/pay // Pay from wallet (for order/payment)
+
+
+
+// Invoice Controller
+GET /api/invoices // Get all invoices (admin/user)
+GET /api/invoices/{invoiceId} // Get invoice by ID

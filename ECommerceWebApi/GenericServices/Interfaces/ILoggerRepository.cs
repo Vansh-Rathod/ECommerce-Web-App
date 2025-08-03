@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static SharedReference.Enums.Enum;
 
-namespace DataAccessLayer.Interfaces
+namespace GenericServices.Interfaces
 {
     public interface ILoggerRepository
     {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SharedReference;
 using SharedReference.Entities;
 using System;
 using System.Collections.Generic;
@@ -10,20 +11,20 @@ namespace DataAccessLayer.Interfaces
 {
     public interface IProductRepository
     {
-        Task<List<Product>> GetProductsAsync(int pageNumber , int pageSize, string searchText, string sortField, string sortOrder, string filterByPrice);
+        Task<CommonResponse<PagedResult<Product>>> GetProductsAsync( int pageNumber, int pageSize, string searchText, string sortField, string sortOrder, string filterByPrice, string filterByStatus );
 
-        Task<List<Product>> GetSellerProductsAsync(Guid sellerId, int pageNumber, int pageSize, string searchText, string sortField, string sortOrder, string filterByPrice);
+        Task<CommonResponse<PagedResult<Product>>> GetSellerProductsAsync( Guid sellerId, int pageNumber, int pageSize, string searchText, string sortField, string sortOrder, string filterByPrice, string filterByStatus );
 
-        Task<Product> GetProductByIdAsync(Guid productId);
+        Task<CommonResponse<Product>> GetProductByIdAsync( Guid productId );
 
-        Task<bool> CreateProductAsync(Product product);
+        Task<CommonResponse<Product>> CreateProductAsync( Product product );
 
-        Task<bool> UpdateProductAsync(Product product);
+        Task<CommonResponse<Product>> UpdateProductAsync( Product product );
 
-        Task<bool> DeleteProductAsync(Guid productId);
+        Task<CommonResponse<Product>> DeleteProductAsync( Guid productId );
 
-        Task<bool> MakeProductInactiveAsync(Guid productId);
+        Task<CommonResponse<Product>> MakeProductInactiveAsync( Guid productId );
 
-        Task<bool> MakeProductActiveAsync(Guid productId);
+        Task<CommonResponse<Product>> MakeProductActiveAsync( Guid productId );
     }
 }

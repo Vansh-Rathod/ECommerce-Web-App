@@ -1,4 +1,5 @@
-﻿using SharedReference.Entities;
+﻿using SharedReference;
+using SharedReference.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,16 +10,16 @@ namespace DataAccessLayer.Interfaces
 {
     public interface ICustomerRepository
     {
-        Task<List<Customer>> GetCustomersAsync(int pageNumber, int pageSize, string searchText, string sortField, string sortOrder, string filterByStatus);
+        Task<CommonResponse<PagedResult<Customer>>> GetCustomersAsync(int pageNumber, int pageSize, string searchText, string sortField, string sortOrder, string filterByStatus);
 
-        Task<Customer> GetCustomerByIdAsync(Guid customerId);
+        Task<CommonResponse<Customer>> GetCustomerByIdAsync(Guid customerId);
 
-        Task<Customer> GetCustomerByUserIdAsync(Guid userId);
+        Task<CommonResponse<Customer>> GetCustomerByUserIdAsync(Guid userId);
 
-        Task<bool> CreateCustomerInDBAsync(Customer customer);
+        Task<CommonResponse<Customer>> CreateCustomerInDBAsync(Customer customer);
 
-        Task<bool> MakeCustomerInactiveByCustomerIdAsync(Guid customerId);
+        Task<CommonResponse<Customer>> MakeCustomerInactiveByCustomerIdAsync(Guid customerId);
 
-        Task<bool> MakeCustomerActiveByCustomerIdAsync(Guid customerId);
+        Task<CommonResponse<Customer>> MakeCustomerActiveByCustomerIdAsync(Guid customerId);
     }
 }

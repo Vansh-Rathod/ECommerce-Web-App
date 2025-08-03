@@ -71,9 +71,9 @@ namespace ECommerceWebApi.Controllers
 
         [AllowAnonymous]
         [HttpPost("refresh-token")]
-        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenModel refreshTokenModel)
+        public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestModel refreshTokenRequestModel)
         {
-            var result = await _authService.RefreshAccessTokenAsync(refreshTokenModel.RefreshToken);
+            var result = await _authService.RefreshAccessTokenAsync(refreshTokenRequestModel.RefreshToken);
 
             if (!result.Success)
             {
@@ -152,5 +152,24 @@ namespace ECommerceWebApi.Controllers
         // TODO: Make admin dashboard api here to Get admin dashboard statistics -> GET /api/admin/dashboard
         // TODO: Make pending seller api to Get all pending seller approval requests -> GET /api/admin/sellers/pending
         // TODO: modify the api endpoint for approve-user-by-approval-token and reject-user-by-rejection-token
+
+
+        [AllowAnonymous]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] VerifyOtpRequestModel verifyOtpRequest)
+        {
+            CommonResponse<object> result = await _authService.VerifyUserOtpAsync(verifyOtpRequest);
+            if (!result.Success)
+            {
+                return Ok(new CommonResponse<object> { Success = false, Message = result.Message, Data = null, Errors = result.Errors, TimeStamp = result.TimeStamp });
+                //return Ok(new APIResponse { Status = 400, Message = result.Message, Data=Errors });
+            }
+            else
+            {
+                return Ok(new CommonResponse<object> { Success = true, Message = result.Message, Data = result.Data, Errors = null, TimeStamp = result.TimeStamp });
+            }
+        }
+
+        
     }
 }

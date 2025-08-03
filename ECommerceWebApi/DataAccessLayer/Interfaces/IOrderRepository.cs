@@ -1,4 +1,5 @@
-﻿using SharedReference.Entities;
+﻿using SharedReference;
+using SharedReference.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,18 +10,18 @@ namespace DataAccessLayer.Interfaces
 {
     public interface IOrderRepository
     {
-        Task<Order> PlaceOrderAsync(Guid customerId);
+        Task<CommonResponse<Order>> PlaceOrderAsync(Guid customerId);
 
-        Task<Order> GetOrderByIdAsync(Guid orderId);
+        Task<CommonResponse<Order>> GetOrderByIdAsync(Guid orderId);
 
-        Task<List<Order>> GetOrdersByCustomerIdAsync(Guid customerId);
+        Task<CommonResponse<PagedResult<Order>>> GetOrdersByCustomerIdAsync(Guid customerId, int pageNumber, int pageSize, string searchText, int filterByYear );
 
-        Task<List<Order>> GetOrdersBySellerIdAsync(Guid sellerId);
+        Task<CommonResponse<PagedResult<Order>>> GetOrdersBySellerIdAsync( Guid sellerId, int pageNumber, int pageSize, string searchText, string filterByOrderStatus );
 
-        Task<List<OrderItem>> GetPendingOrderItemsBySellerAsync(Guid sellerId);
+        Task<CommonResponse<PagedResult<OrderItem>>> GetPendingOrderItemsBySellerAsync(Guid sellerId, int pageNumber, int pageSize, string searchText );
 
-        Task<OrderItem> ApproveOrderItemAsync(Guid orderItemId);
+        Task<CommonResponse<OrderItem>> ApproveOrderItemAsync(Guid orderItemId);
 
-        Task<OrderItem> RejectOrderItemAsync(Guid orderItemId);
+        Task<CommonResponse<OrderItem>> RejectOrderItemAsync(Guid orderItemId);
     }
 }

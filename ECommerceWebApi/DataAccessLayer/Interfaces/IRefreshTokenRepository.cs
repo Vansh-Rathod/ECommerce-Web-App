@@ -9,14 +9,14 @@ namespace DataAccessLayer.Interfaces
 {
     public interface IRefreshTokenRepository
     {
-        Task<RefreshTokenModel> GetRefreshTokenByTokenAsync(string refreshToken);
+        Task<CommonResponse<RefreshTokenModel>> GetRefreshTokenByTokenAsync(string refreshToken);
 
-        Task<RefreshTokenModel> GetRefreshTokenByIdAsync(Guid id);
+        Task<CommonResponse<RefreshTokenModel>> GetRefreshTokenByIdAsync(Guid id);
 
-        Task<List<RefreshTokenModel>> GetRefreshTokensByUserIdAsync(Guid userId);
+        Task<CommonResponse<PagedResult<RefreshTokenModel>>> GetRefreshTokensByUserIdAsync(Guid userId);
 
-        Task<bool> SaveRefreshTokenAsync(RefreshTokenModel refreshTokenModel);
+        Task<CommonResponse<RefreshTokenModel>> SaveRefreshTokenAsync(RefreshTokenModel refreshTokenModel);
 
-        Task<bool> UpdateRefreshTokenAsync(RefreshTokenModel refreshTokenModel);
+        Task<CommonResponse<RefreshTokenModel>> UpdateRefreshTokenAsync(RefreshTokenModel refreshTokenModel);
     }
 }

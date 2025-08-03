@@ -50,6 +50,7 @@ builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IUserApprovalRequestRepository, UserApprovalRequestRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IUserOtpRepository, UserOtpRepository>();
+builder.Services.AddScoped<ILoggerRepository, LoggerRepository>();
 
 
 builder.Services.AddTransient<IEmailNotificationService, EmailNotificationService>();

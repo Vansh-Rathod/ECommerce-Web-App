@@ -30,8 +30,8 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
-            var customer = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
-            if (customer == null)
+            var customerResult = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
+            if (!customerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Customer Not found" });
             }
@@ -39,22 +39,22 @@ namespace ECommerceWebApi.Controllers
 
             var response =  new
             {
-                CustomerId = customer.Id,
-                UserId = customer.UserId,
-                IsActive = customer.IsActive,
-                CreatedAt = customer.CreatedAt,
+                CustomerId = customerResult.Data.Id,
+                UserId = customerResult.Data.UserId,
+                IsActive = customerResult.Data.IsActive,
+                CreatedAt = customerResult.Data.CreatedAt,
 
-                CustomerName = customer.User?.FullName,
-                CustomerEmail = customer.User?.Email,
-                CustomerLastLogin = customer.User?.LastLogin,
+                Name = customerResult.Data.User?.FullName,
+                Email = customerResult.Data.User?.Email,
+                LastLogin = customerResult.Data.User?.LastLogin,
 
-                Is2FAEnabled = customer.User?.Is2FAEnabled,
+                Is2FAEnabled = customerResult.Data.User?.Is2FAEnabled,
 
-                CustomerWallet = new
+                Wallet = new
                 {
-                    WalletId = customer.Wallet?.Id,
-                    Balance = customer.Wallet?.Balance,
-                    Transactions = customer?.Wallet?.Transactions.Select(walletTransactionObj => new
+                    WalletId = customerResult.Data.Wallet?.Id,
+                    Balance = customerResult.Data.Wallet?.Balance,
+                    Transactions = customerResult?.Data.Wallet?.Transactions.Select(walletTransactionObj => new
                     {
                         TransactionId = walletTransactionObj.Id,
                         TransactionAmount = walletTransactionObj.Amount,
@@ -65,10 +65,10 @@ namespace ECommerceWebApi.Controllers
                     })
                 },
 
-                CustomerCart = new
+                Cart = new
                 {
-                    CartId = customer?.Cart?.Id,
-                    CartItems = customer?.Cart?.CartItems?.Select(carItemObj => new
+                    CartId = customerResult?.Data.Cart?.Id,
+                    CartItems = customerResult?.Data.Cart?.CartItems?.Select(carItemObj => new
                     {
                         CartItemId = carItemObj?.Id,
                         ProductId = carItemObj?.ProductId,
@@ -76,7 +76,7 @@ namespace ECommerceWebApi.Controllers
                     }),
                 },
 
-                CustomerOrders = customer?.Orders?.Select(orderObj => new
+                Orders = customerResult?.Data.Orders?.Select(orderObj => new
                 {
                     OrderId = orderObj?.Id,
                     OrderDate = orderObj?.OrderDate,
@@ -94,7 +94,7 @@ namespace ECommerceWebApi.Controllers
                     })
                 }),
 
-                IsSeller = customer?.User?.SellerProfile?.IsApproved ?? false
+                IsSeller = customerResult?.Data.User?.SellerProfile?.IsApproved ?? false
 
             };
 
@@ -107,30 +107,30 @@ namespace ECommerceWebApi.Controllers
         [HttpGet("customers")]
         public async Task<IActionResult> GetCustomersAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string sortField = "fullname", [FromQuery] string sortOrder = "asc", [FromQuery] string filterByStatus = "all")
         {
-            var customers = await _customerRepository.GetCustomersAsync(pageNumber, pageSize, searchText, sortField, sortOrder, filterByStatus);
-            if (customers == null)
+            var result = await _customerRepository.GetCustomersAsync(pageNumber, pageSize, searchText, sortField, sortOrder, filterByStatus);
+            if (!result.Success)
             {
-                return Ok(new APIResponse { Status = 400, Message = "No Customers Found" });
+                return Ok(new APIResponse { Status = 400, Message = result.Message });
             }
 
-            var response = customers.Select(customerObj => new
+            var customers = result.Data.Items.Select(customerObj => new
             {
                 CustomerId = customerObj.Id,
                 UserId = customerObj.UserId,
                 IsActive = customerObj.IsActive,
                 CreatedAt = customerObj.CreatedAt,
 
-                CustomerName = customerObj.User?.FullName,
-                CustomerEmail = customerObj.User?.Email,
-                CustomerLastLogin = customerObj.User?.LastLogin,
+                Name = customerObj.User?.FullName,
+                Email = customerObj.User?.Email,
+                LastLogin = customerObj.User?.LastLogin,
 
-                CustomerWallet = new
+                Wallet = new
                 {
                     WalletId = customerObj.Wallet?.Id,
                     Balance = customerObj.Wallet?.Balance,
                 },
 
-                CustomerCart = new
+                Cart = new
                 {
                     CartId = customerObj.Cart?.Id,
                     CartItems = customerObj?.Cart?.CartItems?.Select(carItemObj => new
@@ -141,7 +141,7 @@ namespace ECommerceWebApi.Controllers
                     }),
                 },
 
-                CustomerOrders = customerObj?.Orders?.Select(orderObj => new
+                Orders = customerObj?.Orders?.Select(orderObj => new
                 {
                     OrderId = orderObj?.Id,
                     OrderDate = orderObj?.OrderDate,
@@ -162,6 +162,14 @@ namespace ECommerceWebApi.Controllers
 
             });
 
+            var response = new
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalUsers = result.Data.TotalRecords,
+                Users = customers
+            };
+
             return Ok(new APIResponse { Status = 200, Message = "Customers fetched successfully", Data = response });
         }
 
@@ -171,34 +179,34 @@ namespace ECommerceWebApi.Controllers
         [HttpGet("{customerId}")]
         public async Task<IActionResult> GetCustomerById(Guid customerId)
         {
-            var customer = await _customerRepository.GetCustomerByIdAsync(customerId);
+            var customerResult = await _customerRepository.GetCustomerByIdAsync(customerId);
 
-            if (customer == null)
+            if (!customerResult.Success)
             {
-                return Ok(new APIResponse { Status = 404, Message = $"No Customer Found by customerId: {customerId}" });
+                return Ok(new APIResponse { Status = 404, Message = "Customer Not found" });
             }
 
             var response =  new
             {
-                CustomerId = customer.Id,
-                UserId = customer.UserId,
-                IsActive = customer.IsActive,
-                CreatedAt = customer.CreatedAt,
+                Id = customerResult.Data.Id,
+                UserId = customerResult.Data.UserId,
+                IsActive = customerResult.Data.IsActive,
+                CreatedAt = customerResult.Data.CreatedAt,
 
-                CustomerName = customer.User?.FullName,
-                CustomerEmail = customer.User?.Email,
-                CustomerLastLogin = customer.User?.LastLogin,
+                Name = customerResult.Data.User?.FullName,
+                Email = customerResult.Data.User?.Email,
+                LastLogin = customerResult.Data.User?.LastLogin,
 
-                CustomerWallet = new
+                Wallet = new
                 {
-                    WalletId = customer.Wallet?.Id,
-                    Balance = customer.Wallet?.Balance,
+                    WalletId = customerResult.Data.Wallet?.Id,
+                    Balance = customerResult.Data.Wallet?.Balance,
                 },
 
-                CustomerCart = new
+                Cart = new
                 {
-                    CartId = customer.Cart?.Id,
-                    CartItems = customer?.Cart?.CartItems?.Select(carItemObj => new
+                    CartId = customerResult.Data.Cart?.Id,
+                    CartItems = customerResult.Data?.Cart?.CartItems?.Select(carItemObj => new
                     {
                         CartItemId = carItemObj?.Id,
                         ProductId = carItemObj?.ProductId,
@@ -206,7 +214,7 @@ namespace ECommerceWebApi.Controllers
                     }),
                 },
 
-                CustomerOrders = customer?.Orders?.Select(orderObj => new
+                Orders = customerResult.Data?.Orders?.Select(orderObj => new
                 {
                     OrderId = orderObj?.Id,
                     OrderDate = orderObj?.OrderDate,
@@ -223,7 +231,7 @@ namespace ECommerceWebApi.Controllers
                     })
                 }),
 
-                IsSeller = customer?.User?.SellerProfile?.IsApproved ?? false
+                IsSeller = customerResult.Data?.User?.SellerProfile?.IsApproved ?? false
 
             };
 
@@ -237,12 +245,12 @@ namespace ECommerceWebApi.Controllers
         public async Task<IActionResult> MakeCustomerInactiveByCustomerId(Guid customerId)
         {
             var result = await _customerRepository.MakeCustomerInactiveByCustomerIdAsync(customerId);
-            if (!result)
+            if (!result.Success)
             {
-                return Ok(new APIResponse { Status = 400, Message = "Failed to inactivate customer" });
+                return Ok(new APIResponse { Status = 400, Message = "Failed to deactivate customer" });
             }
 
-            return Ok(new APIResponse { Status = 200, Message = "Customer inactivated successfully", Data = null });
+            return Ok(new APIResponse { Status = 200, Message = "Customer deactivated successfully", Data = null });
         }
 
         // MAKE CUSTOMER ACTIVE BY CUSTOMER ID
@@ -251,9 +259,9 @@ namespace ECommerceWebApi.Controllers
         public async Task<IActionResult> MakeCustomerActiveByCustomerId(Guid customerId)
         {
             var result = await _customerRepository.MakeCustomerActiveByCustomerIdAsync(customerId);
-            if (!result)
+            if (!result.Success)
             {
-                return Ok(new APIResponse { Status = 400, Message = "Failed to activate seller" });
+                return Ok(new APIResponse { Status = 400, Message = "Failed to activate customer" });
             }
 
             return Ok(new APIResponse { Status = 200, Message = "Customer activated successfully", Data = null });

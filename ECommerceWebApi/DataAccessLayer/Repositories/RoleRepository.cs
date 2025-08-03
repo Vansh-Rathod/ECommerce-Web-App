@@ -1,7 +1,9 @@
 ﻿using DataAccessLayer.Data;
 using DataAccessLayer.Interfaces;
+using GenericServices.Interfaces;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.EntityFrameworkCore;
+using SharedReference;
 using SharedReference.Entities;
 using System;
 using System.Collections.Generic;
@@ -14,65 +16,142 @@ namespace DataAccessLayer.Repositories
     public class RoleRepository : IRoleRepository
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly ILoggerRepository _loggerRepository;
 
-        public RoleRepository(ApplicationDbContext dbContext)
+        public RoleRepository( ApplicationDbContext dbContext, ILoggerRepository loggerRepository )
         {
             _dbContext = dbContext;
+            _loggerRepository = loggerRepository;
         }
 
-        public async Task<List<Role>> GetAllRoles()
+        public async Task<CommonResponse<PagedResult<Role>>> GetAllRoles()
         {
             try
             {
-                return await _dbContext.Roles.ToListAsync();
+                int pageNumber = 1;
+                int pageSize = int.MaxValue;
+
+                var query = _dbContext.Roles.AsQueryable();
+
+                int totalRecords = await query.CountAsync();
+
+                var roles = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+                var result = new PagedResult<Role>
+                {
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Items = roles,
+                    TotalRecords = totalRecords,
+                };
+
+                return CommonResponse<PagedResult<Role>>.SuccessResponse(
+                   result,
+                   "Roles fetched successfully");
+
             }
             catch(Exception ex)
             {
-                Console.WriteLine("Exception occurred while retrieving roles from db: " + ex.Message);
-                return null;
+                await _loggerRepository.LogAsync($"Exception occurred while retrieving roles.", SharedReference.Enums.Enum.LogLevel.Error, "RoleRepository.GetAllRoles()", ex, null, null, null);
+                return CommonResponse<PagedResult<Role>>.FailureResponse(
+                       new List<string> { $"Exception occurred while retrieving roles." },
+                       "Failed to fetch roles.");
             }
         }
 
-        public async Task<Role> GetRoleByName(string roleName)
+        public async Task<CommonResponse<Role>> GetRoleByName( string roleName )
         {
             try
             {
-                return await _dbContext.Roles
+                var role = await _dbContext.Roles
                     .FirstOrDefaultAsync(roleObj => roleObj.Name == roleName);
+
+                if(role == null)
+                {
+                    return CommonResponse<Role>.FailureResponse(
+                        new List<string> { "Role not found." },
+                        "Role not found.");
+                }
+
+                return CommonResponse<Role>.SuccessResponse(
+                   role,
+                   "Role fetched successfully.");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                Console.WriteLine("Exception occurred while retrieving role by name from db: " + ex.Message);
-                return null;
+                await _loggerRepository.LogAsync($"Exception occurred while retrieving role by role name: {roleName}.", SharedReference.Enums.Enum.LogLevel.Error, "RoleRepository.GetRoleByName()", ex, null, null, new Dictionary<string, object> { { "RoleName", roleName } });
+                return CommonResponse<Role>.FailureResponse(
+                       new List<string> { $"Exception occurred while retrieving role by role name: {roleName}." },
+                       "Failed to fetch role.");
             }
         }
 
-        public async Task<List<Role>> GetRolesByNamesAsync(List<string> roleNames)
+        public async Task<CommonResponse<PagedResult<Role>>> GetRolesByNamesAsync( List<string> roleNames )
         {
             try
             {
-                return await _dbContext.Roles
+                int pageNumber = 1;
+                int pageSize = int.MaxValue;
+
+                var query = _dbContext.Roles
                     .Where(roleObj => roleNames.Contains(roleObj.Name))
-                    .ToListAsync();
+                    .AsQueryable();
+
+                int totalRecords = await query.CountAsync();
+
+                var roles = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+                var result = new PagedResult<Role>
+                {
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Items = roles,
+                    TotalRecords = totalRecords,
+                };
+
+                return CommonResponse<PagedResult<Role>>.SuccessResponse(
+                   result,
+                   "Roles fetched successfully");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                Console.WriteLine("Exception occurred while retrieving roles by names from DB: " + ex.Message);
-                return new List<Role>();
+                await _loggerRepository.LogAsync($"Exception occurred while retrieving roles by role names: {roleNames}.", SharedReference.Enums.Enum.LogLevel.Error, "RoleRepository.GetRolesByNamesAsync()", ex, null, null, new Dictionary<string, object> { { "RoleNames", roleNames } });
+                return CommonResponse<PagedResult<Role>>.FailureResponse(
+                       new List<string> { $"Exception occurred while retrieving roles by role names: {roleNames}." },
+                       "Failed to fetch roles.");
             }
         }
 
-        public async Task<Role> GetRoleById(Guid roleId)
+        public async Task<CommonResponse<Role>> GetRoleById( Guid roleId )
         {
             try
             {
-                return await _dbContext.Roles
+                var role = await _dbContext.Roles
                     .FirstOrDefaultAsync(roleObj => roleObj.Id == roleId);
+
+                if(role == null)
+                {
+                    return CommonResponse<Role>.FailureResponse(
+                        new List<string> { "Role not found." },
+                        "Role not found.");
+                }
+
+                return CommonResponse<Role>.SuccessResponse(
+                   role,
+                   "Role fetched successfully.");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                Console.WriteLine("Exception occurred while retrieving role by roleId from db: " + ex.Message);
-                return null;
+                await _loggerRepository.LogAsync($"Exception occurred while retrieving role by id: {roleId}.", SharedReference.Enums.Enum.LogLevel.Error, "RoleRepository.GetRoleById()", ex, null, null, new Dictionary<string, object> { { "RoleId", roleId } });
+                return CommonResponse<Role>.FailureResponse(
+                       new List<string> { $"Exception occurred while retrieving role by id: {roleId}." },
+                       "Failed to fetch role.");
             }
         }
     }

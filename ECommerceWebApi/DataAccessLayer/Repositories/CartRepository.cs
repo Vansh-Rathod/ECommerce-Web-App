@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GenericServices.Interfaces;
 
 namespace DataAccessLayer.Repositories
 {
@@ -17,38 +18,61 @@ namespace DataAccessLayer.Repositories
         private readonly ApplicationDbContext _dbContext;
         private readonly ILoggerRepository _loggerRepository;
 
-        public CartRepository(ApplicationDbContext dbContext, ILoggerRepository loggerRepository)
+        public CartRepository( ApplicationDbContext dbContext, ILoggerRepository loggerRepository )
         {
             _dbContext = dbContext;
             _loggerRepository = loggerRepository;
         }
 
         // GET CART BY CART ID
-        public async Task<CommonResponse<Cart>> GetCartByIdAsync(Guid cartId)
+        public async Task<CommonResponse<PagedResult<Cart>>> GetCartByIdAsync( Guid cartId, int pageNumber, int pageSize )
         {
             try
             {
                 var cart = await _dbContext.Carts
-                    .Include(cartObj => cartObj.Customer)
-                    .Include(cartObj => cartObj.CartItems)
-                    .FirstOrDefaultAsync(cart => cart.Id == cartId);
+            .Include(cartObj => cartObj.Customer)
+            .FirstOrDefaultAsync(cart => cart.Id == cartId);
 
-                if (cart != null)
+                if(cart == null)
                 {
-                    return CommonResponse<Cart>.SuccessResponse(
-                    cart,
-                    "Cart fetched successfully");
+                    return CommonResponse<PagedResult<Cart>>.FailureResponse(
+                        new List<string> { $"Cart not found by Id: {cartId}." },
+                        "Cart not found"
+                    );
                 }
 
-                return CommonResponse<Cart>.FailureResponse(
-                    new List<string> { $"Cart not found by Id: {cartId}." },
-                    "Cart not found"
+                // Total items for pagination
+                var totalCartItemsCount = await _dbContext.CartItems
+                    .Where(item => item.CartId == cartId)
+                    .CountAsync();
+
+                // Paginated items
+                var paginatedItems = await _dbContext.CartItems
+                    .Where(item => item.CartId == cartId)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                // Set the paginated items back into the cart object
+                cart.CartItems = paginatedItems;
+
+                var pagedResult = new PagedResult<Cart>
+                {
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Items = new List<Cart> { cart },
+                    TotalRecords = totalCartItemsCount,
+                };
+
+                return CommonResponse<PagedResult<Cart>>.SuccessResponse(
+                    pagedResult,
+                    "Cart fetched successfully"
                 );
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                await _loggerRepository.LogAsync($"Failed to fetch Cart by Id: {cartId}.", SharedReference.Enums.Enum.LogLevel.Error, "CartRepository.GetCartByIdAsync()", ex, null, null, null);
-                return CommonResponse<Cart>.FailureResponse(
+                await _loggerRepository.LogAsync($"Excpetion occurred while fetching Cart by Cart Id: {cartId}.", SharedReference.Enums.Enum.LogLevel.Error, "CartRepository.GetCartByIdAsync()", ex, null, null, new Dictionary<string, object> { { "CartId", cartId } });
+                return CommonResponse<PagedResult<Cart>>.FailureResponse(
                     new List<string> { $"Excpetion occurred while fetching Cart by Cart Id: {cartId}." },
                     "Failed to fetch Cart"
                 );
@@ -57,7 +81,7 @@ namespace DataAccessLayer.Repositories
 
 
         // GET CART BY CUSTOMER ID
-        public async Task<CommonResponse<Cart>> GetCartByCustomerIdAsync(Guid customerId)
+        public async Task<CommonResponse<Cart>> GetCartByCustomerIdAsync( Guid customerId )
         {
             try
             {
@@ -68,7 +92,7 @@ namespace DataAccessLayer.Repositories
                         .ThenInclude(ci => ci.Product)
                     .FirstOrDefaultAsync(cart => cart.CustomerId == customerId);
 
-                if (cart != null)
+                if(cart != null)
                 {
                     return CommonResponse<Cart>.SuccessResponse(
                     cart,
@@ -80,9 +104,9 @@ namespace DataAccessLayer.Repositories
                     "Cart not found"
                 );
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                await _loggerRepository.LogAsync($"Failed to fetch Cart by Customer Id: {customerId}.", SharedReference.Enums.Enum.LogLevel.Error, "CartRepository.GetCartByCustomerIdAsync()", ex, null, null, null);
+                await _loggerRepository.LogAsync($"Exception occurred while fetching Cart by Customer Id: {customerId}.", SharedReference.Enums.Enum.LogLevel.Error, "CartRepository.GetCartByCustomerIdAsync()", ex, null, null, new Dictionary<string, object> { { "CustomerId", customerId } });
                 return CommonResponse<Cart>.FailureResponse(
                     new List<string> { $"Exception occurred while fetching Cart by Customer Id: {customerId}." },
                     "Failed to fetch Cart"
@@ -92,13 +116,13 @@ namespace DataAccessLayer.Repositories
 
 
         // ADD PRODUCT TO CART
-        public async Task<CommonResponse<CartItem>> AddToCartAsync(Guid cartId, Guid productId, int quantity)
+        public async Task<CommonResponse<CartItem>> AddToCartAsync( Guid cartId, Guid productId, int quantity )
         {
             try
             {
                 var existingProduct = await _dbContext.Products.FirstOrDefaultAsync(productObj => productObj.Id == productId);
 
-                if (existingProduct == null)
+                if(existingProduct == null)
                 {
                     return CommonResponse<CartItem>.FailureResponse(
                     new List<string> { $"Product not found by Product Id: {productId}." },
@@ -107,7 +131,7 @@ namespace DataAccessLayer.Repositories
 
                 var existingCart = await _dbContext.Carts.FirstOrDefaultAsync(cartObj => cartObj.Id == cartId);
 
-                if (existingCart == null)
+                if(existingCart == null)
                 {
                     return CommonResponse<CartItem>.FailureResponse(
                     new List<string> { $"Cart not found by Cart Id: {cartId}." },
@@ -118,7 +142,7 @@ namespace DataAccessLayer.Repositories
                         .Include(cartItemObj => cartItemObj.Product)
                         .FirstOrDefaultAsync(cartItemObj => cartItemObj.CartId == cartId && cartItemObj.ProductId == productId);
 
-                if (existingCartItem != null)
+                if(existingCartItem != null)
                 {
                     existingCartItem.Quantity += quantity;
 
@@ -156,9 +180,9 @@ namespace DataAccessLayer.Repositories
                 }
 
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                await _loggerRepository.LogAsync($"Failed to add product to cart.", SharedReference.Enums.Enum.LogLevel.Error, "CartRepository.AddToCartAsync()", ex, null, null, new Dictionary<string, object> { { "CartId", cartId }, { "ProductId", productId }, { "Quantity", quantity } });
+                await _loggerRepository.LogAsync($"Exception occurred while adding product to cart.", SharedReference.Enums.Enum.LogLevel.Error, "CartRepository.AddToCartAsync()", ex, null, null, new Dictionary<string, object> { { "CartId", cartId }, { "ProductId", productId }, { "Quantity", quantity } });
                 return CommonResponse<CartItem>.FailureResponse(
                     new List<string> { $"Exception occurred while adding product to cart." },
                     "Failed to add product in cart."
@@ -168,13 +192,13 @@ namespace DataAccessLayer.Repositories
 
 
         // REMOVE PRODUCT FROM CART
-        public async Task<CommonResponse<CartItem>> RemoveFromCartAsync(Guid cartId, Guid productId, int quantity)
+        public async Task<CommonResponse<CartItem>> RemoveFromCartAsync( Guid cartId, Guid productId, int quantity )
         {
             try
             {
                 var existingProduct = await _dbContext.Products.FirstOrDefaultAsync(productObj => productObj.Id == productId);
 
-                if (existingProduct == null)
+                if(existingProduct == null)
                 {
                     return CommonResponse<CartItem>.FailureResponse(
                     new List<string> { $"Product not found by Product Id: {productId}." },
@@ -183,7 +207,7 @@ namespace DataAccessLayer.Repositories
 
                 var existingCart = await _dbContext.Carts.FirstOrDefaultAsync(cartObj => cartObj.Id == cartId);
 
-                if (existingCart == null)
+                if(existingCart == null)
                 {
                     return CommonResponse<CartItem>.FailureResponse(
                     new List<string> { $"Cart not found by Cart Id: {cartId}." },
@@ -194,7 +218,7 @@ namespace DataAccessLayer.Repositories
                     .Include(cartItemObj => cartItemObj.Product)
                 .FirstOrDefaultAsync(cartItemObj => cartItemObj.CartId == cartId && cartItemObj.ProductId == productId);
 
-                if (existingCartItem == null)
+                if(existingCartItem == null)
                 {
                     return CommonResponse<CartItem>.FailureResponse(
                     new List<string> { $"Cart Item not found by Product Id: {productId}." },
@@ -202,7 +226,7 @@ namespace DataAccessLayer.Repositories
                 }
 
                 // if the item is totaly removed from the cart
-                if (existingCartItem.Quantity == quantity)
+                if(existingCartItem.Quantity == quantity)
                 {
                     _dbContext.CartItems.Remove(existingCartItem);
                     existingCart.UpdatedAt = DateTime.UtcNow;
@@ -214,7 +238,7 @@ namespace DataAccessLayer.Repositories
                 }
                 else
                 {
-                    if (existingCartItem.Quantity < quantity)
+                    if(existingCartItem.Quantity < quantity)
                     {
                         return CommonResponse<CartItem>.FailureResponse(
                             new List<string> { $"Cart does not have {quantity} of Cart Item." },
@@ -232,9 +256,9 @@ namespace DataAccessLayer.Repositories
                     "Cart Item removed successfully");
                 }
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                await _loggerRepository.LogAsync($"Failed to remove product from cart.", SharedReference.Enums.Enum.LogLevel.Error, "CartRepository.RemoveFromCartAsync()", ex, null, null, new Dictionary<string, object> { { "CartId", cartId }, { "ProductId", productId }, { "Quantity", quantity } });
+                await _loggerRepository.LogAsync($"Exception occurred while removing items from cart.", SharedReference.Enums.Enum.LogLevel.Error, "CartRepository.RemoveFromCartAsync()", ex, null, null, new Dictionary<string, object> { { "CartId", cartId }, { "ProductId", productId }, { "Quantity", quantity } });
                 return CommonResponse<CartItem>.FailureResponse(
                     new List<string> { $"Exception occurred while removing items from cart." },
                     "Failed to remove product from cart."
@@ -244,13 +268,13 @@ namespace DataAccessLayer.Repositories
 
 
         // CLEAR CART
-        public async Task<CommonResponse<Cart>> ClearCartAsync(Guid cartId)
+        public async Task<CommonResponse<Cart>> ClearCartAsync( Guid cartId )
         {
             try
             {
                 var existingCart = await _dbContext.Carts.FirstOrDefaultAsync(cartObj => cartObj.Id == cartId);
 
-                if (existingCart == null)
+                if(existingCart == null)
                 {
                     return CommonResponse<Cart>.FailureResponse(
                     new List<string> { $"Cart not found by Cart Id: {cartId}." },
@@ -276,7 +300,7 @@ namespace DataAccessLayer.Repositories
                    existingCart,
                    "Cart cleared successfully");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 Console.WriteLine("Exception occurred while clearing cart: " + ex.Message);
 

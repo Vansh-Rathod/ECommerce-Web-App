@@ -1,7 +1,9 @@
 ﻿using DataAccessLayer.Interfaces;
 using DataAccessLayer.Repositories;
+using MailKit.Search;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using SharedReference;
 using SharedReference.Entities;
@@ -36,31 +38,31 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
-            var customer = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
-            if (customer == null)
+            var customerResult = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
+            if (!customerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Customer Not found" });
             }
 
 
-            var order = await _orderRepository.PlaceOrderAsync(customer.Id);
-            if (order == null)
+            var orderResult = await _orderRepository.PlaceOrderAsync(customerResult.Data.Id);
+            if (!orderResult.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Failed to place order" });
             }
 
             var response = new
             {
-                OrderId = order.Id,
-                CustomerId = order.CustomerId,
-                CustomerName = order.Customer.User.FullName,
-                CustomerEmail = order.Customer.User.Email,
+                OrderId = orderResult.Data.Id,
+                CustomerId = orderResult.Data.CustomerId,
+                CustomerName = orderResult.Data.Customer.User.FullName,
+                CustomerEmail = orderResult.Data.Customer.User.Email,
 
-                OrderDate = order.OrderDate,
-                EstimatedDeliveryTime = order.EstimatedDeliveryTime,
-                TotalAmount = order.TotalAmount,
+                OrderDate = orderResult.Data.OrderDate,
+                EstimatedDeliveryTime = orderResult.Data.EstimatedDeliveryTime,
+                TotalAmount = orderResult.Data.TotalAmount,
 
-                OrderedItems = order?.OrderItems.Select(orderItemObj => new
+                OrderedItems = orderResult.Data?.OrderItems.Select(orderItemObj => new
                 {
                     OrderItemId = orderItemObj?.Id,
                     ProductId = orderItemObj?.ProductId,
@@ -83,28 +85,30 @@ namespace ECommerceWebApi.Controllers
         // GET CUSTOMER ORDERS
         [Authorize(Roles = "Customer")]
         [HttpGet]
-        public async Task<IActionResult> GetOrders()
+        public async Task<IActionResult> GetOrders( [FromQuery] int? filterByYear, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "" )
         {
+            int year = filterByYear ?? DateTime.Now.Year;
+
             var userId = User.FindFirst("userId")?.Value;
             if (!Guid.TryParse(userId, out var userGuid))
             {
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
-            var customer = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
-            if (customer == null)
+            var customerResult = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
+            if (!customerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Customer Not found" });
             }
 
 
-            var orders = await _orderRepository.GetOrdersByCustomerIdAsync(customer.Id);
-            if (orders == null)
+            var ordersResult = await _orderRepository.GetOrdersByCustomerIdAsync(customerResult.Data.Id, pageNumber, pageSize, searchText, year);
+            if (!ordersResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Failed to fetch orders" });
             }
 
-            var response = orders.Select(orderObj => new
+            var orders = ordersResult.Data.Items.Select(orderObj => new
             {
                 OrderId = orderObj.Id,
                 CustomerId = orderObj.CustomerId,
@@ -132,12 +136,21 @@ namespace ECommerceWebApi.Controllers
 
             });
 
+            var response = new
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalUsers = ordersResult.Data.TotalRecords,
+                Orders = orders
+            };
+
             return Ok(new APIResponse { Status = 200, Message = "Orders fetched successfully", Data = response });
         }
 
+
         [Authorize(Roles = "Seller")]
         [HttpGet("seller/orders")]
-        public async Task<IActionResult> GetSellerOrders()
+        public async Task<IActionResult> GetSellerOrders( [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string filterByOrderStatus = "all" )
         {
             var userId = User.FindFirst("userId")?.Value;
             if (!Guid.TryParse(userId, out var userGuid))
@@ -145,18 +158,19 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
-            var seller = await _sellerRepository.GetSellerByUserIdAsync(userGuid);
-            if (seller == null)
+            var sellerResult = await _sellerRepository.GetSellerByUserIdAsync(userGuid);
+            if (sellerResult == null)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Seller Not found" });
             }
 
-            var orders = await _orderRepository.GetOrdersBySellerIdAsync(seller.Id);
-            if (orders == null || !orders.Any())
+            var ordersResult = await _orderRepository.GetOrdersBySellerIdAsync(sellerResult.Id, pageNumber, pageSize, searchText, filterByOrderStatus);
+            if (!ordersResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "No Orders Found" });
             }
-            var response = orders.Select(orderObj => new
+
+            var orders = ordersResult.Data.Items.Select(orderObj => new
             {
                 OrderId = orderObj?.Id,
                 CustomerId = orderObj?.CustomerId,
@@ -181,32 +195,40 @@ namespace ECommerceWebApi.Controllers
 
             });
 
+            var response = new
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalUsers = ordersResult.Data.TotalRecords,
+                Orders = orders
+            };
+
             return Ok(new APIResponse { Status = 200, Message = "Seller orders fetched successfully", Data = response });
         }
 
 
-        [Authorize]
+        [Authorize(Roles = "Admin,Seller,Customer")]
         [HttpGet("{orderId}")]
         public async Task<IActionResult> GetOrder(Guid orderId)
         {
-            var order = await _orderRepository.GetOrderByIdAsync(orderId);
-            if (order == null)
+            var orderResult = await _orderRepository.GetOrderByIdAsync(orderId);
+            if (!orderResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Order Not found" });
             }
 
             var response = new
             {
-                OrderId = order.Id,
-                CustomerId = order.CustomerId,
-                CustomerName = order.Customer.User.FullName,
-                CustomerEmail = order.Customer.User.Email,
+                OrderId = orderResult.Data.Id,
+                CustomerId = orderResult.Data.CustomerId,
+                CustomerName = orderResult.Data.Customer.User.FullName,
+                CustomerEmail = orderResult.Data.Customer.User.Email,
 
-                OrderDate = order.OrderDate,
-                EstimatedDeliveryTime = order.EstimatedDeliveryTime,
-                TotalAmount = order.TotalAmount,
+                OrderDate = orderResult.Data.OrderDate,
+                EstimatedDeliveryTime = orderResult.Data.EstimatedDeliveryTime,
+                TotalAmount = orderResult.Data.TotalAmount,
 
-                OrderedItems = order?.OrderItems.Select(orderItemObj => new
+                OrderedItems = orderResult.Data?.OrderItems.Select(orderItemObj => new
                 {
                     OrderItemId = orderItemObj?.Id,
                     ProductId = orderItemObj?.ProductId,
@@ -228,7 +250,7 @@ namespace ECommerceWebApi.Controllers
 
         [Authorize(Roles = "Seller")]
         [HttpGet("pending-items")]
-        public async Task<IActionResult> GetPendingOrderItems()
+        public async Task<IActionResult> GetPendingOrderItems( [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "" )
         {
             var userId = User.FindFirst("userId")?.Value;
             if (!Guid.TryParse(userId, out var userGuid))
@@ -236,18 +258,20 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
-            var seller = await _sellerRepository.GetSellerByUserIdAsync(userGuid);
-            if (seller == null)
+            var sellerResult = await _sellerRepository.GetSellerByUserIdAsync(userGuid);
+            if (sellerResult == null)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Seller Not found" });
             }
 
-            var items = await _orderRepository.GetPendingOrderItemsBySellerAsync(seller.Id);
-            if(items == null || !items.Any())
+            var orderItemsResult = await _orderRepository.GetPendingOrderItemsBySellerAsync(sellerResult.Id, pageNumber, pageSize, searchText);
+            
+            if(!orderItemsResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "No Pending Order Items Found" });
             }
-            var response = items.Select(itemObj => new
+
+            var orderItems = orderItemsResult.Data.Items.Select(itemObj => new
             {
                 OrderItemId = itemObj.Id,
                 OrderId = itemObj.OrderId,
@@ -267,6 +291,14 @@ namespace ECommerceWebApi.Controllers
 
             });
 
+            var response = new
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalUsers = orderItemsResult.Data.TotalRecords,
+                Orders = orderItems
+            };
+
             return Ok(new APIResponse { Status = 200, Message = "Pending order items for fetched successfully", Data = response });
         }
 
@@ -277,27 +309,25 @@ namespace ECommerceWebApi.Controllers
         [HttpPut("approve/{orderItemId}")]
         public async Task<IActionResult> ApproveOrderItem(Guid orderItemId)
         {
-            // using orderItemId check that orderItem is already approved or not
-
-            var item = await _orderRepository.ApproveOrderItemAsync(orderItemId);
-            if (item == null)
+            var orderItemResult = await _orderRepository.ApproveOrderItemAsync(orderItemId);
+            if (!orderItemResult.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Failed to approve order" });
             }
 
             var response = new
             {
-                OrderItemId = item.Id,
-                OrderId = item.OrderId,
+                OrderItemId = orderItemResult.Data.Id,
+                OrderId = orderItemResult.Data.OrderId,
 
-                ProductId = item.ProductId,
-                ProductName = item.Product.Name,
-                ProductPrice = item.Product.Price,
-                ProductStockQuantity = item.Product.StockQuantity,
+                ProductId = orderItemResult.Data.ProductId,
+                ProductName = orderItemResult.Data.Product.Name,
+                ProductPrice = orderItemResult.Data.Product.Price,
+                ProductStockQuantity = orderItemResult.Data.Product.StockQuantity,
 
-                QuantityIssued = item.Quantity,
-                PriceAtPurchase = item.PriceAtPurchase,
-                OrderStatus = item.Status,
+                QuantityIssued = orderItemResult.Data.Quantity,
+                PriceAtPurchase = orderItemResult.Data.PriceAtPurchase,
+                OrderStatus = orderItemResult.Data.Status,
 
             };
 
@@ -309,27 +339,25 @@ namespace ECommerceWebApi.Controllers
         [HttpPut("reject/{orderItemId}")]
         public async Task<IActionResult> RejectOrderItem(Guid orderItemId)
         {
-            // using orderItemId check that orderItem is already rejected or not
-
-            var item = await _orderRepository.RejectOrderItemAsync(orderItemId);
-            if (item == null)
+            var orderItemResult = await _orderRepository.RejectOrderItemAsync(orderItemId);
+            if (!orderItemResult.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Failed to reject order item" });
             }
 
             var response = new
             {
-                OrderItemId = item.Id,
-                OrderId = item.OrderId,
+                OrderItemId = orderItemResult.Data.Id,
+                OrderId = orderItemResult.Data.OrderId,
 
-                ProductId = item.ProductId,
-                ProductName = item.Product.Name,
-                ProductPrice = item.Product.Price,
-                ProductStockQuantity = item.Product.StockQuantity,
+                ProductId = orderItemResult.Data.ProductId,
+                ProductName = orderItemResult.Data.Product.Name,
+                ProductPrice = orderItemResult.Data.Product.Price,
+                ProductStockQuantity = orderItemResult.Data.Product.StockQuantity,
 
-                QuantityIssued = item.Quantity,
-                PriceAtPurchase = item.PriceAtPurchase,
-                OrderStatus = item.Status,
+                QuantityIssued = orderItemResult.Data.Quantity,
+                PriceAtPurchase = orderItemResult.Data.PriceAtPurchase,
+                OrderStatus = orderItemResult.Data.Status,
 
             };
 

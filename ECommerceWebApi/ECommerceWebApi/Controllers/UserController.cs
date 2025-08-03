@@ -1,7 +1,5 @@
 using DataAccessLayer.Interfaces;
-using DataAccessLayer.Repositories;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SharedReference;
 
@@ -15,7 +13,7 @@ namespace ECommerceWebApi.Controllers
         private readonly ICustomerRepository _customerRepository;
         private readonly ISellerRepository _sellerRepository;
 
-        public UserController(IUserRepository userRepository, ICustomerRepository customerRepository, ISellerRepository sellerRepository)
+        public UserController( IUserRepository userRepository, ICustomerRepository customerRepository, ISellerRepository sellerRepository )
         {
             _userRepository = userRepository;
             _customerRepository = customerRepository;
@@ -25,21 +23,14 @@ namespace ECommerceWebApi.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("users")]
-        public async Task<IActionResult> GetUsers([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string sortField = "fullname", [FromQuery] string sortOrder = "asc")
+        public async Task<IActionResult> GetUsers( [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string sortField = "fullname", [FromQuery] string sortOrder = "asc", [FromQuery] DateTime? fromDate = null,
+    [FromQuery] DateTime? toDate = null )
         {
-            var result = await _userRepository.GetUsersAsync(pageNumber, pageSize, searchText, sortField, sortOrder);
+            var result = await _userRepository.GetUsersAsync(pageNumber, pageSize, searchText, sortField, sortOrder, fromDate, toDate);
 
-            if (!result.Success)
+            if(!result.Success)
             {
-                var data = new
-                {
-                    TotalUsers = 0,
-                    PageNumber = pageNumber,
-                    PageSize = pageSize,
-                    Users = new List<User>()
-                };
-
-                return Ok(new APIResponse { Status = 404, Message = result.Message, Data = null});
+                return Ok(new APIResponse { Status = 404, Message = result.Message, Data = null });
             }
 
             var users = result.Data.Items.Select(userObj => new
@@ -66,9 +57,9 @@ namespace ECommerceWebApi.Controllers
 
             var response = new
             {
-                TotalUsers = result.Data.TotalCount,
                 PageNumber = pageNumber,
                 PageSize = pageSize,
+                TotalUsers = result.Data.TotalRecords,
                 Users = users
             };
 
@@ -80,11 +71,11 @@ namespace ECommerceWebApi.Controllers
         // GET USER BY ID
         [Authorize(Roles = "Admin")]
         [HttpGet("{userId}")]
-        public async Task<IActionResult> GetUserById(Guid userId)
+        public async Task<IActionResult> GetUserById( Guid userId )
         {
             var userResult = await _userRepository.GetUserByIdAsync(userId);
 
-            if (!userResult.Success)
+            if(!userResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = userResult.Message });
             }
@@ -119,17 +110,17 @@ namespace ECommerceWebApi.Controllers
 
         [Authorize(Roles = "Admin,Seller,Customer")]
         [HttpPut("change2FAStatus")]
-        public async Task<IActionResult> ChangeUser2FAStatus([FromBody] bool status)
+        public async Task<IActionResult> ChangeUser2FAStatus( [FromBody] bool status )
         {
             var userId = User.FindFirst("userId")?.Value;
-            if (!Guid.TryParse(userId, out var userGuid))
+            if(!Guid.TryParse(userId, out var userGuid))
             {
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
             var result = await _userRepository.Change2FAStatus(userGuid, status);
 
-            if (!result.Success)
+            if(!result.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = result.Message });
             }

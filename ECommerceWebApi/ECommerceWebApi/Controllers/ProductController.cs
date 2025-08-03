@@ -2,6 +2,7 @@
 using DataAccessLayer.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using SharedReference;
 using SharedReference.Entities;
@@ -27,13 +28,13 @@ namespace ECommerceWebApi.Controllers
 
 
         // GET PRODUCTS
-        //[Authorize(Roles = "Seller")]
+        [Authorize(Roles = "Admin,Customer")]
         [HttpGet("products")]
-        public async Task<IActionResult> GetProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string sortField = "name", [FromQuery] string sortOrder = "asc", [FromQuery] string filterByPrice = "")
+        public async Task<IActionResult> GetProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string sortField = "name", [FromQuery] string sortOrder = "asc", [FromQuery] string filterByPrice = "all", [FromQuery] string filterByStatus = "all" )
         {
-            var products = await _productRepository.GetProductsAsync(pageNumber, pageSize, searchText, sortField, sortOrder, filterByPrice);
+            var productsResult = await _productRepository.GetProductsAsync(pageNumber, pageSize, searchText, sortField, sortOrder, filterByPrice, filterByStatus);
 
-            if (products == null)
+            if (!productsResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "No Products Found" });
             }
@@ -41,7 +42,7 @@ namespace ECommerceWebApi.Controllers
             // Base URL from the current request
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
 
-            var response = products.Select(productObj => new
+            var products = productsResult.Data.Items.Select(productObj => new
             {
                 ProductId = productObj.Id,
                 Name = productObj.Name,
@@ -57,15 +58,22 @@ namespace ECommerceWebApi.Controllers
             : $"{baseUrl}{productObj.ImageUrl.Replace("\\", "/")}"  // Normalize for URLs
             });
 
-
+            var response = new
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalUsers = productsResult.Data.TotalRecords,
+                Users = products
+            };
 
             return Ok(new APIResponse { Status = 200, Message = "Products Fetched Successfully", Data = response });
         }
 
+
         // GET SELLER PRODUCTS
         [Authorize(Roles = "Seller")]
         [HttpGet("seller-products")]
-        public async Task<IActionResult> GetSellerProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string sortField = "name", [FromQuery] string sortOrder = "asc", [FromQuery] string filterByPrice = "")
+        public async Task<IActionResult> GetSellerProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string sortField = "name", [FromQuery] string sortOrder = "asc", [FromQuery] string filterByPrice = "", [FromQuery] string filterByStatus = "all" )
         {
             var userId = User.FindFirst("userId")?.Value;
             if (!Guid.TryParse(userId, out var userGuid))
@@ -79,9 +87,9 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 404, Message = "Seller Not found" });
             }
 
-            var products = await _productRepository.GetSellerProductsAsync(seller.Id, pageNumber, pageSize, searchText, sortField, sortOrder, filterByPrice);
+            var productsResult = await _productRepository.GetSellerProductsAsync(seller.Id, pageNumber, pageSize, searchText, sortField, sortOrder, filterByPrice, filterByStatus);
 
-            if (products == null)
+            if (!productsResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "No products found for seller" });
             }
@@ -89,7 +97,7 @@ namespace ECommerceWebApi.Controllers
             // Base URL from the current request
             var baseUrl = $"{Request.Scheme}://{Request.Host}";
 
-            var response = products.Select(productObj => new
+            var products = productsResult.Data.Items.Select(productObj => new
             {
                 ProductId = productObj.Id,
                 Name = productObj.Name,
@@ -105,7 +113,13 @@ namespace ECommerceWebApi.Controllers
             : $"{baseUrl}{productObj.ImageUrl.Replace("\\", "/")}"  // Normalize for URLs
             });
 
-
+            var response = new
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalUsers = productsResult.Data.TotalRecords,
+                Users = products
+            };
 
             return Ok(new APIResponse { Status = 200, Message = "Products for seller fetched successfully", Data = response });
         }
@@ -116,11 +130,11 @@ namespace ECommerceWebApi.Controllers
         [HttpGet("{productId}")]
         public async Task<IActionResult> GetProductById(Guid productId)
         {
-            var product = await _productRepository.GetProductByIdAsync(productId);
+            var productResult = await _productRepository.GetProductByIdAsync(productId);
 
-            if (product == null)
+            if (!productResult.Success)
             {
-                return Ok(new APIResponse { Status = 404, Message = $"No Product Found by productId: {productId}" });
+                return Ok(new APIResponse { Status = 404, Message = "No product found." });
             }
 
             // Base URL from the current request
@@ -128,18 +142,18 @@ namespace ECommerceWebApi.Controllers
 
             var response = new
             {
-                ProductId = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                StockQuantity = product.StockQuantity,
-                IsActive = product.IsActive,
-                SellerId = product.SellerId,
-                CreatedAt = product.CreatedAt,
-                UpdatedAt = product.UpdatedAt,
-                ImageUrl = string.IsNullOrEmpty(product.ImageUrl)
+                ProductId = productResult.Data.Id,
+                Name = productResult.Data.Name,
+                Description = productResult.Data.Description,
+                Price = productResult.Data.Price,
+                StockQuantity = productResult.Data.StockQuantity,
+                IsActive = productResult.Data.IsActive,
+                SellerId = productResult.Data.SellerId,
+                CreatedAt = productResult.Data.CreatedAt,
+                UpdatedAt = productResult.Data.UpdatedAt,
+                ImageUrl = string.IsNullOrEmpty(productResult.Data.ImageUrl)
             ? null
-            : $"{baseUrl}{product.ImageUrl.Replace("\\", "/")}"  // Normalize for URLs
+            : $"{baseUrl}{productResult.Data.ImageUrl.Replace("\\", "/")}"  // Normalize for URLs
             };
 
 
@@ -151,7 +165,7 @@ namespace ECommerceWebApi.Controllers
         // CREATE PRODUCT
         [Authorize(Roles = "Seller")]
         [HttpPost("products")]
-        public async Task<IActionResult> AddPorduct([FromForm] AddProductDto addProductDto)
+        public async Task<IActionResult> AddProduct([FromForm] AddProductDto addProductDto)
         {
             // validate fields from addProductDto, then call create product function 
 
@@ -186,8 +200,8 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 400, Message = userResult.Message });
             }
 
-            var seller = userResult.Data?.SellerProfile;
-            if (seller == null)
+            var sellerResult = userResult.Data?.SellerProfile;
+            if (sellerResult == null)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Seller profile not found." });
             }
@@ -221,32 +235,32 @@ namespace ECommerceWebApi.Controllers
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                SellerId = seller.Id,
+                SellerId = sellerResult.Id,
                 ImageUrl = imageUrl
             };
 
-            var isProductCreated = await _productRepository.CreateProductAsync(product);
+            var productResult = await _productRepository.CreateProductAsync(product);
 
-            if (!isProductCreated)
+            if (!productResult.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Failed to create product" });
             }
 
             var response = new
             {
-                ProductId = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                StockQuantity = product.StockQuantity,
-                IsActive = product.IsActive,
-                CreatedAt = product.CreatedAt,
-                UpdatedAt = product.UpdatedAt,
-                SellerId = product.SellerId,
+                ProductId = productResult.Data.Id,
+                Name = productResult.Data.Name,
+                Description = productResult.Data.Description,
+                Price = productResult.Data.Price,
+                StockQuantity = productResult.Data.StockQuantity,
+                IsActive = productResult.Data.IsActive,
+                CreatedAt = productResult.Data.CreatedAt,
+                UpdatedAt = productResult.Data.UpdatedAt,
+                SellerId = productResult.Data.SellerId,
                 ImageUrl = imageUrl
             };
 
-            return Ok(new APIResponse { Status = 200, Message = "Products Created Successfully", Data = response });
+            return Ok(new APIResponse { Status = 200, Message = "Product Created Successfully", Data = response });
         }
 
 
@@ -282,15 +296,15 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 400, Message = userResult.Message });
             }
 
-            var seller = userResult.Data.SellerProfile;
-            if (seller == null)
+            var sellerResult = userResult.Data.SellerProfile;
+            if (sellerResult == null)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Seller profile not found." });
             }
 
             // Find the product to update
-            var product = await _productRepository.GetProductByIdAsync(productId);
-            if (product == null || product.SellerId != seller.Id)
+            var productResult = await _productRepository.GetProductByIdAsync(productId);
+            if (!productResult.Success || productResult.Data.SellerId != sellerResult.Id)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Product not found or unauthorized." });
             }
@@ -312,34 +326,34 @@ namespace ECommerceWebApi.Controllers
                     await updateProductDto.Image.CopyToAsync(stream);
                 }
 
-                product.ImageUrl = $"/uploads/products/{uniqueFileName}"; // Update image URL only if new image uploaded
+                productResult.Data.ImageUrl = $"/uploads/products/{uniqueFileName}"; // Update image URL only if new image uploaded
             }
 
             // Update the product data
-            product.Name = updateProductDto.Name;
-            product.Description = updateProductDto.Description;
-            product.Price = updateProductDto.Price;
-            product.StockQuantity = updateProductDto.StockQuantity;
-            product.UpdatedAt = DateTime.UtcNow;
+            productResult.Data.Name = updateProductDto.Name;
+            productResult.Data.Description = updateProductDto.Description;
+            productResult.Data.Price = updateProductDto.Price;
+            productResult.Data.StockQuantity = updateProductDto.StockQuantity;
+            productResult.Data.UpdatedAt = DateTime.UtcNow;
 
-            var isUpdated = await _productRepository.UpdateProductAsync(product);
-            if (!isUpdated)
+            var updateProductResult = await _productRepository.UpdateProductAsync(productResult.Data);
+            if (!updateProductResult.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Failed to update product." });
             }
 
             var response = new
             {
-                ProductId = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                StockQuantity = product.StockQuantity,
-                IsActive = product.IsActive,
-                CreatedAt = product.CreatedAt,
-                UpdatedAt = product.UpdatedAt,
-                SellerId = product.SellerId,
-                ImageUrl = product.ImageUrl
+                ProductId = updateProductResult.Data.Id,
+                Name = updateProductResult.Data.Name,
+                Description = updateProductResult.Data.Description,
+                Price = updateProductResult.Data.Price,
+                StockQuantity = updateProductResult.Data.StockQuantity,
+                IsActive = updateProductResult.Data.IsActive,
+                CreatedAt = updateProductResult.Data.CreatedAt,
+                UpdatedAt = updateProductResult.Data.UpdatedAt,
+                SellerId = updateProductResult.Data.SellerId,
+                ImageUrl = updateProductResult.Data.ImageUrl
             };
 
             return Ok(new APIResponse { Status = 200, Message = "Product updated successfully.", Data = response });
@@ -378,15 +392,15 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 401, Message = userResult.Message });
             }
 
-            var seller = userResult.Data.SellerProfile;
-            if (seller == null)
+            var sellerResult = userResult.Data.SellerProfile;
+            if (sellerResult == null)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Seller profile not found." });
             }
 
             // Find the product to update
-            var product = await _productRepository.GetProductByIdAsync(productId);
-            if (product == null || product.SellerId != seller.Id)
+            var productResult = await _productRepository.GetProductByIdAsync(productId);
+            if (!productResult.Success || productResult.Data.SellerId != sellerResult.Id)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Product not found or unauthorized." });
             }
@@ -394,39 +408,39 @@ namespace ECommerceWebApi.Controllers
             // Update the product data
             if(updateStockDto.Pattern == "Increase")
             {
-                product.StockQuantity += updateStockDto.StockQuantity;
+                productResult.Data.StockQuantity += updateStockDto.StockQuantity;
             }
             else if(updateStockDto.Pattern == "Decrease")
             {
-                if(product.StockQuantity < updateStockDto.StockQuantity)
+                if(productResult.Data.StockQuantity < updateStockDto.StockQuantity)
                 {
-                    return Ok(new APIResponse { Status = 400, Message = "Stock Qunatity cannot be negative." });
+                    return Ok(new APIResponse { Status = 400, Message = "Stock Quantity cannot be negative." });
                 }
-                product.StockQuantity -= updateStockDto.StockQuantity;
+                productResult.Data.StockQuantity -= updateStockDto.StockQuantity;
             }
                 
 
-            var isStockQuantityUpdated = await _productRepository.UpdateProductAsync(product);
-            if (!isStockQuantityUpdated)
+            var updatedProductResult = await _productRepository.UpdateProductAsync(productResult.Data);
+            if (!updatedProductResult.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Failed to update product stock quantity." });
             }
 
             var response = new
             {
-                ProductId = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                StockQuantity = product.StockQuantity,
-                IsActive = product.IsActive,
-                CreatedAt = product.CreatedAt,
-                UpdatedAt = product.UpdatedAt,
-                SellerId = product.SellerId,
-                ImageUrl = product.ImageUrl
+                ProductId = updatedProductResult.Data.Id,
+                Name = updatedProductResult.Data.Name,
+                Description = updatedProductResult.Data.Description,
+                Price = updatedProductResult.Data.Price,
+                StockQuantity = updatedProductResult.Data.StockQuantity,
+                IsActive = updatedProductResult.Data.IsActive,
+                CreatedAt = updatedProductResult.Data.CreatedAt,
+                UpdatedAt = updatedProductResult.Data.UpdatedAt,
+                SellerId = updatedProductResult.Data.SellerId,
+                ImageUrl = updatedProductResult.Data.ImageUrl
             };
 
-            return Ok(new APIResponse { Status = 200, Message = "Product updated successfully.", Data = response });
+            return Ok(new APIResponse { Status = 200, Message = "Product stock updated successfully.", Data = response });
         }
 
 
@@ -461,21 +475,21 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 400, Message = userResult.Message });
             }
 
-            var seller = userResult.Data.SellerProfile;
-            if (seller == null)
+            var sellerResult = userResult.Data.SellerProfile;
+            if (sellerResult == null)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Seller profile not found." });
             }
 
             // Find the product to delete
-            var product = await _productRepository.GetProductByIdAsync(productId);
-            if (product == null || product.SellerId != seller.Id)
+            var productResult = await _productRepository.GetProductByIdAsync(productId);
+            if (!productResult.Success || productResult.Data.SellerId != sellerResult.Id)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Product not found or unauthorized." });
             }
 
-            var isDeleted = await _productRepository.DeleteProductAsync(productId);
-            if (!isDeleted)
+            var updatedProductResult = await _productRepository.DeleteProductAsync(productId);
+            if (!updatedProductResult.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Failed to delete product." });
             }
@@ -515,26 +529,26 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 401, Message = userResult.Message });
             }
 
-            var seller = userResult.Data.SellerProfile;
-            if (seller == null)
+            var sellerResult = userResult.Data.SellerProfile;
+            if (sellerResult == null)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Seller profile not found." });
             }
 
             // Find the product to delete
-            var product = await _productRepository.GetProductByIdAsync(productId);
-            if (product == null || product.SellerId != seller.Id)
+            var productResult = await _productRepository.GetProductByIdAsync(productId);
+            if (!productResult.Success || productResult.Data.SellerId != sellerResult.Id)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Product not found or unauthorized." });
             }
 
-            var isInactive = await _productRepository.MakeProductInactiveAsync(productId);
-            if (!isInactive)
+            var updatedProductResult = await _productRepository.MakeProductInactiveAsync(productId);
+            if (!updatedProductResult.Success)
             {
-                return Ok(new APIResponse { Status = 400, Message = "Failed to Inactivate product." });
+                return Ok(new APIResponse { Status = 400, Message = "Failed to Deactivate product." });
             }
 
-            return Ok(new APIResponse { Status = 200, Message = "Product Inactivated successfully." });
+            return Ok(new APIResponse { Status = 200, Message = "Product Deactivated successfully." });
         }
 
 
@@ -569,21 +583,21 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 400, Message = userResult.Message });
             }
 
-            var seller = userResult.Data.SellerProfile;
-            if (seller == null)
+            var sellerResult = userResult.Data.SellerProfile;
+            if (sellerResult == null)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Seller profile not found." });
             }
 
             // Find the product to delete
-            var product = await _productRepository.GetProductByIdAsync(productId);
-            if (product == null || product.SellerId != seller.Id)
+            var productResult = await _productRepository.GetProductByIdAsync(productId);
+            if (!productResult.Success || productResult.Data.SellerId != sellerResult.Id)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Product not found or unauthorized." });
             }
 
-            var isActive = await _productRepository.MakeProductActiveAsync(productId);
-            if (!isActive)
+            var updateProductResult = await _productRepository.MakeProductActiveAsync(productId);
+            if (!updateProductResult.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Failed to Activate product." });
             }
