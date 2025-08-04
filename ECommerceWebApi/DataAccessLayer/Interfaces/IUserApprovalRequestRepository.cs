@@ -1,4 +1,5 @@
-﻿using SharedReference.Entities;
+﻿using SharedReference;
+using SharedReference.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace DataAccessLayer.Interfaces
 {
     public interface IUserApprovalRequestRepository
     {
-        Task<bool> CreateUserApprovalRequestAsync(UserApprovalRequest userApprovalRequest);
+        Task<CommonResponse<UserApprovalRequest>> CreateUserApprovalRequestAsync(UserApprovalRequest userApprovalRequest);
 
         //Task<bool> UpdateUserApprovalRequestAsync(UserApprovalRequest userApprovalRequest);
     }

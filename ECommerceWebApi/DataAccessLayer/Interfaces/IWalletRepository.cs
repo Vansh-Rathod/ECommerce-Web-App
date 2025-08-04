@@ -1,4 +1,5 @@
-﻿using SharedReference.Entities;
+﻿using SharedReference;
+using SharedReference.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,16 +10,16 @@ namespace DataAccessLayer.Interfaces
 {
     public interface IWalletRepository
     {
-        Task<Wallet> GetWalletByIdAsync(Guid walletId);
+        Task<CommonResponse<Wallet>> GetWalletByIdAsync(Guid walletId);
 
-        Task<Wallet> GetWalletByCustomerIdAsync(Guid customerId);
+        Task<CommonResponse<Wallet>> GetWalletByCustomerIdAsync(Guid customerId);
 
-        Task<List<WalletTransaction>> GetTransactionHistoryAsync(Guid walletId);
+        Task<CommonResponse<PagedResult<WalletTransaction>>> GetTransactionHistoryAsync(Guid walletId);
 
-        Task<WalletTransaction> AddFundsAsync(Guid walletId, decimal amount, string Description);
+        Task<CommonResponse<WalletTransaction>> AddFundsAsync(Guid walletId, decimal amount, string Description);
 
-        Task<WalletTransaction> PayAsync(Guid walletId, decimal amount, string Description);
+        Task<CommonResponse<WalletTransaction>> PayAsync(Guid walletId, decimal amount, string Description);
 
-        Task<WalletTransaction> RefundAmountToWalletAsync(Guid walletId, decimal amount, Guid orderId, string orderItemName);
+        Task<CommonResponse<WalletTransaction>> RefundAmountToWalletAsync(Guid walletId, decimal amount, Guid orderId, string orderItemName);
     }
 }

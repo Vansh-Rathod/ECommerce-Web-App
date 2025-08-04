@@ -1,6 +1,8 @@
 ﻿using DataAccessLayer.Data;
 using DataAccessLayer.Interfaces;
+using GenericServices.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using SharedReference;
 using SharedReference.Entities;
 using System;
 using System.Collections.Generic;
@@ -13,20 +15,23 @@ namespace DataAccessLayer.Repositories
     public class SellerRepository : ISellerRepository
     {
         private readonly ApplicationDbContext _dbContext;
+        private readonly ILoggerRepository _loggerRepository;
 
-        public SellerRepository(ApplicationDbContext dbContext)
+        public SellerRepository(ApplicationDbContext dbContext, ILoggerRepository loggerRepository )
         {
             _dbContext = dbContext;
+            _loggerRepository = loggerRepository;
         }
 
-        public async Task<List<Seller>> GetSellersAsync(int pageNumber, int pageSize, string searchText, string sortField, string sortOrder, string filterByStatus, string filterByApproval, string filterByCity)
+        public async Task<CommonResponse<PagedResult<Seller>>> GetSellersAsync(int pageNumber, int pageSize, string searchText, string sortField, string sortOrder, string filterByStatus, string filterByApproval, string filterByCity)
         {
             try
             {
-                IQueryable<Seller> query = _dbContext.Sellers.AsQueryable()
+                var query = _dbContext.Sellers.AsQueryable()
                     .Include(sellrObj => sellrObj.User)
                     .Include(sellrObj => sellrObj.Products)
-                    .Include(sellrObj => sellrObj.OrderItems);
+                    .Include(sellrObj => sellrObj.OrderItems)
+                    .AsQueryable();
 
             //    var query = _dbContext.Sellers
             //.Where(s => s.IsActive); // Only active products
@@ -41,18 +46,29 @@ namespace DataAccessLayer.Repositories
                 // Filter by IsActive status
                 if (!string.IsNullOrEmpty(filterByStatus) && filterByStatus.ToLower() != "all")
                 {
-                    if (bool.TryParse(filterByStatus, out bool isActive))
+                    switch(filterByStatus.ToLower())
                     {
-                        query = query.Where(seller => seller.IsActive == isActive);
+                        case "active":
+                            query = query.Where(seller => seller.IsActive == true);
+                            break;
+                        case "inactive":
+                            query = query.Where(seller => seller.IsActive == false);
+                            break;
                     }
                 }
 
                 // Filter by approval status
                 if (!string.IsNullOrEmpty(filterByApproval) && filterByApproval.ToLower() != "all")
                 {
-                    if (bool.TryParse(filterByApproval, out bool isApproved))
+                    switch(filterByApproval.ToLower())
                     {
-                        query = query.Where(seller => seller.IsApproved == isApproved);
+                        case "approved":
+                            query = query.Where(seller => seller.IsApproved == true);
+                            break;
+                        case "notapproved":
+                        case "pending":
+                            query = query.Where(seller => seller.IsApproved == false);
+                            break;
                     }
                 }
 
@@ -63,6 +79,8 @@ namespace DataAccessLayer.Repositories
                     query = query.Where(seller => seller.City.ToLower().Contains(lowerCity));
                 }
 
+                int totalRecords = await query.CountAsync();
+
                 // Sorting
                 bool ascending = sortOrder?.ToLower() == "asc";
                 query = sortField?.ToLower() switch
@@ -70,85 +88,138 @@ namespace DataAccessLayer.Repositories
                     "fullname" => ascending ? query.OrderBy(s => s.User.FullName) : query.OrderByDescending(s => s.User.FullName),
                     "storename" => ascending ? query.OrderBy(s => s.StoreName) : query.OrderByDescending(s => s.StoreName),
                     "city" => ascending ? query.OrderBy(s => s.City) : query.OrderByDescending(s => s.City),
-                    //"createdat" => ascending ? query.OrderBy(s => s.CreatedAt) : query.OrderByDescending(s => s.CreatedAt),
+                    "createdat" => ascending ? query.OrderBy(s => s.CreatedAt) : query.OrderByDescending(s => s.CreatedAt),
                     _ => query.OrderByDescending(s => s.StoreName) // default sort
                 };
 
                 // Pagination
-                query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+                var pagedSellers = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
 
-                return await query.ToListAsync();
+                var pagedResult = new PagedResult<Seller>
+                {
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Items = pagedSellers,
+                    TotalRecords = totalRecords
+                };
+
+                return CommonResponse<PagedResult<Seller>>.SuccessResponse(
+                   pagedResult,
+                   "Sellers fetched successfully");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error occurred while fetching sellers: " + ex.Message);
-                return new List<Seller>();
+                await _loggerRepository.LogAsync($"Exception occurred while retrieving sellers.", SharedReference.Enums.Enum.LogLevel.Error, "SellerRepository.GetSellersAsync()", ex, null, null, null);
+                return CommonResponse<PagedResult<Seller>>.FailureResponse(
+                  new List<string> { $"Exception occurred while retrieving sellers." },
+                  "Failed to fetch sellers."
+              );
             }
         }
 
-        public async Task<Seller> GetSellerByIdAsync(Guid sellerId)
+        public async Task<CommonResponse<Seller>> GetSellerByIdAsync(Guid sellerId)
         {
             try
             {
-                return await _dbContext.Sellers
+                var seller = await _dbContext.Sellers
                     .Include(customerObj => customerObj.User)
                     .Include(customerObj => customerObj.Products)
                     .Include(customerObj => customerObj.OrderItems)
                     .FirstOrDefaultAsync(seller => seller.Id == sellerId);
+
+                if(seller != null)
+                {
+                    return CommonResponse<Seller>.SuccessResponse(
+                        seller,
+                        "Seller fetched successfully");
+                }
+
+                return CommonResponse<Seller>.FailureResponse(
+                    new List<string> { $"Seller not found by sellerId: {sellerId}." },
+                    "Seller not found");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception occurred while retrieving seller by id: " + ex.Message);
-                return null;
+                await _loggerRepository.LogAsync($"Exception occurred while retrieving seller by id: {sellerId}.", SharedReference.Enums.Enum.LogLevel.Error, "SellerRepository.GetSellerByIdAsync()", ex, null, null, new Dictionary<string, object> { { "SellerId", sellerId } });
+                return CommonResponse<Seller>.FailureResponse(
+                       new List<string> { $"Exception occurred while retrieving seller by id: {sellerId}." },
+                       "Failed to fetch seller");
             }
         }
 
-        public async Task<Seller> GetSellerByUserIdAsync(Guid userId)
+        public async Task<CommonResponse<Seller>> GetSellerByUserIdAsync(Guid userId)
         {
             try
             {
-                return await _dbContext.Sellers
+                var seller = await _dbContext.Sellers
                     .Include(customerObj => customerObj.User)
                     .Include(customerObj => customerObj.Products)
                     .Include(customerObj => customerObj.OrderItems)
                     .FirstOrDefaultAsync(seller => seller.UserId == userId);
+
+                if(seller != null)
+                {
+                    return CommonResponse<Seller>.SuccessResponse(
+                        seller,
+                        "Seller fetched successfully");
+                }
+
+                return CommonResponse<Seller>.FailureResponse(
+                    new List<string> { $"Seller not found by user id: {userId}." },
+                    "Seller not found");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception occurred while retrieving seller by user id: " + ex.Message);
-                return null;
+                await _loggerRepository.LogAsync($"Exception occurred while retrieving seller by user id: {userId}.", SharedReference.Enums.Enum.LogLevel.Error, "SellerRepository.GetSellerByUserIdAsync()", ex, null, null, new Dictionary<string, object> { { "UserId", userId } });
+                return CommonResponse<Seller>.FailureResponse(
+                       new List<string> { $"Exception occurred while retrieving seller by user id: {userId}." },
+                       "Failed to fetch seller");
             }
         }
 
-        public async Task<bool> CreateSellerInDBAsync(Seller seller)
+        public async Task<CommonResponse<Seller>> CreateSellerInDBAsync(Seller seller)
         {
             try
             {
                 await _dbContext.Sellers.AddAsync(seller);
 
-                var result = await _dbContext.SaveChangesAsync();
+                await _dbContext.SaveChangesAsync();
 
-                return result > 0;
+                return CommonResponse<Seller>.SuccessResponse(
+                    seller,
+                    "Seller created successfully");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception Occurred: " + ex.Message);
-                return false;
+                await _loggerRepository.LogAsync($"Exception occurred while creating seller.", SharedReference.Enums.Enum.LogLevel.Error, "SellerRepository.CreateSellerInDBAsync()", ex, null, null, new Dictionary<string, object> { { "Seller", seller } });
+                return CommonResponse<Seller>.FailureResponse(
+                       new List<string> { $"Exception occurred while creating seller." },
+                       "Failed to create seller");
             }
         }
 
-        public async Task<bool> ApproveSellerBySellerIdAsync(Guid sellerId)
+        public async Task<CommonResponse<Seller>> ApproveSellerBySellerIdAsync(Guid sellerId)
         {
             try
             {
                 // Find the seller by sellerId
                 var seller = await _dbContext.Sellers
+                    .Include(s => s.User)
+                        .ThenInclude(u => u.CustomerProfile)
                     .FirstOrDefaultAsync(s => s.Id == sellerId);
 
-                if (seller == null || seller.IsApproved)
+                if (seller == null)
                 {
-                    // If seller doesn't exist or seller is already approved then, return false
-                    return false;
+                    return CommonResponse<Seller>.FailureResponse(
+                    new List<string> { $"Seller not found by seller id: {sellerId}." },
+                    "Seller not found");
+                }
+
+                if(seller.IsApproved)
+                {
+                    return CommonResponse<Seller>.FailureResponse(
+                    new List<string> { $"Seller is already approved" },
+                    "Seller is already approved");
                 }
 
                 // Approve the seller by setting IsApproved to true
@@ -158,16 +229,20 @@ namespace DataAccessLayer.Repositories
                 // Save changes to the database
                 await _dbContext.SaveChangesAsync();
 
-                return true;
+                return CommonResponse<Seller>.SuccessResponse(
+                    seller,
+                    "Seller approved successfully");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception occurred while approving seller: " + ex.Message);
-                return false;
+                await _loggerRepository.LogAsync($"Exception occurred while approving seller.", SharedReference.Enums.Enum.LogLevel.Error, "SellerRepository.ApproveSellerBySellerIdAsync()", ex, null, null, new Dictionary<string, object> { { "SellerId", sellerId } });
+                return CommonResponse<Seller>.FailureResponse(
+                       new List<string> { $"Exception occurred while approving seller." },
+                       "Failed to approve seller");
             }
         }
 
-        public async Task<bool> RejectSellerBySellerIdAsync(Guid sellerId)
+        public async Task<CommonResponse<Seller>> RejectSellerBySellerIdAsync(Guid sellerId)
         {
             try
             {
@@ -177,10 +252,18 @@ namespace DataAccessLayer.Repositories
                         .ThenInclude(u => u.CustomerProfile)
                     .FirstOrDefaultAsync(s => s.Id == sellerId);
 
-                if (seller == null || seller.IsApproved)
+                if(seller == null)
                 {
-                    // if seller not found or seller is already approved then, reutrn false
-                    return false;
+                    return CommonResponse<Seller>.FailureResponse(
+                    new List<string> { $"Seller not found by seller id: {sellerId}." },
+                    "Seller not found");
+                }
+
+                if(!seller.IsApproved)
+                {
+                    return CommonResponse<Seller>.FailureResponse(
+                    new List<string> { $"Seller is already rejected" },
+                    "Seller is already rejected");
                 }
 
                 var user = seller.User;
@@ -195,54 +278,88 @@ namespace DataAccessLayer.Repositories
                 }
 
                 await _dbContext.SaveChangesAsync();
-                return true;
+
+                return CommonResponse<Seller>.SuccessResponse(
+                    seller,
+                    "Seller rejected successfully");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception occurred while rejecting seller: " + ex.Message);
-                return false;
+                await _loggerRepository.LogAsync($"Exception occurred while rejecting seller.", SharedReference.Enums.Enum.LogLevel.Error, "SellerRepository.RejectSellerBySellerIdAsync()", ex, null, null, new Dictionary<string, object> { { "SellerId", sellerId } });
+                return CommonResponse<Seller>.FailureResponse(
+                       new List<string> { $"Exception occurred while rejecting seller." },
+                       "Failed to reject seller");
             }
         }
 
-        public async Task<bool> MakeSellerInactiveBySellerIdAsync(Guid sellerId)
+        public async Task<CommonResponse<Seller>> MakeSellerInactiveBySellerIdAsync(Guid sellerId)
         {
             try
             {
                 var seller = await _dbContext.Sellers.FindAsync(sellerId);
-                if (seller == null || !seller.IsApproved)
+
+                if(seller == null)
                 {
-                    return false;
+                    return CommonResponse<Seller>.FailureResponse(
+                    new List<string> { $"Seller not found by seller id: {sellerId}." },
+                    "Seller not found");
+                }
+
+                if(!seller.IsApproved)
+                {
+                    return CommonResponse<Seller>.FailureResponse(
+                    new List<string> { $"Seller profile is not approved" },
+                    "Seller profile is not approved");
                 }
 
                 seller.IsActive = false;
                 await _dbContext.SaveChangesAsync();
-                return true;
+
+                return CommonResponse<Seller>.SuccessResponse(
+                    seller,
+                    "Seller inactivated successfully");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error making seller inactive: " + ex.Message);
-                return false;
+                await _loggerRepository.LogAsync($"Exception occurred while inactivating seller.", SharedReference.Enums.Enum.LogLevel.Error, "SellerRepository.MakeSellerInactiveBySellerIdAsync()", ex, null, null, new Dictionary<string, object> { { "SellerId", sellerId } });
+                return CommonResponse<Seller>.FailureResponse(
+                       new List<string> { $"Exception occurred while inactivating seller." },
+                       "Failed to inactivate seller");
             }
         }
 
-        public async Task<bool> MakeSellerActiveBySellerIdAsync(Guid sellerId)
+        public async Task<CommonResponse<Seller>> MakeSellerActiveBySellerIdAsync(Guid sellerId)
         {
             try
             {
                 var seller = await _dbContext.Sellers.FindAsync(sellerId);
-                if (seller == null || !seller.IsApproved)
+                if(seller == null)
                 {
-                    return false;
+                    return CommonResponse<Seller>.FailureResponse(
+                    new List<string> { $"Seller not found by seller id: {sellerId}." },
+                    "Seller not found");
+                }
+
+                if(!seller.IsApproved)
+                {
+                    return CommonResponse<Seller>.FailureResponse(
+                    new List<string> { $"Seller profile is not approved" },
+                    "Seller profile is not approved");
                 }
 
                 seller.IsActive = true;
                 await _dbContext.SaveChangesAsync();
-                return true;
+
+                return CommonResponse<Seller>.SuccessResponse(
+                    seller,
+                    "Seller activated successfully");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error making seller active: " + ex.Message);
-                return false;
+                await _loggerRepository.LogAsync($"Exception occurred while activating seller.", SharedReference.Enums.Enum.LogLevel.Error, "SellerRepository.MakeSellerActiveBySellerIdAsync()", ex, null, null, new Dictionary<string, object> { { "SellerId", sellerId } });
+                return CommonResponse<Seller>.FailureResponse(
+                       new List<string> { $"Exception occurred while activating seller." },
+                       "Failed to activate seller");
             }
         }
     }
