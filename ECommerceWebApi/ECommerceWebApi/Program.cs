@@ -2,9 +2,10 @@ using DataAccessLayer.Data;
 using DataAccessLayer.Interfaces;
 using DataAccessLayer.Repositories;
 using ECommerceWebApi.Services;
-using ECommerceWebApi.Services.EmailService;
-using ECommerceWebApi.Services.LoggerService;
 using ECommerceWebApi.Services.TokenService;
+using GenericServices.EmailService;
+using GenericServices.Interfaces;
+using GenericServices.LoggerService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -51,9 +52,11 @@ builder.Services.AddScoped<IUserApprovalRequestRepository, UserApprovalRequestRe
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IUserOtpRepository, UserOtpRepository>();
 builder.Services.AddScoped<ILoggerRepository, LoggerRepository>();
+builder.Services.AddScoped<IEmailTemplates, EmailTemplates>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 
-builder.Services.AddTransient<IEmailNotificationService, EmailNotificationService>();
+//builder.Services.AddTransient<IEmailNotificationService, EmailNotificationService>();
 
 
 // Services

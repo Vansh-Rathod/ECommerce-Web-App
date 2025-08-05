@@ -32,29 +32,29 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
-            var customer = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
-            if (customer == null)
+            var customerResult = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
+            if (customerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Customer for Wallet Not found" });
             }
 
-            var wallet = await _walletRepository.GetWalletByCustomerIdAsync(customer.Id);
-            if (wallet == null)
+            var walletResult = await _walletRepository.GetWalletByCustomerIdAsync(customerResult.Data.Id);
+            if (!walletResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Wallet Not found by Customer" });
             }
 
             var response = new
             {
-                WalletId = wallet.Id,
-                Balance = wallet.Balance,
-                LastUpdated = wallet.LastUpdated,
+                WalletId = walletResult.Data.Id,
+                Balance = walletResult.Data.Balance,
+                LastUpdated = walletResult.Data.LastUpdated,
 
-                CustomerId = wallet.CustomerId,
-                CustomerName = wallet.Customer.User.FullName,
-                CustomerEmail = wallet.Customer.User.Email,
+                CustomerId = walletResult.Data.CustomerId,
+                CustomerName = walletResult.Data.Customer.User.FullName,
+                CustomerEmail = walletResult.Data.Customer.User.Email,
 
-                WalletTransactions = wallet.Transactions.Select(walletTransactionObj => new
+                WalletTransactions = walletResult.Data.Transactions.Select(walletTransactionObj => new
                 {
                     TransactionId = walletTransactionObj.Id,
                     TransactionAmount = walletTransactionObj.Amount,
@@ -80,29 +80,29 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
-            var customer = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
-            if (customer == null)
+            var customerResult = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
+            if (!customerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Customer for Wallet Not found" });
             }
 
-            var wallet = await _walletRepository.GetWalletByCustomerIdAsync(customer.Id);
-            if (wallet == null)
+            var walletResult = await _walletRepository.GetWalletByCustomerIdAsync(customerResult.Data.Id);
+            if (!walletResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Wallet Not found by Customer" });
             }
 
             var response = new
             {
-                WalletId = wallet.Id,
-                Balance = wallet.Balance,
-                LastUpdated = wallet.LastUpdated,
+                WalletId = walletResult.Data.Id,
+                Balance = walletResult.Data.Balance,
+                LastUpdated = walletResult.Data.LastUpdated,
 
-                CustomerId = wallet.CustomerId,
-                CustomerName = wallet.Customer.User.FullName,
-                CustomerEmail = wallet.Customer.User.Email,
+                CustomerId = walletResult.Data.CustomerId,
+                CustomerName = walletResult.Data.Customer.User.FullName,
+                CustomerEmail = walletResult.Data.Customer.User.Email,
 
-                WalletTransactions = wallet.Transactions.Select(walletTransactionObj => new
+                WalletTransactions = walletResult.Data.Transactions.Select(walletTransactionObj => new
                 {
                     TransactionId = walletTransactionObj.Id,
                     TransactionAmount = walletTransactionObj.Amount,
@@ -127,42 +127,42 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
-            var customer = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
-            if (customer == null)
+            var customerResult = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
+            if (!customerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Customer for Wallet Not found" });
             }
 
-            var wallet = await _walletRepository.GetWalletByCustomerIdAsync(customer.Id);
-            if (wallet == null)
+            var walletResult = await _walletRepository.GetWalletByCustomerIdAsync(customerResult.Data.Id);
+            if (!walletResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Wallet Not found by Customer" });
             }
 
-            var walletTransaction = await _walletRepository.AddFundsAsync(wallet.Id, addFundsDto.Amount, addFundsDto.Description);
+            var walletTransactionResult = await _walletRepository.AddFundsAsync(walletResult.Data.Id, addFundsDto.Amount, addFundsDto.Description);
 
-            if (walletTransaction == null)
+            if (!walletTransactionResult.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Failed to add funds" });
             }
 
             var response = new
             {
-                WalletId = wallet.Id,
-                Balance = wallet.Balance,
-                LastUpdated = wallet.LastUpdated,
+                WalletId = walletResult.Data.Id,
+                Balance = walletResult.Data.Balance,
+                LastUpdated = walletResult.Data.LastUpdated,
 
-                CustomerId = wallet.CustomerId,
-                CustomerName = wallet.Customer.User.FullName,
-                CustomerEmail = wallet.Customer.User.Email,
+                CustomerId = walletResult.Data.CustomerId,
+                CustomerName = walletResult.Data.Customer.User.FullName,
+                CustomerEmail = walletResult.Data.Customer.User.Email,
 
                 TransactionDetails =  new
                 {
-                    TransactionId = walletTransaction.Id,
-                    TransactionAmount = walletTransaction.Amount,
-                    TransactionType = walletTransaction.TransactionType,
-                    TransactionDescription = walletTransaction.Description,
-                    TransactionDate = walletTransaction.TransactionDate
+                    TransactionId = walletTransactionResult.Data.Id,
+                    TransactionAmount = walletTransactionResult.Data.Amount,
+                    TransactionType = walletTransactionResult.Data.TransactionType,
+                    TransactionDescription = walletTransactionResult.Data.Description,
+                    TransactionDate = walletTransactionResult.Data.TransactionDate
                 }
             };
 
@@ -180,42 +180,42 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
-            var customer = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
-            if (customer == null)
+            var customerResult = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
+            if (!customerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Customer for Wallet Not found" });
             }
 
-            var wallet = await _walletRepository.GetWalletByCustomerIdAsync(customer.Id);
-            if (wallet == null)
+            var walletResult = await _walletRepository.GetWalletByCustomerIdAsync(customerResult.Data.Id);
+            if (!walletResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Wallet Not found by Customer" });
             }
 
-            var walletTransaction = await _walletRepository.PayAsync(wallet.Id, payDto.Amount, payDto.Description);
+            var walletTransactionResult = await _walletRepository.PayAsync(walletResult.Data.Id, payDto.Amount, payDto.Description);
 
-            if (walletTransaction == null)
+            if (!walletTransactionResult.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Payment Unsuccessful" });
             }
 
             var response = new
             {
-                WalletId = wallet.Id,
-                Balance = wallet.Balance,
-                LastUpdated = wallet.LastUpdated,
+                WalletId = walletResult.Data.Id,
+                Balance = walletResult.Data.Balance,
+                LastUpdated = walletResult.Data.LastUpdated,
 
-                CustomerId = wallet.CustomerId,
-                CustomerName = wallet.Customer.User.FullName,
-                CustomerEmail = wallet.Customer.User.Email,
+                CustomerId = walletResult.Data.CustomerId,
+                CustomerName = walletResult.Data.Customer.User.FullName,
+                CustomerEmail = walletResult.Data.Customer.User.Email,
 
                 TransactionDetails = new
                 {
-                    TransactionId = walletTransaction.Id,
-                    TransactionAmount = walletTransaction.Amount,
-                    TransactionType = walletTransaction.TransactionType,
-                    TransactionDescription = walletTransaction.Description,
-                    TransactionDate = walletTransaction.TransactionDate
+                    TransactionId = walletTransactionResult.Data.Id,
+                    TransactionAmount = walletTransactionResult.Data.Amount,
+                    TransactionType = walletTransactionResult.Data.TransactionType,
+                    TransactionDescription = walletTransactionResult.Data.Description,
+                    TransactionDate = walletTransactionResult.Data.TransactionDate
                 }
             };
 

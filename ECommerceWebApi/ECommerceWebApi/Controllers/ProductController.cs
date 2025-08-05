@@ -81,13 +81,13 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
-            var seller = await _sellerRepository.GetSellerByUserIdAsync(userGuid);
-            if (seller == null)
+            var sellerResult = await _sellerRepository.GetSellerByUserIdAsync(userGuid);
+            if (!sellerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Seller Not found" });
             }
 
-            var productsResult = await _productRepository.GetSellerProductsAsync(seller.Id, pageNumber, pageSize, searchText, sortField, sortOrder, filterByPrice, filterByStatus);
+            var productsResult = await _productRepository.GetSellerProductsAsync(sellerResult.Data.Id, pageNumber, pageSize, searchText, sortField, sortOrder, filterByPrice, filterByStatus);
 
             if (!productsResult.Success)
             {

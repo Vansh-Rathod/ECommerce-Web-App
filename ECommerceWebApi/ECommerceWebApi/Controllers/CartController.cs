@@ -37,12 +37,12 @@ namespace ECommerceWebApi.Controllers
             }
 
             var customerResult = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
-            if (customerResult == null)
+            if (!customerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Customer Not found" });
             }
 
-            var cartResult = await _cartRepository.GetCartByCustomerIdAsync(customerResult.Id);
+            var cartResult = await _cartRepository.GetCartByCustomerIdAsync(customerResult.Data.Id);
             if (!cartResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = cartResult.Message });
@@ -97,13 +97,13 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
-            var customer = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
-            if (customer == null)
+            var customerResult = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
+            if (!customerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Customer Not found" });
             }
 
-            var cartResult = await _cartRepository.GetCartByCustomerIdAsync(customer.Id);
+            var cartResult = await _cartRepository.GetCartByCustomerIdAsync(customerResult.Data.Id);
             if (!cartResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = cartResult.Message });
@@ -164,13 +164,13 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
-            var customer = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
-            if (customer == null)
+            var customerResult = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
+            if (!customerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Customer Not found" });
             }
 
-            var cartResult = await _cartRepository.GetCartByCustomerIdAsync(customer.Id);
+            var cartResult = await _cartRepository.GetCartByCustomerIdAsync(customerResult.Data.Id);
             if (!cartResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Cart Not found" });
@@ -231,13 +231,13 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
-            var customer = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
-            if (customer == null)
+            var customerResult = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
+            if (!customerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Customer Not found" });
             }
 
-            var cartResult = await _cartRepository.GetCartByCustomerIdAsync(customer.Id);
+            var cartResult = await _cartRepository.GetCartByCustomerIdAsync(customerResult.Data.Id);
             if (!cartResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = cartResult.Message });

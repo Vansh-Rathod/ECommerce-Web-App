@@ -3,6 +3,7 @@ using DataAccessLayer.Repositories;
 using MailKit.Search;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using SharedReference;
 using SharedReference.Entities;
@@ -32,8 +33,8 @@ namespace ECommerceWebApi.Controllers
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
-            var seller = await _sellerRepository.GetSellerByUserIdAsync(userGuid);
-            if (seller == null)
+            var sellerResult = await _sellerRepository.GetSellerByUserIdAsync(userGuid);
+            if (!sellerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Seller Not found" });
             }
@@ -41,21 +42,21 @@ namespace ECommerceWebApi.Controllers
 
             var response = new
             {
-                SellerId = seller.Id,
-                UserId = seller.UserId,
-                StoreName = seller.StoreName,
-                City = seller.City,
-                IsApproved = seller.IsApproved,
-                IsActive = seller.IsActive,
-                CreatedAt = seller.CreatedAt,
+                SellerId = sellerResult.Data.Id,
+                UserId = sellerResult.Data.UserId,
+                StoreName = sellerResult.Data.StoreName,
+                City = sellerResult.Data.City,
+                IsApproved = sellerResult.Data.IsApproved,
+                IsActive = sellerResult.Data.IsActive,
+                CreatedAt = sellerResult.Data.CreatedAt,
 
-                SellerName = seller.User.FullName,
-                SellerEmail = seller.User.Email,
-                SellerLastLogin = seller.User.LastLogin,
+                SellerName = sellerResult.Data.User.FullName,
+                SellerEmail = sellerResult.Data.User.Email,
+                SellerLastLogin = sellerResult.Data.User.LastLogin,
 
-                Is2FAEnabled = seller.User.Is2FAEnabled,
+                Is2FAEnabled = sellerResult.Data.User.Is2FAEnabled,
 
-                SellerProducts = seller.Products?.Select(productObj => new
+                SellerProducts = sellerResult.Data.Products?.Select(productObj => new
                 {
                     productObj.Id,
                     productObj.Name,
@@ -65,7 +66,7 @@ namespace ECommerceWebApi.Controllers
                     productObj.IsActive
                 }),
 
-                SellerOrders = seller.OrderItems?.Select(orderItemObj => new
+                SellerOrders = sellerResult.Data.OrderItems?.Select(orderItemObj => new
                 {
                     orderItemObj.Id,
                     orderItemObj.OrderId,
@@ -86,13 +87,13 @@ namespace ECommerceWebApi.Controllers
         [HttpGet("sellers")]
         public async Task<IActionResult> GetSellersAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string sortField = "fullname", [FromQuery] string sortOrder = "asc", [FromQuery] string filterByStatus = "all", [FromQuery] string filterByApproval = "all", [FromQuery] string filterByCity = "all")
         {
-            var sellers = await _sellerRepository.GetSellersAsync(pageNumber, pageSize, searchText, sortField, sortOrder, filterByStatus, filterByApproval, filterByCity);
-            if (sellers == null)
+            var sellersResult = await _sellerRepository.GetSellersAsync(pageNumber, pageSize, searchText, sortField, sortOrder, filterByStatus, filterByApproval, filterByCity);
+            if (!sellersResult.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "No Sellers Found" });
             }
 
-            var response = sellers.Select(sellerObj => new
+            var sellers = sellersResult.Data.Items.Select(sellerObj => new
             {
                 SellerId = sellerObj.Id,
                 UserId = sellerObj.UserId,
@@ -146,6 +147,14 @@ namespace ECommerceWebApi.Controllers
 
             });
 
+            var response = new
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalUsers = sellersResult.Data.TotalRecords,
+                Users = sellers
+            };
+
             return Ok(new APIResponse { Status = 200, Message = "Sellers fetched successfully", Data = response });
         }
 
@@ -155,28 +164,28 @@ namespace ECommerceWebApi.Controllers
         [HttpGet("{sellerId}")]
         public async Task<IActionResult> GetSellerById(Guid sellerId)
         {
-            var seller = await _sellerRepository.GetSellerByIdAsync(sellerId);
+            var sellerResult = await _sellerRepository.GetSellerByIdAsync(sellerId);
 
-            if (seller == null)
+            if (!sellerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = $"No Seller Found by sellerId: {sellerId}" });
             }
 
             var response = new
             {
-                SellerId = seller.Id,
-                UserId = seller.UserId,
-                StoreName = seller.StoreName,
-                City = seller.City,
-                IsApproved = seller.IsApproved,
-                IsActive = seller.IsActive,
-                CreatedAt = seller.CreatedAt,
+                SellerId = sellerResult.Data.Id,
+                UserId = sellerResult.Data.UserId,
+                StoreName = sellerResult.Data.StoreName,
+                City = sellerResult.Data.City,
+                IsApproved = sellerResult.Data.IsApproved,
+                IsActive = sellerResult.Data.IsActive,
+                CreatedAt = sellerResult.Data.CreatedAt,
 
-                SellerName = seller.User.FullName,
-                SellerEmail = seller.User.Email,
-                SellerLastLogin = seller.User.LastLogin,
+                SellerName = sellerResult.Data.User.FullName,
+                SellerEmail = sellerResult.Data.User.Email,
+                SellerLastLogin = sellerResult.Data.User.LastLogin,
 
-                SellerProducts = seller.Products?.Select(productObj => new
+                SellerProducts = sellerResult.Data.Products?.Select(productObj => new
                 {
                     productObj.Id,
                     productObj.Name,
@@ -186,7 +195,7 @@ namespace ECommerceWebApi.Controllers
                     productObj.IsActive
                 }),
 
-                SellerOrders = seller.OrderItems?.Select(orderItemObj => new
+                SellerOrders = sellerResult.Data.OrderItems?.Select(orderItemObj => new
                 {
                     orderItemObj.Id,
                     orderItemObj.OrderId,
@@ -210,7 +219,7 @@ namespace ECommerceWebApi.Controllers
         public async Task<IActionResult> ApproveSeller(Guid sellerId)
         {
             var result = await _sellerRepository.ApproveSellerBySellerIdAsync(sellerId);
-            if (!result)
+            if (!result.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Failed to approve seller" });
             }
@@ -224,7 +233,7 @@ namespace ECommerceWebApi.Controllers
         public async Task<IActionResult> RejectSeller(Guid sellerId)
         {
             var result = await _sellerRepository.RejectSellerBySellerIdAsync(sellerId);
-            if (!result)
+            if (!result.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Failed to reject seller" });
             }
@@ -239,7 +248,7 @@ namespace ECommerceWebApi.Controllers
         public async Task<IActionResult> MakeSellerInactiveBySellerId(Guid sellerId)
         {
             var result = await _sellerRepository.MakeSellerInactiveBySellerIdAsync(sellerId);
-            if (!result)
+            if (!result.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Failed to inactivate seller" });
             }
@@ -254,7 +263,7 @@ namespace ECommerceWebApi.Controllers
         public async Task<IActionResult> MakeSellerActiveBySellerId(Guid sellerId)
         {
             var result = await _sellerRepository.MakeSellerActiveBySellerIdAsync(sellerId);
-            if (!result)
+            if (!result.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Failed to activate seller" });
             }

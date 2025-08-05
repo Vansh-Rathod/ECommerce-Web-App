@@ -159,12 +159,12 @@ namespace ECommerceWebApi.Controllers
             }
 
             var sellerResult = await _sellerRepository.GetSellerByUserIdAsync(userGuid);
-            if (sellerResult == null)
+            if (!sellerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Seller Not found" });
             }
 
-            var ordersResult = await _orderRepository.GetOrdersBySellerIdAsync(sellerResult.Id, pageNumber, pageSize, searchText, filterByOrderStatus);
+            var ordersResult = await _orderRepository.GetOrdersBySellerIdAsync(sellerResult.Data.Id, pageNumber, pageSize, searchText, filterByOrderStatus);
             if (!ordersResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "No Orders Found" });
@@ -259,12 +259,12 @@ namespace ECommerceWebApi.Controllers
             }
 
             var sellerResult = await _sellerRepository.GetSellerByUserIdAsync(userGuid);
-            if (sellerResult == null)
+            if (!sellerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Seller Not found" });
             }
 
-            var orderItemsResult = await _orderRepository.GetPendingOrderItemsBySellerAsync(sellerResult.Id, pageNumber, pageSize, searchText);
+            var orderItemsResult = await _orderRepository.GetPendingOrderItemsBySellerAsync(sellerResult.Data.Id, pageNumber, pageSize, searchText);
             
             if(!orderItemsResult.Success)
             {

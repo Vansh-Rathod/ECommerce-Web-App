@@ -10,7 +10,7 @@ namespace DataAccessLayer.Interfaces
 {
     public interface ICartRepository
     {
-        Task<CommonResponse<PagedResult<PagedResult<Cart>>> GetCartByIdAsync(Guid cartId, int pageNumber, int pageSize );
+        Task<CommonResponse<PagedResult<Cart>>> GetCartByIdAsync(Guid cartId, int pageNumber, int pageSize );
 
         Task<CommonResponse<Cart>> GetCartByCustomerIdAsync(Guid customerId);
 

@@ -14,7 +14,7 @@ namespace DataAccessLayer.Interfaces
 
         Task<CommonResponse<Wallet>> GetWalletByCustomerIdAsync(Guid customerId);
 
-        Task<CommonResponse<PagedResult<WalletTransaction>>> GetTransactionHistoryAsync(Guid walletId);
+        Task<CommonResponse<PagedResult<WalletTransaction>>> GetTransactionHistoryAsync(Guid walletId, int pageNumber, int pageSize, string searchText, string sortField, string sortOrder, string filterByAmount, string filterByTransactionType, DateTime? fromDate, DateTime? toDate );
 
         Task<CommonResponse<WalletTransaction>> AddFundsAsync(Guid walletId, decimal amount, string Description);
 

@@ -78,7 +78,7 @@ namespace DataAccessLayer.Repositories
                 // Check customer wallet balance before placing order
                 var wallet = await _walletRepository.GetWalletByCustomerIdAsync(customerId);
 
-                if(wallet == null)
+                if(!wallet.Success)
                 {
                     return CommonResponse<Order>.FailureResponse(
                        new List<string> { $"Wallet not found for customer id: {customerId}" },
@@ -86,10 +86,10 @@ namespace DataAccessLayer.Repositories
                 }
 
                 var totalOrderAmount = cart.CartItems.Sum(cartItemObj => cartItemObj.Product.Price * cartItemObj.Quantity);
-                if(wallet.Balance < totalOrderAmount)
+                if(wallet.Data.Balance < totalOrderAmount)
                 {
                     return CommonResponse<Order>.FailureResponse(
-                       new List<string> { $"Customer does not have sufficient balance. CustomerId: {customerId}. Current Balance: {wallet.Balance}" },
+                       new List<string> { $"Customer does not have sufficient balance. CustomerId: {customerId}. Current Balance: {wallet.Data.Balance}" },
                        "Insufficient wallet balance.");
                 }
 
@@ -126,7 +126,7 @@ namespace DataAccessLayer.Repositories
                 }
 
                 // Deduct the order amount from the wallet
-                await _walletRepository.PayAsync(wallet.Id, order.TotalAmount, $"Order payment for OrderId: {order.Id}");
+                await _walletRepository.PayAsync(wallet.Data.Id, order.TotalAmount, $"Order payment for OrderId: {order.Id}");
 
 
                 // Save order and clear only cart items
@@ -383,7 +383,7 @@ namespace DataAccessLayer.Repositories
                 if(!string.IsNullOrWhiteSpace(searchText))
                 {
                     query = query.Where(orderItem =>
-                        orderItem.Product.Name.Contains(searchText)
+                        orderItem.Product.Name.Contains(searchText));
                         //orderItem.Order.Customer.User.FullName.Contains(searchText) ||
                         //orderItem.Order.Customer.User.Email.Contains(searchText));
                 }

@@ -7,6 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\EmailService\**" />
+    <Compile Remove="Services\LoggerService\**" />
+    <Content Remove="Services\EmailService\**" />
+    <Content Remove="Services\LoggerService\**" />
+    <EmbeddedResource Remove="Services\EmailService\**" />
+    <EmbeddedResource Remove="Services\LoggerService\**" />
+    <None Remove="Services\EmailService\**" />
+    <None Remove="Services\LoggerService\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="DinkToPdf" Version="1.0.8" />
     <PackageReference Include="MailKit" Version="4.12.0" />
@@ -18,7 +29,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="MimeKit" Version="4.12.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>

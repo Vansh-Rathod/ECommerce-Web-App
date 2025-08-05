@@ -3,6 +3,7 @@ using ECommerceWebApi.Services.TokenService;
 using GenericServices.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using Org.BouncyCastle.Asn1.Ocsp;
 using SharedReference;
 using SharedReference.Entities;
@@ -25,15 +26,15 @@ namespace ECommerceWebApi.Services
         private readonly string _appBaseUrl;
 
         public AuthService(
-            IUserRepository userRepository, 
-            IRoleRepository roleRepository, 
-            ISellerRepository sellerRepository, 
-            IUserApprovalRequestRepository userApprovalRequestRepository, 
-            JwtTokenService jwtTokenService, 
-            IRefreshTokenRepository refreshTokenRepository, 
-            IConfiguration configuration, 
-            IUserOtpRepository userOtpRepository, 
-            IEmailTemplates emailTemplateService, 
+            IUserRepository userRepository,
+            IRoleRepository roleRepository,
+            ISellerRepository sellerRepository,
+            IUserApprovalRequestRepository userApprovalRequestRepository,
+            JwtTokenService jwtTokenService,
+            IRefreshTokenRepository refreshTokenRepository,
+            IConfiguration configuration,
+            IUserOtpRepository userOtpRepository,
+            IEmailTemplates emailTemplateService,
             IEmailService emailService
             )
         {
@@ -56,7 +57,7 @@ namespace ECommerceWebApi.Services
             return random.Next(100000, 999999).ToString(); // returns a 6-digit string
         }
 
-        private string GenerateBody(string otpCode, string userName)
+        private string GenerateBody( string otpCode, string userName )
         {
             return $@"
 <!DOCTYPE html>
@@ -243,12 +244,12 @@ namespace ECommerceWebApi.Services
 </html>";
         }
 
-        public async Task<CommonResponse<object>> LoginUser(LoginRequestModel loginRequest)
+        public async Task<CommonResponse<object>> LoginUser( LoginRequestModel loginRequest )
         {
             // first validate that all the fields are present, after that check that user exists or not, if exists then generate bearerToken and refreshToken and send back that data to the authController
 
             // Step 1: Validate input
-            if (string.IsNullOrEmpty(loginRequest.Email) || string.IsNullOrEmpty(loginRequest.Password))
+            if(string.IsNullOrEmpty(loginRequest.Email) || string.IsNullOrEmpty(loginRequest.Password))
             {
                 //return Ok(new APIResponse { Status = 400, Message = "Email and Password are required" });
 
@@ -260,7 +261,7 @@ namespace ECommerceWebApi.Services
 
             // Step 2: Check if user exists
             var userResult = await _userRepository.GetUserByEmailAsync(loginRequest.Email);
-            if (!userResult.Success)
+            if(!userResult.Success)
             {
                 //return Ok(new APIResponse { Status = 400, Message = "Invalid email or password" });
 
@@ -274,7 +275,7 @@ namespace ECommerceWebApi.Services
 
             // Step 3: Check password
             bool isPasswordValid = BCrypt.Net.BCrypt.Verify(loginRequest.Password, userResult.Data.PasswordHash);
-            if (!isPasswordValid)
+            if(!isPasswordValid)
             {
                 //return Ok(new APIResponse { Status = 400, Message = "Invalid email or password" });
 
@@ -286,7 +287,7 @@ namespace ECommerceWebApi.Services
 
             // check that user is approved and isActive
             // Step 4: Check if user's customer profile and seller is approved and active
-            if (userResult.Data.CustomerProfile != null && !userResult.Data.CustomerProfile.IsActive)
+            if(userResult.Data.CustomerProfile != null && !userResult.Data.CustomerProfile.IsActive)
             {
                 return CommonResponse<object>.FailureResponse(
                     new List<string> { "Your customer profile is inactive. Please contact support." },
@@ -294,9 +295,9 @@ namespace ECommerceWebApi.Services
                 );
             }
 
-            if (userResult.Data.SellerProfile != null)
+            if(userResult.Data.SellerProfile != null)
             {
-                if (!userResult.Data.SellerProfile.IsApproved)
+                if(!userResult.Data.SellerProfile.IsApproved)
                 {
                     //return Ok(new APIResponse { Status = 400, Message = "Your seller account is awaiting admin approval" });
 
@@ -306,7 +307,7 @@ namespace ECommerceWebApi.Services
                     );
                 }
 
-                if (!userResult.Data.SellerProfile.IsActive)
+                if(!userResult.Data.SellerProfile.IsActive)
                 {
                     //return Ok(new APIResponse { Status = 400, Message = "Your seller account is inactive" });
 
@@ -319,7 +320,7 @@ namespace ECommerceWebApi.Services
 
 
             // Step 5: Check if 2FA is enabled
-            if (userResult.Data.Is2FAEnabled)
+            if(userResult.Data.Is2FAEnabled)
             {
                 // Clear old OTPs
                 await _userOtpRepository.DeleteAllOtpsByUserIdAsync(userResult.Data.Id);
@@ -342,7 +343,7 @@ namespace ECommerceWebApi.Services
                 //await _emailService.SendEmailAsync(userResult.Data.Email, "2FA Requests OTP For Login", GenerateBody(otpCode, userResult.Data.FullName));
 
                 var htmlBodyResult = _emailTemplateService.GenerateOTPVerificationEmailTemplate(otpCode, userResult.Data.FullName);
-                await _emailService.SendEmailAsync(userResult.Data.Email, "2FA Requests OTP For Login", htmlBodyResult.Data, null)
+                await _emailService.SendEmailAsync(userResult.Data.Email, "2FA Requests OTP For Login", htmlBodyResult.Data, null);
 
                 var twoFAResposneData = new
                 {
@@ -371,14 +372,17 @@ namespace ECommerceWebApi.Services
             var refreshToken = _jwtTokenService.GenerateRefreshToken();
 
             // Step 6: Get all existing refresh tokens by userId
-            var existingRefreshTokens = await _refreshTokenRepository.GetRefreshTokensByUserIdAsync(userResult.Data.Id);
+            var existingRefreshTokensResult = await _refreshTokenRepository.GetRefreshTokensByUserIdAsync(userResult.Data.Id);
 
-            // Step 7: Revoke old tokens
-            foreach (var token in existingRefreshTokens.Where(t => !t.IsRevoked))
+            if(existingRefreshTokensResult.Success && existingRefreshTokensResult.Data.Items.Any())
             {
-                token.IsRevoked = true;
-                //token.ExpiresAt = DateTime.UtcNow; // Optional: expire immediately
-                await _refreshTokenRepository.UpdateRefreshTokenAsync(token);
+                // Step 7: Revoke old tokens
+                foreach(var token in existingRefreshTokensResult.Data.Items.Where(t => !t.IsRevoked))
+                {
+                    token.IsRevoked = true;
+                    //token.ExpiresAt = DateTime.UtcNow; // Optional: expire immediately
+                    await _refreshTokenRepository.UpdateRefreshTokenAsync(token);
+                }
             }
 
             // Step 8: Save the refreh token in the database
@@ -455,11 +459,11 @@ namespace ECommerceWebApi.Services
             );
         }
 
-        public async Task<CommonResponse<object>> VerifyUserOtpAsync(VerifyOtpRequestModel userOtpRequestModel)
+        public async Task<CommonResponse<object>> VerifyUserOtpAsync( VerifyOtpRequestModel userOtpRequestModel )
         {
             // Step 1: Validate user
             var userResult = await _userRepository.GetUserByIdAsync(userOtpRequestModel.UserId);
-            if (!userResult.Success)
+            if(!userResult.Success)
             {
                 return CommonResponse<object>.FailureResponse(
                     new List<string> { "User not found." },
@@ -469,11 +473,19 @@ namespace ECommerceWebApi.Services
 
             // Step 2: Fetch latest valid OTP
             var userOtp = await _userOtpRepository.GetLatestValidOtpByUserIdAsync(userResult.Data.Id);
-            if (userOtp == null || userOtp.ExpiryTime < DateTime.UtcNow)
+            if(!userOtp.Success)
             {
                 return CommonResponse<object>.FailureResponse(
-                   new List<string> { "OTP is expired or not found." },
-                   "Invalid or expired OTP"
+                   new List<string> { "Failed to fetch OTP." },
+                   "OTP not found"
+               );
+            }
+
+            if(userOtp.Data.ExpiryTime < DateTime.UtcNow)
+            {
+                return CommonResponse<object>.FailureResponse(
+                   new List<string> { "OTP is expired." },
+                   "OTP is expired."
                );
             }
 
@@ -488,7 +500,7 @@ namespace ECommerceWebApi.Services
             //}
 
             // Step 4: Validate OTP
-            if (userOtp.OtpCode != userOtpRequestModel.OtpCode)
+            if(userOtp.Data.OtpCode != userOtpRequestModel.OtpCode)
             {
                 await _userOtpRepository.IncrementAttemptAsync(userResult.Data.Id); // central handling
                 return CommonResponse<object>.FailureResponse(
@@ -505,12 +517,13 @@ namespace ECommerceWebApi.Services
             var refreshToken = _jwtTokenService.GenerateRefreshToken();
 
             // Step 7: Revoke old refresh tokens
-            var existingRefreshTokens = await _refreshTokenRepository.GetRefreshTokensByUserIdAsync(userResult.Data.Id);
-            foreach (var token in existingRefreshTokens.Where(t => !t.IsRevoked))
-            {
-                token.IsRevoked = true;
-                await _refreshTokenRepository.UpdateRefreshTokenAsync(token);
-            }
+            var existingRefreshTokensResult = await _refreshTokenRepository.GetRefreshTokensByUserIdAsync(userResult.Data.Id);
+            if(existingRefreshTokensResult.Success || existingRefreshTokensResult.Data.Items.Any())
+                foreach(var token in existingRefreshTokensResult.Data.Items.Where(t => !t.IsRevoked))
+                {
+                    token.IsRevoked = true;
+                    await _refreshTokenRepository.UpdateRefreshTokenAsync(token);
+                }
 
             // Step 8: Save new refresh token
             await _refreshTokenRepository.SaveRefreshTokenAsync(new RefreshTokenModel
@@ -557,12 +570,12 @@ namespace ECommerceWebApi.Services
         }
 
 
-        public async Task<CommonResponse<object>> RegisterUser(RegisterRequestModel registerRequest)
+        public async Task<CommonResponse<object>> RegisterUser( RegisterRequestModel registerRequest )
         {
             // validate the register data, then check that user exists with same email or not, then send email to the admin, but if it is admin then dont send email instead approve it
 
             // Step-1: Validations
-            if (string.IsNullOrEmpty(registerRequest.Email) ||
+            if(string.IsNullOrEmpty(registerRequest.Email) ||
                 string.IsNullOrEmpty(registerRequest.Password) ||
                 string.IsNullOrEmpty(registerRequest.FullName) ||
                 registerRequest.Roles == null || !registerRequest.Roles.Any())
@@ -572,14 +585,14 @@ namespace ECommerceWebApi.Services
 
             // Step 2: Validate roles
             var validRoles = new[] { "Customer", "Seller", "Admin" };
-            if (registerRequest.Roles.Any(r => !validRoles.Contains(r)))
+            if(registerRequest.Roles.Any(r => !validRoles.Contains(r)))
             {
                 return CommonResponse<object>.FailureResponse(new List<string> { "Only 'Customer', 'Seller', or 'Admin' are allowed" }, "Invalid role(s) specified");
             }
 
             // Step 3: Check if user exists
             var existingUserResult = await _userRepository.GetUserByEmailAsync(registerRequest.Email);
-            if (!existingUserResult.Success)
+            if(!existingUserResult.Success)
             {
                 return CommonResponse<object>.FailureResponse(new List<string> { "Duplicate email" }, "User already exists");
             }
@@ -588,9 +601,9 @@ namespace ECommerceWebApi.Services
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(registerRequest.Password);
 
             var newUserId = Guid.NewGuid();
-            var rolesFromDb = await _roleRepository.GetRolesByNamesAsync(registerRequest.Roles);
+            var rolesFromDbResult = await _roleRepository.GetRolesByNamesAsync(registerRequest.Roles);
 
-            if (rolesFromDb == null || rolesFromDb.Count == 0)
+            if(!rolesFromDbResult.Success || !rolesFromDbResult.Data.Items.Any())
             {
                 return CommonResponse<object>.FailureResponse(new List<string> { $"Invalid Roles: {string.Join(", ", registerRequest.Roles)}" }, "Invalid Role(s)");
             }
@@ -603,7 +616,7 @@ namespace ECommerceWebApi.Services
                 PasswordHash = hashedPassword,
                 FullName = registerRequest.FullName,
                 CreatedAt = DateTime.UtcNow,
-                Roles = rolesFromDb.Select(role => new UserRole
+                Roles = rolesFromDbResult.Data.Items.Select(role => new UserRole
                 {
                     UserId = newUserId,
                     RoleId = role.Id,
@@ -612,7 +625,7 @@ namespace ECommerceWebApi.Services
             };
 
             // Step 6: Add profiles based on roles
-            if (registerRequest.Roles.Contains("Customer"))
+            if(registerRequest.Roles.Contains("Customer"))
             {
                 var customerId = Guid.NewGuid();
 
@@ -637,7 +650,7 @@ namespace ECommerceWebApi.Services
                 };
             }
 
-            if (registerRequest.Roles.Contains("Seller"))
+            if(registerRequest.Roles.Contains("Seller"))
             {
                 newUser.SellerProfile = new Seller
                 {
@@ -653,13 +666,13 @@ namespace ECommerceWebApi.Services
 
             // Step 7: Save user to DB
             var isCreated = await _userRepository.CreateUserInDBAsync(newUser);
-            if (!isCreated.Success)
+            if(!isCreated.Success)
             {
                 return CommonResponse<object>.FailureResponse(new List<string> { "User could not be saved to the database." }, "User Registration failed");
             }
 
             // Step 8: Create UserApprovalRequest (for non-admins)
-            if (!registerRequest.Roles.Contains("Admin") && newUser.SellerProfile != null)
+            if(!registerRequest.Roles.Contains("Admin") && newUser.SellerProfile != null)
             {
                 var userApprovalRequest = new UserApprovalRequest
                 {
@@ -670,8 +683,8 @@ namespace ECommerceWebApi.Services
                     Status = UserApprovalStatus.Pending
                 };
 
-                var approvalRequestCreated = await _userApprovalRequestRepository.CreateUserApprovalRequestAsync(userApprovalRequest);
-                if (!approvalRequestCreated)
+                var approvalRequestCreatedResult = await _userApprovalRequestRepository.CreateUserApprovalRequestAsync(userApprovalRequest);
+                if(!approvalRequestCreatedResult.Success)
                 {
                     return CommonResponse<object>.FailureResponse(
                         new List<string> { "UserApprovalRequest could not be saved." },
@@ -683,7 +696,7 @@ namespace ECommerceWebApi.Services
 
 
             // Step 9: Notify Admin (optional for non-admins)
-            if (!registerRequest.Roles.Contains("Admin") && newUser.SellerProfile != null)
+            if(!registerRequest.Roles.Contains("Admin") && newUser.SellerProfile != null)
             {
                 // fetch the admin email and pass it to email serivce
                 var adminUsersResult = await _userRepository.GetUsersByRoleAsync("Admin");
@@ -692,7 +705,7 @@ namespace ECommerceWebApi.Services
                 var approvalToken = _jwtTokenService.GenerateApprovalToken(newUser.Id);
                 var rejectionToken = _jwtTokenService.GenerateRejectionToken(newUser.Id);
 
-                foreach (var adminEmail in adminEmails)
+                foreach(var adminEmail in adminEmails)
                 {
                     //await _emailService.SendApprovalRequestToAdminAsync(newUser, adminEmail, approvalToken, rejectionToken);
 
@@ -711,7 +724,7 @@ namespace ECommerceWebApi.Services
             bool hasCustomer = newUser.CustomerProfile != null;
             bool hasSeller = newUser.SellerProfile != null;
 
-            if (hasCustomer && hasSeller)
+            if(hasCustomer && hasSeller)
             {
                 profileInfo = new
                 {
@@ -720,14 +733,14 @@ namespace ECommerceWebApi.Services
                     SellerProfileActive = newUser.SellerProfile.IsActive
                 };
             }
-            else if (hasCustomer)
+            else if(hasCustomer)
             {
                 profileInfo = new
                 {
                     CustomerProfileActive = newUser.CustomerProfile.IsActive
                 };
             }
-            else if (hasSeller)
+            else if(hasSeller)
             {
                 profileInfo = new
                 {
@@ -747,9 +760,9 @@ namespace ECommerceWebApi.Services
                 }, "User registered successfully. Awaiting approval.");
         }
 
-        public async Task<CommonResponse<object>> RefreshAccessTokenAsync(string refreshToken)
+        public async Task<CommonResponse<object>> RefreshAccessTokenAsync( string refreshToken )
         {
-            if (string.IsNullOrWhiteSpace(refreshToken))
+            if(string.IsNullOrWhiteSpace(refreshToken))
             {
                 return CommonResponse<object>.FailureResponse(
                     new List<string> { "Refresh token is required." },
@@ -757,29 +770,46 @@ namespace ECommerceWebApi.Services
                 );
             }
 
-            var token = await _refreshTokenRepository.GetRefreshTokenByTokenAsync(refreshToken);
+            var tokenResult = await _refreshTokenRepository.GetRefreshTokenByTokenAsync(refreshToken);
 
-            if (token == null || token.IsRevoked || token.ExpiresAt < DateTime.UtcNow)
+            if(!tokenResult.Success)
             {
                 return CommonResponse<object>.FailureResponse(
-                    new List<string> { "Invalid or expired refresh token." },
-                    "Token validation failed"
+                    new List<string> { "Failed to fetch refresh token" },
+                    "Refresh token not found"
+                );
+            }
+
+            if(tokenResult.Data.IsRevoked)
+            {
+                return CommonResponse<object>.FailureResponse(
+                    new List<string> { "Token validation failed" },
+                    "Refresh token is revoked."
+                );
+            }
+
+            if(tokenResult.Data.ExpiresAt < DateTime.UtcNow)
+            {
+                return CommonResponse<object>.FailureResponse(
+                    new List<string> { "Token validation failed" },
+                    "Refresh token is expired."
+
                 );
             }
 
             // Revoke the current token
-            token.IsRevoked = true;
-            await _refreshTokenRepository.UpdateRefreshTokenAsync(token);
+            tokenResult.Data.IsRevoked = true;
+            await _refreshTokenRepository.UpdateRefreshTokenAsync(tokenResult.Data);
 
             // Generate new tokens
-            var newAccessToken = _jwtTokenService.GenerateJwtToken(token.User);
+            var newAccessToken = _jwtTokenService.GenerateJwtToken(tokenResult.Data.User);
             var newRefreshToken = _jwtTokenService.GenerateRefreshToken();
 
             // Save new refresh token
             await _refreshTokenRepository.SaveRefreshTokenAsync(new RefreshTokenModel
             {
                 RefreshToken = newRefreshToken,
-                UserId = token.UserId,
+                UserId = tokenResult.Data.UserId,
                 CreatedAt = DateTime.UtcNow,
                 ExpiresAt = DateTime.UtcNow.AddDays(Convert.ToDouble(_configuration["Jwt:RefreshTokenExpireDays"]))
             });
@@ -795,11 +825,11 @@ namespace ECommerceWebApi.Services
         }
 
 
-        public async Task<CommonResponse<object>> ApproveUserByApprovalTokenAsync(string approvalToken)
+        public async Task<CommonResponse<object>> ApproveUserByApprovalTokenAsync( string approvalToken )
         {
             object responseData;
             var principal = _jwtTokenService.ValidateApprovalToken(approvalToken);
-            if (principal == null)
+            if(principal == null)
             {
                 //return Ok(new APIResponse { Status = 401, Message = "Invalid or expired token" });
                 return CommonResponse<object>.FailureResponse(new List<string> { "Invalid or expired token" }, "Invalid or expired token");
@@ -808,7 +838,7 @@ namespace ECommerceWebApi.Services
             var userId = Guid.Parse(principal.FindFirst("userId")?.Value);
             var userResult = await _userRepository.GetUserByIdAsync(userId);
 
-            if (!userResult.Success)
+            if(!userResult.Success)
             {
                 //return Ok(new APIResponse { Status = 400, Message = userResult.Message });
                 return CommonResponse<object>.FailureResponse(
@@ -817,7 +847,7 @@ namespace ECommerceWebApi.Services
                 );
             }
 
-            if (userResult.Data.SellerProfile.IsApproved)
+            if(userResult.Data.SellerProfile.IsApproved)
             {
                 //return Ok(new APIResponse { Status = 400, Message = "User already approved." });
                 return CommonResponse<object>.FailureResponse(new List<string> { "User not found or already approved" }, "User not found or already approved");
@@ -830,37 +860,24 @@ namespace ECommerceWebApi.Services
 
             //await _userRepository.UpdateUserInDBAsync(user);
 
-            var isApproved = await _sellerRepository.ApproveSellerBySellerIdAsync(userResult.Data.SellerProfile.Id);
+            var isApprovedResult = await _sellerRepository.ApproveSellerBySellerIdAsync(userResult.Data.SellerProfile.Id);
 
-            if (!isApproved)
+            if(!isApprovedResult.Success)
             {
-                responseData = new
-                {
-                    FullName = userResult.Data.FullName,
-                    Email = userResult.Data.Email,
-                    SellerProfileApproved = userResult.Data.SellerProfile.IsApproved
-                };
-                //return Ok(new APIResponse { Status = 400, Message = "Something Went Wrong While approving User", Data = responseData });
+                return CommonResponse<object>.FailureResponse(
 
-                return CommonResponse<object>.SuccessResponse(new
-                {
-                    FullName = userResult.Data.FullName,
-                    Email = userResult.Data.Email,
-                    SellerProfileApproved = userResult.Data.SellerProfile.IsApproved
-                }, "Something Went Wrong While approving User");
+                    new List<string> { "Failed to approve seller" }
+                , "Something Went Wrong While approving User");
             }
 
-            responseData = new { FullName = userResult.Data.FullName, Email = userResult.Data.Email, SellerProfileApproved = userResult.Data.SellerProfile.IsApproved };
-
-            //return Ok(new APIResponse { Status = 200, Message = "User approved successfully", Data = responseData });
-            return CommonResponse<object>.SuccessResponse(new { FullName = userResult.Data.FullName, Email = userResult.Data.Email, SellerProfileApproved = userResult.Data.SellerProfile.IsApproved }, "User approved successfully");
+            return CommonResponse<object>.SuccessResponse(isApprovedResult.Data, "User approved successfully");
 
         }
 
-        public async Task<CommonResponse<object>> RejectUserByRejectionTokenAsync(string rejectionToken)
+        public async Task<CommonResponse<object>> RejectUserByRejectionTokenAsync( string rejectionToken )
         {
             var principal = _jwtTokenService.ValidateRejectionToken(rejectionToken);
-            if (principal == null)
+            if(principal == null)
             {
                 return CommonResponse<object>.FailureResponse(new List<string> { "Invalid or expired token" }, "Invalid or expired token");
             }
@@ -868,7 +885,7 @@ namespace ECommerceWebApi.Services
             var userId = Guid.Parse(principal.FindFirst("userId")?.Value);
             var userResult = await _userRepository.GetUserByIdAsync(userId);
 
-            if (!userResult.Success|| userResult.Data.SellerProfile == null || userResult.Data.SellerProfile.IsApproved)
+            if(!userResult.Success || userResult.Data.SellerProfile == null || userResult.Data.SellerProfile.IsApproved)
             {
                 return CommonResponse<object>.FailureResponse(new List<string> { "User not found or already processed" }, "User not found or already processed");
             }
@@ -884,22 +901,22 @@ namespace ECommerceWebApi.Services
             //    await _userRepository.DeleteUserAsync(user.Id);
             //}
 
-            var isRejected = await _sellerRepository.RejectSellerBySellerIdAsync(userResult.Data.SellerProfile.Id);
+            var isRejectedResult = await _sellerRepository.RejectSellerBySellerIdAsync(userResult.Data.SellerProfile.Id);
 
-            if (!isRejected)
+            if(!isRejectedResult.Success)
             {
-                return CommonResponse<object>.SuccessResponse(new { FullName = userResult.Data.FullName, Email = userResult.Data.Email, IsApproved = userResult.Data.SellerProfile.IsApproved }, "Something went wrong while rejecting user");
+                return CommonResponse<object>.FailureResponse(new List<string> { "Failed to reject seller" }, "Something went wrong while rejecting user");
             }
 
-            return CommonResponse<object>.SuccessResponse(new { FullName = userResult.Data.FullName, Email = userResult.Data.Email, IsApproved = userResult.Data.SellerProfile.IsApproved }, "User rejected successfully");
+            return CommonResponse<object>.SuccessResponse(isRejectedResult.Data, "User rejected successfully");
         }
 
 
-        public async Task<CommonResponse<object>> GetUserProfileInfo(Guid userId)
+        public async Task<CommonResponse<object>> GetUserProfileInfo( Guid userId )
         {
             var userResult = await _userRepository.GetUserByIdAsync(userId);
 
-            if (!userResult.Success)
+            if(!userResult.Success)
             {
                 return CommonResponse<object>.FailureResponse(
                         new List<string> { "User data not found" },
