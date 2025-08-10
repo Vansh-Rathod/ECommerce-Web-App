@@ -140,7 +140,7 @@ namespace ECommerceWebApi.Controllers
             {
                 PageNumber = pageNumber,
                 PageSize = pageSize,
-                TotalUsers = ordersResult.Data.TotalRecords,
+                TotalOrders = ordersResult.Data.TotalRecords,
                 Orders = orders
             };
 
@@ -199,7 +199,7 @@ namespace ECommerceWebApi.Controllers
             {
                 PageNumber = pageNumber,
                 PageSize = pageSize,
-                TotalUsers = ordersResult.Data.TotalRecords,
+                TotalOrders = ordersResult.Data.TotalRecords,
                 Orders = orders
             };
 
@@ -295,8 +295,8 @@ namespace ECommerceWebApi.Controllers
             {
                 PageNumber = pageNumber,
                 PageSize = pageSize,
-                TotalUsers = orderItemsResult.Data.TotalRecords,
-                Orders = orderItems
+                TotalOrderItems = orderItemsResult.Data.TotalRecords,
+                OrderItems = orderItems
             };
 
             return Ok(new APIResponse { Status = 200, Message = "Pending order items for fetched successfully", Data = response });

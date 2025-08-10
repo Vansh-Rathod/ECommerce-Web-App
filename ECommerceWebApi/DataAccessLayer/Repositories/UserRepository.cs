@@ -3,7 +3,9 @@ using DataAccessLayer.Interfaces;
 using GenericServices.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using SharedReference;
+using SharedReference.Entities;
 using System.Data;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace DataAccessLayer.Repositories
 {
@@ -104,28 +106,70 @@ namespace DataAccessLayer.Repositories
         //    }
         //}
 
-        public async Task<CommonResponse<List<User>>> GetUnapprovedUsersAsync( int pageNumber, int pageSize, string searchText, string sortField, string sortOrder )
+        public async Task<CommonResponse<PagedResult<User>>> GetUnapprovedUsersAsync( int pageNumber, int pageSize, string searchText, string sortField, string sortOrder, DateTime? fromDate = null, DateTime? toDate = null )
         {
             try
             {
-                var unapprovedUsers = await _dbContext.Users
+                var query = _dbContext.Users
                        .Include(userObj => userObj.Roles)
                            .ThenInclude(userRole => userRole.Role)
                        .Include(userObj => userObj.CustomerProfile)
                        .Include(userObj => userObj.SellerProfile)
                        .Where(user => user.SellerProfile != null && !user.SellerProfile.IsApproved)
-                       .ToListAsync();
+                       .AsNoTracking()
+                       .AsQueryable();
 
-                return CommonResponse<List<User>>.SuccessResponse(
-                    unapprovedUsers,
-                    "Unapproved users fetched successfully");
+                // Filter by search text (FullName or Email)
+                if(!string.IsNullOrWhiteSpace(searchText))
+                {
+                    query = query.Where(userObj =>
+                        userObj.FullName.Contains(searchText) ||
+                        userObj.Email.Contains(searchText));
+                }
+
+                if(fromDate.HasValue)
+                {
+                    query = query.Where(userObj => userObj.CreatedAt >= fromDate.Value.Date);
+                }
+
+                if(toDate.HasValue)
+                {
+                    query = query.Where(userObj => userObj.CreatedAt <= toDate.Value.Date.AddDays(1).AddTicks(-1));
+                }
+
+                int totalRecords = await query.CountAsync();
+
+                // Sorting
+                bool ascending = sortOrder?.ToLower() == "asc";
+                query = sortField?.ToLower() switch
+                {
+                    "fullname" => ascending ? query.OrderBy(userObj => userObj.FullName) : query.OrderByDescending(userObj => userObj.FullName),
+                    "email" => ascending ? query.OrderBy(userObj => userObj.Email) : query.OrderByDescending(userObj => userObj.Email),
+                    "createdat" => ascending ? query.OrderBy(userObj => userObj.CreatedAt) : query.OrderByDescending(userObj => userObj.CreatedAt),
+                    _ => query.OrderByDescending(userObj => userObj.CreatedAt) // Default sort
+                };
+
+                // Pagination
+                var pagedUsers = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
+
+                var pagedResult = new PagedResult<User>
+                {
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    Items = pagedUsers,
+                    TotalRecords = totalRecords
+                };
+
+                return CommonResponse<PagedResult<User>>.SuccessResponse(
+                   pagedResult,
+                   "Unapproved users fetched successfully");
             }
             catch(Exception ex)
             {
                 await _loggerRepository.LogAsync($"Exception occurred while retrieving unapproved users.", SharedReference.Enums.Enum.LogLevel.Error, "UserRepository.GetUnapprovedUsersAsync()", ex, null, null, null);
-                return CommonResponse<List<User>>.FailureResponse(
+                return CommonResponse<PagedResult<User>>.FailureResponse(
                   new List<string> { $"Exception occurred while retrieving unapproved users." },
-                  "Failed to fetch Unapproved Users"
+                  "Failed to fetch unapproved Users"
               );
             }
         }
@@ -315,6 +359,81 @@ namespace DataAccessLayer.Repositories
                        "Failed to remove user");
             }
 
+        }
+
+        public async Task<CommonResponse<User>> MakeUserInactiveAsync( Guid userId )
+        {
+            // This repository method will make user's customer & seller profile inactive, if anyone of them exists
+            try
+            {
+                var user = await _dbContext.Users.FindAsync(userId);
+                if(user == null)
+                {
+                    return CommonResponse<User>.FailureResponse(
+                       new List<string> { $"User not found by user id: {userId}." },
+                       "User not found");
+                }
+                if(user.CustomerProfile.IsActive)
+                {
+                    user.CustomerProfile.IsActive = false;
+                }
+
+                if(user.SellerProfile.IsActive)
+                {
+                    user.SellerProfile.IsActive = false;
+                }
+
+                await _dbContext.SaveChangesAsync();
+
+                return CommonResponse<User>.SuccessResponse(
+                    user,
+                    "User deactivated successfully");
+            }
+            catch(Exception ex)
+            {
+                await _loggerRepository.LogAsync($"Exception occurred while deactivating user by user id: {userId}.", SharedReference.Enums.Enum.LogLevel.Error, "UserRepository.MakeUserInactiveAsync()", ex, null, null, new Dictionary<string, object> { { "UserId", userId } });
+                return CommonResponse<User>.FailureResponse(
+                       new List<string> { $"Exception occurred while deactivating user by user id: {userId}." },
+                       "Failed to deactivate user");
+            }
+        }
+
+        public async Task<CommonResponse<User>> MakeUserActiveAsync( Guid userId )
+        {
+            // This repository method will make user's customer & seller profile active, if anyone of them exists
+            try
+            {
+                var user = await _dbContext.Users.FindAsync(userId);
+                if(user == null)
+                {
+                    return CommonResponse<User>.FailureResponse(
+                       new List<string> { $"User not found by user id: {userId}." },
+                       "User not found");
+                }
+
+                if(!user.CustomerProfile.IsActive)
+                {
+                    user.CustomerProfile.IsActive = true;
+                }
+
+                if(!user.SellerProfile.IsActive)
+                {
+                    user.SellerProfile.IsActive = true;
+                }
+
+                await _dbContext.SaveChangesAsync();
+
+                return CommonResponse<User>.SuccessResponse(
+                    user,
+                    "User activated successfully");
+            }
+            catch(Exception ex)
+            {
+                await _loggerRepository.LogAsync($"Exception occurred while activating user by user id: {userId}.", SharedReference.Enums.Enum.LogLevel.Error, "UserRepository.MakeUserActiveAsync()", ex, null, null, new Dictionary<string, object> { { "UserId", userId } });
+                return CommonResponse<User>.FailureResponse(
+                       new List<string> { $"Exception occurred while activating user by user id: {userId}." },
+                       "Failed to activate user");
+            }
         }
 
         public async Task<CommonResponse<User>> Change2FAStatus( Guid userId, bool status )

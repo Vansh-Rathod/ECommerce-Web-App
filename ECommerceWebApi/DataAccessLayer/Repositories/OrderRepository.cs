@@ -21,15 +21,13 @@ namespace DataAccessLayer.Repositories
         private readonly ApplicationDbContext _dbContext;
         private readonly IWalletRepository _walletRepository;
         private readonly ILoggerRepository _loggerRepository;
-        private readonly IEmailNotificationService _emailNotificationService;
         private readonly IEmailTemplates _emailTemplateService;
         private readonly IEmailService _emailService;
 
-        public OrderRepository( ApplicationDbContext dbContext, IWalletRepository walletRepository, IEmailNotificationService emailNotificationService, ILoggerRepository loggerRepository, IEmailTemplates emailTemplateService, IEmailService emailService )
+        public OrderRepository( ApplicationDbContext dbContext, IWalletRepository walletRepository, ILoggerRepository loggerRepository, IEmailTemplates emailTemplateService, IEmailService emailService )
         {
             _dbContext = dbContext;
             _walletRepository = walletRepository;
-            _emailNotificationService = emailNotificationService;
             _loggerRepository = loggerRepository;
             _emailTemplateService = emailTemplateService;
             _emailService = emailService;

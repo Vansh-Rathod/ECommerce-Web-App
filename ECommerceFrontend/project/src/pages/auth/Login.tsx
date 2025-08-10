@@ -15,7 +15,7 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [form] = Form.useForm();
-  
+
   const { login } = useAuth();
 
   const [loading, setLoading] = useState(false);
@@ -45,6 +45,8 @@ const Login = () => {
           message: "Verification Required",
           description:
             "A verification code has been sent to your email address.",
+          duration: null,
+          closable: true
         });
 
         // Redirect to OTP verification
@@ -53,8 +55,8 @@ const Login = () => {
         });
       } else {
         // message.error('Invalid email or password');
-        message.error('Invalid email or password');
-        console.log("Invalid email or password");
+        message.error(result.error);
+        console.log(result.error);
       }
     } catch (error) {
       // message.error("Login failed");
@@ -139,13 +141,6 @@ const Login = () => {
             Sign up
           </Link>
         </div>
-
-        {/* <div className="mt-6 text-center text-xs text-gray-500">
-          <p>Use these test logins:</p>
-          <p>Admin: admin@example.com / password</p>
-          <p>Seller: seller@example.com / password</p>
-          <p>Customer: customer@example.com / password</p>
-        </div> */}
       </Card>
     </div>
   );

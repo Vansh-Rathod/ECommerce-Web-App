@@ -26,6 +26,7 @@ import {
   );
   
   export const AdminProvider = ({ children }: { children: ReactNode }) => {
+    const adminController = import.meta.env.VITE_ADMIN_CONTROLLER
     const [admin, setAdmin] = useState<any>();
     const [pendingApprovals, setPendingApprovals] = useState<any>([]);
   

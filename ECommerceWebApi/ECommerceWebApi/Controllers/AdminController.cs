@@ -77,16 +77,17 @@ namespace ECommerceWebApi.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("pending-approvals")]
-        public async Task<IActionResult> GetPendingApprovalRequests([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string sortField = "fullname", [FromQuery] string sortOrder = "asc")
+        public async Task<IActionResult> GetPendingApprovalRequests([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string sortField = "fullname", [FromQuery] string sortOrder = "asc", [FromQuery] DateTime? fromDate = null,
+    [FromQuery] DateTime? toDate = null )
         {
-            var pendingUsersResult = await _userRepository.GetUnapprovedUsersAsync(pageNumber, pageSize, searchText, sortField, sortOrder);
+            var pendingUsersResult = await _userRepository.GetUnapprovedUsersAsync(pageNumber, pageSize, searchText, sortField, sortOrder, fromDate, toDate);
 
             if (!pendingUsersResult.Success)
             {
-                return Ok(new APIResponse { Status = 400, Message = pendingUsersResult.Message });
+                return Ok(new APIResponse { Status = 400, Message = pendingUsersResult.Message, Data = null });
             }
 
-            var response = pendingUsersResult.Data.Select(userObj => new
+            var pendingUsers = pendingUsersResult.Data.Items.Select(userObj => new
             {
                 UserId = userObj.Id,
                 Name = userObj.FullName,
@@ -107,6 +108,14 @@ namespace ECommerceWebApi.Controllers
                 CustomerProfileStatus = userObj?.CustomerProfile?.IsActive,
                 CustomerProfileCreatedDate = userObj?.CustomerProfile?.CreatedAt,
             });
+
+            var response = new
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalUsers = pendingUsersResult.Data.TotalRecords,
+                Users = pendingUsers
+            };
 
             return Ok(new APIResponse { Status = 200, Message = "Unapproved Users Fetched Successfully", Data = response });
         }

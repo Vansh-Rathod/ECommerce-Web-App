@@ -166,8 +166,8 @@ namespace ECommerceWebApi.Controllers
             {
                 PageNumber = pageNumber,
                 PageSize = pageSize,
-                TotalUsers = result.Data.TotalRecords,
-                Users = customers
+                TotalCustomers = result.Data.TotalRecords,
+                Customers = customers
             };
 
             return Ok(new APIResponse { Status = 200, Message = "Customers fetched successfully", Data = response });

@@ -1,4 +1,5 @@
 using DataAccessLayer.Interfaces;
+using DataAccessLayer.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SharedReference;
@@ -26,9 +27,18 @@ namespace ECommerceWebApi.Controllers
         public async Task<IActionResult> GetUsers( [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string sortField = "fullname", [FromQuery] string sortOrder = "asc", [FromQuery] DateTime? fromDate = null,
     [FromQuery] DateTime? toDate = null )
         {
+            // Set defaults if values are not provided
+            fromDate ??= DateTime.UtcNow.AddDays(-7);
+            toDate ??= DateTime.UtcNow;
+
+            // Optional: If you want them in local time (e.g., IST)
+            // var localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+            // fromDate = TimeZoneInfo.ConvertTimeFromUtc(fromDate.Value, localTimeZone);
+            // toDate = TimeZoneInfo.ConvertTimeFromUtc(toDate.Value, localTimeZone);
+
             var result = await _userRepository.GetUsersAsync(pageNumber, pageSize, searchText, sortField, sortOrder, fromDate, toDate);
 
-            if(!result.Success)
+            if(!result.Success || !result.Data.Items.Any())
             {
                 return Ok(new APIResponse { Status = 404, Message = result.Message, Data = null });
             }
@@ -105,6 +115,89 @@ namespace ECommerceWebApi.Controllers
 
 
             return Ok(new APIResponse { Status = 200, Message = "User Fetched Successfully", Data = response });
+        }
+
+        // DELETE USER
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{userId}")]
+        public async Task<IActionResult> DeleteUser( Guid userId )
+        {
+            if(userId == Guid.Empty)
+            {
+                return Ok(new APIResponse { Status = 400, Message = "User ID missing or invalid." });
+            }
+
+            // Fetch user and seller profile
+            var userResult = await _userRepository.GetUserByIdAsync(userId);
+
+            if(!userResult.Success)
+            {
+                return Ok(new APIResponse { Status = 400, Message = userResult.Message });
+            }
+
+            var deletedUserResult = await _userRepository.DeleteUserAsync(userId);
+            if(!deletedUserResult.Success)
+            {
+                return Ok(new APIResponse { Status = 400, Message = "Failed to delete user." });
+            }
+
+            return Ok(new APIResponse { Status = 200, Message = "User deleted successfully." });
+        }
+
+
+        // MAKE USER INACTIVE
+        [Authorize(Roles = "Admin")]
+        [HttpPut("inactive/{userId}")]
+        public async Task<IActionResult> MakeUserInactive( Guid userId )
+        {
+            if(userId == Guid.Empty)
+            {
+                return Ok(new APIResponse { Status = 400, Message = "User ID missing or invalid." });
+            }
+
+            // Fetch user
+            var userResult = await _userRepository.GetUserByIdAsync(userId);
+
+            if(!userResult.Success)
+            {
+                return Ok(new APIResponse { Status = 404, Message = "User not found" });
+            }
+
+            var result = await _userRepository.MakeUserInactiveAsync(userId);
+            if(!result.Success)
+            {
+                return Ok(new APIResponse { Status = 400, Message = "Failed to Deactivate user." });
+            }
+
+            return Ok(new APIResponse { Status = 200, Message = "User Deactivated successfully." });
+        }
+
+
+        // MAKE USER ACTIVE
+        [Authorize(Roles = "Admin")]
+        [HttpPut("active/{userId}")]
+        public async Task<IActionResult> MakeUserActive( Guid userId )
+        {
+            if(userId == Guid.Empty)
+            {
+                return Ok(new APIResponse { Status = 400, Message = "User ID missing or invalid." });
+            }
+
+            // Fetch user
+            var userResult = await _userRepository.GetUserByIdAsync(userId);
+
+            if(!userResult.Success)
+            {
+                return Ok(new APIResponse { Status = 404, Message = "User not found" });
+            }
+
+            var result = await _userRepository.MakeUserActiveAsync(userId);
+            if(!result.Success)
+            {
+                return Ok(new APIResponse { Status = 400, Message = "Failed to Activate user." });
+            }
+
+            return Ok(new APIResponse { Status = 200, Message = "User Activated successfully." });
         }
 
 

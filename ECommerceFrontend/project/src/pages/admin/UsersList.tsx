@@ -24,6 +24,8 @@ import {
   User,
   ShoppingCart,
   Currency,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import { useUser } from "../../context/UserContext";
 import {
@@ -49,15 +51,22 @@ import {
   Switch,
   message,
   Tag,
+  DatePicker
 } from "antd";
+import dayjs from "dayjs";
 import { debounce, formatDate } from "../../utils/helpers";
 import api from "../../services/api";
+import { CommonResponse } from "../../Types";
 
 const { Option } = Select;
 const { Title, Text } = Typography;
 
 const UsersList = () => {
-  const { users, getUsers, totalUsers, setTotalUsers } = useUser();
+  // const { users, getUsers, totalUsers, setTotalUsers } = useUser();
+  const userController = import.meta.env.VITE_USER_CONTROLLER
+
+  const [users, setUsers] = useState<any>([]);
+  const [totalUsers, setTotalUsers] = useState<number>(0);
 
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -68,6 +77,7 @@ const UsersList = () => {
     sortOrder: "asc",
   });
 
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [form] = Form.useForm();
@@ -79,19 +89,135 @@ const UsersList = () => {
     setLoading(true); // Start loading immediately on any change
     const handler = setTimeout(async () => {
       try {
-        await getUsers(
+        const fromDate = dateRange?.[0]
+        ? dateRange[0].toISOString()
+        : null;
+      const toDate = dateRange?.[1]
+        ? dateRange[1].toISOString()
+        : null;
+
+        const result = await getUsers(
           pagination.current,
           pagination.pageSize,
           searchText,
           filters.sortField,
-          filters.sortOrder
+          filters.sortOrder,
+          fromDate,
+          toDate
         );
-      } finally {
+
+        if (result.success) {
+          setUsers(result.data.users);
+          setTotalUsers(result.data.totalUsers);
+        }
+      }catch(error){
+        message.error("Something went wrong while fetching users");
+        console.error("Something went wrong while fetching users: ", error);
+      }
+      
+      finally {
         setLoading(false); // Stop loading after API call
       }
     }, 1000);
     return () => clearTimeout(handler);
-  }, [pagination, searchText, filters]);
+  }, [pagination, searchText, filters, dateRange]);
+
+  // Get all users
+  const getUsers = async (
+    pageNumber = 1,
+    pageSize = 10,
+    searchText: string,
+    sortField: string,
+    sortOrder: string,
+    fromDate?: string | null,
+  toDate?: string | null
+  ): Promise<CommonResponse<any>> => {
+    // setLoading(true);
+    try {
+      const response = await api.get(`${userController}/users`, {
+        params: {
+          pageNumber,
+          pageSize,
+          searchText,
+          sortField,
+          sortOrder,
+          fromDate,
+          toDate
+        },
+      });
+
+      if (!response.data) {
+        // message.error("Network Error. Something went wrong while establishing connection with server");
+        return { success: false, error: "Network Error. Something went wrong while establishing connection with server" };
+      }
+
+      if (response.data.status != 200) {
+        // message.error("User not found")
+        return { success: false, error: "No users found" };
+      }
+
+      const usersResponse = response.data.data;
+      if (!usersResponse) {
+        // message.error(response.data.message);
+        return { success: false, error: response.data.message };
+      }
+
+
+      const usersData = response.data.data.users;
+      const totalUsersData = response.data.data.totalUsers;
+      // setUsers(usersData);
+      // setTotalUsers(totalUsersData);
+
+      return { success: true, data: { users: usersData, totalUsers: totalUsersData } };
+    } catch (error) {
+      console.error("Something went wrong while fetching users: ", error);
+      return { success: false, error: "Something went wrong while fetching users" };
+    } finally {
+      // setLoading(false);
+      console.log("GetUsers API call completed");
+    }
+  };
+
+  // Get user by userId
+  const getUserById = async (userId: string): Promise<CommonResponse<any>> => {
+    if (userId) {
+      // console.log("User ID: ", userId);
+      // setLoading(true);
+      try {
+        const response = await api.get(`/${userController}/${userId}`);
+
+        if (!response.data) {
+          // message.error("Network Error. Something went wrong while establishing connection with server");
+          return { success: false, error: "Network Error. Something went wrong while establishing connection with server" };
+        }
+
+        // setSelectedProduct(response.data.data);
+        if (response.data.status != 200) {
+          // message.error("User not found")
+          return { success: false, error: "User not found" };
+        }
+
+        const userByIdData = response.data.data;
+        if (!userByIdData) {
+          // message.error(response.data.message);
+          return { success: false, error: response.data.message };
+        }
+
+        return { success: true, data: userByIdData };
+      } catch (error) {
+        // message.error("Something went wrong while user details");
+        console.error("Something went wrong while fetching user details: ", error);
+        return { success: false, error: "Something went wrong while fetching user details" };
+      } finally {
+        // setLoading(false);
+        console.log("GetUserById API call completed");
+      }
+    }
+    else {
+      console.log("Please provide user id");
+      return { success: false, error: "Please provide user id" };
+    }
+  };
 
   // Statistics calculation
   const stats = {
@@ -114,6 +240,8 @@ const UsersList = () => {
     //     0
     //   ) || 0,
   };
+
+
 
   // fucntion for role badge
   const getRoleBadgeColor = (role: any) => {
@@ -171,35 +299,7 @@ const UsersList = () => {
     });
   };
 
-  // Get product by productId
-  const getUserById = async (userId: any) => {
-    if (userId) {
-      // console.log("User ID: ", userId);
-      setLoading(true);
-      try {
-        const response = await api.get(`/user/${userId}`);
-        // setSelectedProduct(response.data.data);
-        if (response.data.status != 200) {
-          notification.error({
-            message: "Error",
-            description: "Something went wrong while fetching user details.",
-          });
-          return null;
-        }
-        const userByIdData = response.data.data;
-        return userByIdData;
-      } catch (error) {
-        console.error("Failed to fetch user details:", error);
-        notification.error({
-          message: "Error",
-          description: "Failed to fetch user details. Please try again.",
-        });
-        return null;
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
+
 
   const handleViewDetails = async (user: any) => {
     setLoading(true);
@@ -371,44 +471,44 @@ const UsersList = () => {
   };
 
   // Handle delete product
-  // const handleDelete = async (product: Product) => {
-  //   const productByIdData = getProductById(product.productId);
-  //   if (productByIdData !== null) {
+  const handleDelete = async (user: any) => {
+    const userByIdData = getUserById(user.userId);
+    if (userByIdData !== null) {
 
-  //     setActionLoading(product.productId);
-  //     try {
-  //       const response = await api.delete(`/product/${product.productId}`);
-  //       if (response.data.status !== 200) {
-  //         notification.error({
-  //           message: "Error",
-  //           description: `Something went wrong while deleting ${product.name}`,
-  //         });
-  //       }
-  //       notification.success({
-  //         message: "Success",
-  //         description: `${product.name} has been deleted successfully.`,
-  //       });
+      setActionLoading(user.userId);
+      try {
+        const response = await api.delete(`/product/${product.productId}`);
+        if (response.data.status !== 200) {
+          notification.error({
+            message: "Error",
+            description: `Something went wrong while deleting ${product.name}`,
+          });
+        }
+        notification.success({
+          message: "Success",
+          description: `${product.name} has been deleted successfully.`,
+        });
 
-  //       // Refresh the products list
-  //       await fetchAllSellerProducts(
-  //         pagination.current,
-  //         pagination.pageSize,
-  //         filters.searchText,
-  //         filters.sortField,
-  //         filters.sortOrder,
-  //         filters.priceFilter
-  //       );
-  //     } catch (error) {
-  //       console.error("Failed to delete product:", error);
-  //       notification.error({
-  //         message: "Error",
-  //         description: "Failed to delete product. Please try again.",
-  //       });
-  //     } finally {
-  //       setActionLoading(null);
-  //     }
-  //   };
-  // }
+        // Refresh the products list
+        await fetchAllSellerProducts(
+          pagination.current,
+          pagination.pageSize,
+          filters.searchText,
+          filters.sortField,
+          filters.sortOrder,
+          filters.priceFilter
+        );
+      } catch (error) {
+        console.error("Failed to delete product:", error);
+        notification.error({
+          message: "Error",
+          description: "Failed to delete product. Please try again.",
+        });
+      } finally {
+        setActionLoading(null);
+      }
+    };
+  }
 
   // Edit, Activate/Deactivate, View, Duplicate , Delete Prodcut Options
   const actionMenu = (record: any): MenuProps => ({
@@ -420,25 +520,36 @@ const UsersList = () => {
         icon: <Edit size={14} />,
         onClick: () => showModal(record),
       },
-      // {
-      //   key: "toggle",
-      //   label: record.isActive ? "Deactivate" : "Activate",
-      //   icon: record.isActive ? (
-      //     <ToggleLeft size={14} />
-      //   ) : (
-      //     <ToggleRight size={14} />
-      //   ),
-      //   onClick: () => {
-      //     Modal.confirm({
-      //       title: record.isActive ? `Are you sure you want to Deactivate "${record.name}"` : `Are you sure you want to Activate "${record.name}"`,
-      //       content: record.isActive ? 'You can later Activate it.' : 'You can later Deactivate it.',
-      //       okText: record.isActive ? 'Deactivate' : "Activate",
-      //       okType: 'danger',
-      //       cancelText: 'Cancel',
-      //       onOk: () => toggleProductStatus(record),
-      //     });
-      //   },
-      // },
+      {
+        key: "toggle",
+        label: record.isActive ? "Deactivate" : "Activate",
+        icon: record.isActive ? (
+          <ToggleLeft size={14} />
+        ) : (
+          <ToggleRight size={14} />
+        ),
+        onClick: () => {
+          const profiles: string[] = [];
+
+          if (record.sellerProfile) profiles.push("Seller");
+          if (record.customerProfile) profiles.push("Customer");
+
+          const profileText = profiles.length > 0 ? `${profiles.join(" & ")} profile` : "account";
+
+          Modal.confirm({
+            title: record.isActive
+              ? `Are you sure you want to Deactivate "${record.name}"?`
+              : `Are you sure you want to Activate "${record.name}"?`,
+            content: record.isActive
+              ? `This action will make "${record.name}"'s ${profileText} inactive. You can later activate it.`
+              : `This action will make "${record.name}"'s ${profileText} active. You can later deactivate it.`,
+            okText: record.isActive ? "Deactivate" : "Activate",
+            okType: "danger",
+            cancelText: "Cancel",
+            onOk: () => toggleProductStatus(record),
+          });
+        },
+      },
       {
         key: "view",
         label: "View Details",
@@ -475,16 +586,16 @@ const UsersList = () => {
         label: "Delete",
         icon: <Trash2 size={14} />,
         danger: true,
-        // onClick: () => {
-        //   Modal.confirm({
-        //     title: `Are you sure you want to delete "${record.name}"`,
-        //     content: 'This action cannot be undone.',
-        //     okText: 'Yes, Delete',
-        //     okType: 'danger',
-        //     cancelText: 'Cancel',
-        //     onOk: () => handelDelete(record),
-        //   });
-        // },
+        onClick: () => {
+          Modal.confirm({
+            title: `Are you sure you want to delete "${record.name}"`,
+            content: 'This action cannot be undone.',
+            okText: 'Yes, Delete',
+            okType: 'danger',
+            cancelText: 'Cancel',
+            onOk: () => handelDelete(record),
+          });
+        },
       },
     ],
   });
@@ -690,38 +801,17 @@ const UsersList = () => {
 
             {/* SortField, SortOrder, Clear, Export */}
             <div className="flex flex-wrap gap-3">
-              <Select
-                placeholder="Sort Field"
-                value={filters.sortField || undefined}
-                onChange={value => {
-                  setFilters(prev => ({ ...prev, sortField: value }));
+              <DatePicker.RangePicker
+                size="large"
+                className="shadow-lg"
+                value={dateRange}
+                onChange={(dates) => {
+                  setDateRange(dates);
                   setPagination(prev => ({ ...prev, current: 1 }));
                 }}
-                style={{ width: 140 }}
-                size="large"
                 allowClear
-                className="shadow-lg"
-              >
-                <Option value="fullname">Name</Option>
-                <Option value="email">Email</Option>
-                <Option value="createdat">Registered At</Option>
-              </Select>
+              />
 
-              <Select
-                placeholder="Sort Order"
-                value={filters.sortOrder || undefined}
-                onChange={value => {
-                  setFilters(prev => ({ ...prev, sortOrder: value }));
-                  setPagination(prev => ({ ...prev, current: 1 }));
-                }}
-                style={{ width: 140 }}
-                size="large"
-                allowClear
-                className="shadow-lg"
-              >
-                <Option value="asc">Ascending</Option>
-                <Option value="desc">Descending</Option>
-              </Select>
 
               <Tooltip title="Clear all filters">
                 <Button

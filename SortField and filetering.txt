@@ -1,0 +1,32 @@
+<Select
+                placeholder="Sort Field"
+                value={filters.sortField || undefined}
+                onChange={value => {
+                  setFilters(prev => ({ ...prev, sortField: value }));
+                  setPagination(prev => ({ ...prev, current: 1 }));
+                }}
+                style={{ width: 140 }}
+                size="large"
+                allowClear
+                className="shadow-lg"
+              >
+                <Option value="fullname">Name</Option>
+                <Option value="email">Email</Option>
+                <Option value="createdat">Registered At</Option>
+              </Select>
+
+              <Select
+                placeholder="Sort Order"
+                value={filters.sortOrder || undefined}
+                onChange={value => {
+                  setFilters(prev => ({ ...prev, sortOrder: value }));
+                  setPagination(prev => ({ ...prev, current: 1 }));
+                }}
+                style={{ width: 140 }}
+                size="large"
+                allowClear
+                className="shadow-lg"
+              >
+                <Option value="asc">Ascending</Option>
+                <Option value="desc">Descending</Option>
+              </Select>

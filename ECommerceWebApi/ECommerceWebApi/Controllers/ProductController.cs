@@ -62,8 +62,8 @@ namespace ECommerceWebApi.Controllers
             {
                 PageNumber = pageNumber,
                 PageSize = pageSize,
-                TotalUsers = productsResult.Data.TotalRecords,
-                Users = products
+                TotalProducts = productsResult.Data.TotalRecords,
+                Products = products
             };
 
             return Ok(new APIResponse { Status = 200, Message = "Products Fetched Successfully", Data = response });
@@ -117,8 +117,8 @@ namespace ECommerceWebApi.Controllers
             {
                 PageNumber = pageNumber,
                 PageSize = pageSize,
-                TotalUsers = productsResult.Data.TotalRecords,
-                Users = products
+                TotalProducts = productsResult.Data.TotalRecords,
+                Products = products
             };
 
             return Ok(new APIResponse { Status = 200, Message = "Products for seller fetched successfully", Data = response });

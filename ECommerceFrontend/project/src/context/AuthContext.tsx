@@ -33,6 +33,7 @@ interface LoginResult {
   requires2FA?: boolean;
   email?: string;
   userId?: string;
+  error?: string;
 }
 
 interface VerifyOtpResult {
@@ -47,14 +48,14 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<LoginResult>;
   verifyOtp: (otpCode: string) => Promise<VerifyOtpResult>;
   // resendOtp: (email: string) => Promise<boolean>;
-  register: (
-    name: string,
-    email: string,
-    password: string,
-    roles: ("Customer" | "Seller")[],
-    city?: string,
-    storeName?: string
-  ) => Promise<boolean>;
+  // register: (
+  //   name: string,
+  //   email: string,
+  //   password: string,
+  //   roles: ("Customer" | "Seller")[],
+  //   city?: string,
+  //   storeName?: string
+  // ) => Promise<boolean>;
   logout: () => void;
   hasRole: (role: "customer" | "seller" | "admin") => boolean;
 
@@ -69,12 +70,15 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const authController = import.meta.env.VITE_AUTH_CONTROLLER;
   const [user, setUser] = useState<User | null>(null);
   const [activeRole, setActiveRole] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [pendingVerification, setPendingVerification] =
     useState<boolean>(false);
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+
+
 
   useEffect(() => {
     const loadUser = async () => {
@@ -144,12 +148,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     password: string
   ): Promise<LoginResult> => {
     try {
-      const response = await api.post("/auth/login", {
+      if (!email || !password) {
+        return { success: false, error: "Email and password are required" };
+      }
+
+      const response = await api.post(`/${authController}/login`, {
         email: email,
         password: password,
       });
 
+      if (!response.data) {
+        return { success: false, error: "Network Error. Something went wrong while establishing connection with server" };
+      }
+
+      if (response.data.status !== 200) {
+        return { success: false, error: "Invalid email or password" };
+      }
+
       const userData = response.data.data;
+
+      if (!userData) {
+        return { success: false, error: response.data.message };
+      }
 
       // Check for 2FA requirement
       if (userData.status === "2FA_REQUIRED") {
@@ -203,7 +223,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return { success: true };
     } catch (error) {
       console.error("Login failed:", error);
-      return { success: false };
+      return { success: false, error: "Something went wrong while validating crendentials" };
     }
   };
 
@@ -216,11 +236,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       //   message: "Verification Error",
       //   description: "Session expired. Please login again.",
       // });
-      return {success: false, message: "Verification Error" , description: "Session expired. Please login again."};
+      return { success: false, message: "Verification Error", description: "Session expired. Please login again." };
     }
 
     try {
-      const response = await api.post("/auth/verify-otp", {
+      const response = await api.post(`/${authController}/verify-otp`, {
         userId: userId,
         otpCode: otpCode,
         // email: email
@@ -269,10 +289,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         //   duration: 3,
         // });
 
-        return {success: true, message: "Verification Successful", description: "OTP Verfied Successfully"};
+        return { success: true, message: "Verification Successful", description: "OTP Verfied Successfully" };
       }
-      else{
-        return {success: false, message: `${response.data.message}`, description: `${response.data.errors[0]}`};
+      else {
+        return { success: false, message: `${response.data.message}`, description: `${response.data.errors[0]}` };
       }
     } catch (error: any) {
       console.error("OTP verification failed:", error);
@@ -283,7 +303,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       //   duration: 4,
       // });
 
-      return {success: false, message: "Verification Failed", description: "Something went wrong while verfying OTP"};
+      return { success: false, message: "Verification Failed", description: "Something went wrong while verfying OTP" };
     }
   };
 
@@ -346,10 +366,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const response = await api.post("/auth/register", payload);
       console.log("Resposne: " + response);
       console.log("JSON Resposne: " + JSON.stringify(response));
-      return true;
+
+      if (!name || !email || !password || !roles) {
+        if (roles.includes("Seller") && (!city || !storeName)) {
+          return { success: false, error: "City & Store Name are required for sellers" };
+        }
+        return { success: false, error: "Name, Email, Password & Roles are required fields" };
+      }
+
+      if (!response.data) {
+        return { success: false, error: "Network Error" };
+      }
+
+      if (response.data.status !== 200) {
+        return { success: false, error: response.data.message };
+      }
+
+      return { success: true };
     } catch (error) {
       console.error("Registration failed:", error);
-      return false;
+      return { success: false };
     }
   };
 
@@ -381,7 +417,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         isAuthenticated,
         login,
         verifyOtp,
-        register,
+        // register,
         logout,
         hasRole,
 

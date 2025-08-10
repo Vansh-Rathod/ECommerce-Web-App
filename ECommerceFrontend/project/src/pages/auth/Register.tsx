@@ -10,9 +10,9 @@ import {
   Radio,
   Checkbox,
 } from "antd";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { Link, useNavigate } from "react-router-dom"
 import { Mail, Lock, User, ShoppingBag, MapPin, Store } from "lucide-react";
+import api from "../../services/api";
 
 const { Title, Text } = Typography;
 
@@ -27,33 +27,48 @@ interface RegisterFormValues {
 }
 
 const Register = () => {
-  const { register } = useAuth();
+  const authController = import.meta.env.VITE_AUTH_CONTROLLER;
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [selectedRoles, setSelectedRoles] = useState<(string | number)[]>([
-    "Customer",
-  ]);
+  const [selectedRoles, setSelectedRoles] = useState<(string | number)[]>([]);
 
   const onFinish = async (values: RegisterFormValues) => {
     setLoading(true);
     try {
-      const success = await register(
-        values.name,
-        values.email,
-        values.password,
-        values.roles,
-        values.city,
-        values.storeName
-      );
-      if (success) {
-        message.success("Registration successful! Please log in.");
-        navigate("/login");
-      } else { // BadRequest - 400, Unauthorized - 401, Forbidden - 403, NotFound - 404, ServerError - 500
-        // message.error("Registration failed");
-        console.log("Registration failed");
+      if (!values.name || !values.email || !values.password || !values.roles || values.roles.length === 0) {
+        message.error("Name, Email, Password & Roles are required fields");
+        return;
       }
+      if (values.roles.includes("Seller") && (!values.city || !values.storeName)) {
+        message.error("City & Store Name are required for sellers");
+        return;
+      }
+
+      const payload = {
+        fullName: values.name,
+        email: values.email,
+        password: values.password,
+        roles: values.roles,
+        city: values.city ? values.city : null,
+        storeName: values.storeName ? values.storeName : null,
+      };
+
+      const response = await api.post(`/${authController}/register`, payload);
+
+      if (!response.data) {
+        message.error("Network Error. Something went wrong while establishing connection with server");
+        return;
+      }
+
+      if (response.data.status !== 200) {
+        message.error(response.data.message);
+        return;
+      }
+
+      message.success("Registration successful! Please log in.");
+      navigate("/login");
     } catch (error) {
-      message.error("Registration failed. Please try again");
+      message.error("Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -147,9 +162,17 @@ const Register = () => {
           <Form.Item
             name="roles"
             label="Registering as"
-            initialValue={["customer"]}
             rules={[
-              { required: true, message: "Please select at least one role" },
+              { 
+                required: true, 
+                message: "Please select at least one role",
+                validator: (_, value) => {
+                  if (!value || value.length === 0) {
+                    return Promise.reject(new Error("Please select at least one role"));
+                  }
+                  return Promise.resolve();
+                }
+              },
             ]}
           >
             <Checkbox.Group onChange={handleRoleChange}>
