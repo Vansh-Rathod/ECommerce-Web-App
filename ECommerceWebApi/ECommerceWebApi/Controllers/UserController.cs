@@ -27,9 +27,9 @@ namespace ECommerceWebApi.Controllers
         public async Task<IActionResult> GetUsers( [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string sortField = "fullname", [FromQuery] string sortOrder = "asc", [FromQuery] DateTime? fromDate = null,
     [FromQuery] DateTime? toDate = null )
         {
-            // Set defaults if values are not provided
-            fromDate ??= DateTime.UtcNow.AddDays(-7);
-            toDate ??= DateTime.UtcNow;
+            //// Set defaults if values are not provided
+            //fromDate ??= DateTime.UtcNow.AddDays(-7);
+            //toDate ??= DateTime.UtcNow;
 
             // Optional: If you want them in local time (e.g., IST)
             // var localTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");

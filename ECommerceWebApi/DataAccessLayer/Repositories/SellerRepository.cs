@@ -17,13 +17,13 @@ namespace DataAccessLayer.Repositories
         private readonly ApplicationDbContext _dbContext;
         private readonly ILoggerRepository _loggerRepository;
 
-        public SellerRepository(ApplicationDbContext dbContext, ILoggerRepository loggerRepository )
+        public SellerRepository( ApplicationDbContext dbContext, ILoggerRepository loggerRepository )
         {
             _dbContext = dbContext;
             _loggerRepository = loggerRepository;
         }
 
-        public async Task<CommonResponse<PagedResult<Seller>>> GetSellersAsync(int pageNumber, int pageSize, string searchText, string sortField, string sortOrder, string filterByStatus, string filterByApproval, string filterByCity)
+        public async Task<CommonResponse<PagedResult<Seller>>> GetSellersAsync( int pageNumber, int pageSize, string searchText, string sortField, string sortOrder, string filterByStatus, string filterByApproval, string filterByCity )
         {
             try
             {
@@ -33,18 +33,18 @@ namespace DataAccessLayer.Repositories
                     .Include(sellrObj => sellrObj.OrderItems)
                     .AsQueryable();
 
-            //    var query = _dbContext.Sellers
-            //.Where(s => s.IsActive); // Only active products
+                //    var query = _dbContext.Sellers
+                //.Where(s => s.IsActive); // Only active products
 
                 // Filter by search text
-                if (!string.IsNullOrWhiteSpace(searchText))
+                if(!string.IsNullOrWhiteSpace(searchText))
                 {
                     query = query.Where(sellerObj =>
                         sellerObj.StoreName.Contains(searchText));
                 }
 
                 // Filter by IsActive status
-                if (!string.IsNullOrEmpty(filterByStatus) && filterByStatus.ToLower() != "all")
+                if(!string.IsNullOrEmpty(filterByStatus) && filterByStatus.ToLower() != "all")
                 {
                     switch(filterByStatus.ToLower())
                     {
@@ -58,7 +58,7 @@ namespace DataAccessLayer.Repositories
                 }
 
                 // Filter by approval status
-                if (!string.IsNullOrEmpty(filterByApproval) && filterByApproval.ToLower() != "all")
+                if(!string.IsNullOrEmpty(filterByApproval) && filterByApproval.ToLower() != "all")
                 {
                     switch(filterByApproval.ToLower())
                     {
@@ -73,7 +73,7 @@ namespace DataAccessLayer.Repositories
                 }
 
                 // Filter by city
-                if (!string.IsNullOrWhiteSpace(filterByCity) && filterByCity.ToLower() != "all")
+                if(!string.IsNullOrWhiteSpace(filterByCity) && filterByCity.ToLower() != "all")
                 {
                     string lowerCity = filterByCity.ToLower();
                     query = query.Where(seller => seller.City.ToLower().Contains(lowerCity));
@@ -107,7 +107,7 @@ namespace DataAccessLayer.Repositories
                    pagedResult,
                    "Sellers fetched successfully");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 await _loggerRepository.LogAsync($"Exception occurred while retrieving sellers.", SharedReference.Enums.Enum.LogLevel.Error, "SellerRepository.GetSellersAsync()", ex, null, null, null);
                 return CommonResponse<PagedResult<Seller>>.FailureResponse(
@@ -117,7 +117,7 @@ namespace DataAccessLayer.Repositories
             }
         }
 
-        public async Task<CommonResponse<Seller>> GetSellerByIdAsync(Guid sellerId)
+        public async Task<CommonResponse<Seller>> GetSellerByIdAsync( Guid sellerId )
         {
             try
             {
@@ -138,7 +138,7 @@ namespace DataAccessLayer.Repositories
                     new List<string> { $"Seller not found by sellerId: {sellerId}." },
                     "Seller not found");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 await _loggerRepository.LogAsync($"Exception occurred while retrieving seller by id: {sellerId}.", SharedReference.Enums.Enum.LogLevel.Error, "SellerRepository.GetSellerByIdAsync()", ex, null, null, new Dictionary<string, object> { { "SellerId", sellerId } });
                 return CommonResponse<Seller>.FailureResponse(
@@ -147,7 +147,7 @@ namespace DataAccessLayer.Repositories
             }
         }
 
-        public async Task<CommonResponse<Seller>> GetSellerByUserIdAsync(Guid userId)
+        public async Task<CommonResponse<Seller>> GetSellerByUserIdAsync( Guid userId )
         {
             try
             {
@@ -168,7 +168,7 @@ namespace DataAccessLayer.Repositories
                     new List<string> { $"Seller not found by user id: {userId}." },
                     "Seller not found");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 await _loggerRepository.LogAsync($"Exception occurred while retrieving seller by user id: {userId}.", SharedReference.Enums.Enum.LogLevel.Error, "SellerRepository.GetSellerByUserIdAsync()", ex, null, null, new Dictionary<string, object> { { "UserId", userId } });
                 return CommonResponse<Seller>.FailureResponse(
@@ -177,7 +177,7 @@ namespace DataAccessLayer.Repositories
             }
         }
 
-        public async Task<CommonResponse<Seller>> CreateSellerInDBAsync(Seller seller)
+        public async Task<CommonResponse<Seller>> CreateSellerInDBAsync( Seller seller )
         {
             try
             {
@@ -189,7 +189,7 @@ namespace DataAccessLayer.Repositories
                     seller,
                     "Seller created successfully");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 await _loggerRepository.LogAsync($"Exception occurred while creating seller.", SharedReference.Enums.Enum.LogLevel.Error, "SellerRepository.CreateSellerInDBAsync()", ex, null, null, new Dictionary<string, object> { { "Seller", seller } });
                 return CommonResponse<Seller>.FailureResponse(
@@ -198,7 +198,7 @@ namespace DataAccessLayer.Repositories
             }
         }
 
-        public async Task<CommonResponse<Seller>> ApproveSellerBySellerIdAsync(Guid sellerId)
+        public async Task<CommonResponse<Seller>> ApproveSellerBySellerIdAsync( Guid sellerId )
         {
             try
             {
@@ -208,7 +208,7 @@ namespace DataAccessLayer.Repositories
                         .ThenInclude(u => u.CustomerProfile)
                     .FirstOrDefaultAsync(s => s.Id == sellerId);
 
-                if (seller == null)
+                if(seller == null)
                 {
                     return CommonResponse<Seller>.FailureResponse(
                     new List<string> { $"Seller not found by seller id: {sellerId}." },
@@ -233,7 +233,7 @@ namespace DataAccessLayer.Repositories
                     seller,
                     "Seller approved successfully");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 await _loggerRepository.LogAsync($"Exception occurred while approving seller.", SharedReference.Enums.Enum.LogLevel.Error, "SellerRepository.ApproveSellerBySellerIdAsync()", ex, null, null, new Dictionary<string, object> { { "SellerId", sellerId } });
                 return CommonResponse<Seller>.FailureResponse(
@@ -242,7 +242,7 @@ namespace DataAccessLayer.Repositories
             }
         }
 
-        public async Task<CommonResponse<Seller>> RejectSellerBySellerIdAsync(Guid sellerId)
+        public async Task<CommonResponse<Seller>> RejectSellerBySellerIdAsync( Guid sellerId )
         {
             try
             {
@@ -259,40 +259,41 @@ namespace DataAccessLayer.Repositories
                     "Seller not found");
                 }
 
+                // If Seller is pending for approval then only reject seller
                 if(!seller.IsApproved)
                 {
-                    return CommonResponse<Seller>.FailureResponse(
-                    new List<string> { $"Seller is already rejected" },
-                    "Seller is already rejected");
+                    var user = seller.User;
+
+                    // Remove the seller profile
+                    _dbContext.Sellers.Remove(seller);
+
+                    // If the user does NOT have a customer profile, also remove the user
+                    if(user?.CustomerProfile == null)
+                    {
+                        _dbContext.Users.Remove(user);
+                    }
+
+                    await _dbContext.SaveChangesAsync();
+
+                    return CommonResponse<Seller>.SuccessResponse(
+                        seller,
+                        "Seller rejected successfully");
                 }
+                return CommonResponse<Seller>.FailureResponse(
+                    new List<string> { $"Seller is already approved" },
+                    "Seller is already approved");
 
-                var user = seller.User;
-
-                // Remove the seller profile
-                _dbContext.Sellers.Remove(seller);
-
-                // If the user does NOT have a customer profile, also remove the user
-                if (user?.CustomerProfile == null)
-                {
-                    _dbContext.Users.Remove(user);
-                }
-
-                await _dbContext.SaveChangesAsync();
-
-                return CommonResponse<Seller>.SuccessResponse(
-                    seller,
-                    "Seller rejected successfully");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
-                await _loggerRepository.LogAsync($"Exception occurred while rejecting seller.", SharedReference.Enums.Enum.LogLevel.Error, "SellerRepository.RejectSellerBySellerIdAsync()", ex, null, null, new Dictionary<string, object> { { "SellerId", sellerId } });
+                await _loggerRepository.LogAsync($"Exception occurred while rejecting seller.", SharedReference.Enums.Enum.LogLevel.Error, "SellerRepository.RejectSellerBySellerIdAsync()", ex, null, null, new Dictionary<string, object> { { "SellerId", sellerId } } );
                 return CommonResponse<Seller>.FailureResponse(
                        new List<string> { $"Exception occurred while rejecting seller." },
                        "Failed to reject seller");
             }
         }
 
-        public async Task<CommonResponse<Seller>> MakeSellerInactiveBySellerIdAsync(Guid sellerId)
+        public async Task<CommonResponse<Seller>> MakeSellerInactiveBySellerIdAsync( Guid sellerId )
         {
             try
             {
@@ -319,7 +320,7 @@ namespace DataAccessLayer.Repositories
                     seller,
                     "Seller inactivated successfully");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 await _loggerRepository.LogAsync($"Exception occurred while inactivating seller.", SharedReference.Enums.Enum.LogLevel.Error, "SellerRepository.MakeSellerInactiveBySellerIdAsync()", ex, null, null, new Dictionary<string, object> { { "SellerId", sellerId } });
                 return CommonResponse<Seller>.FailureResponse(
@@ -328,7 +329,7 @@ namespace DataAccessLayer.Repositories
             }
         }
 
-        public async Task<CommonResponse<Seller>> MakeSellerActiveBySellerIdAsync(Guid sellerId)
+        public async Task<CommonResponse<Seller>> MakeSellerActiveBySellerIdAsync( Guid sellerId )
         {
             try
             {
@@ -354,7 +355,7 @@ namespace DataAccessLayer.Repositories
                     seller,
                     "Seller activated successfully");
             }
-            catch (Exception ex)
+            catch(Exception ex)
             {
                 await _loggerRepository.LogAsync($"Exception occurred while activating seller.", SharedReference.Enums.Enum.LogLevel.Error, "SellerRepository.MakeSellerActiveBySellerIdAsync()", ex, null, null, new Dictionary<string, object> { { "SellerId", sellerId } });
                 return CommonResponse<Seller>.FailureResponse(

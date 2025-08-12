@@ -16,6 +16,7 @@ export interface PagedResponse<T> {
     message?: string;
     data?: T | null;
     error?: string;
+    timeStamp?: Date
 }
 
 //   export interface Role {

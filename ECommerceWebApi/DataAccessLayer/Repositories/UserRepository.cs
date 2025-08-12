@@ -373,12 +373,12 @@ namespace DataAccessLayer.Repositories
                        new List<string> { $"User not found by user id: {userId}." },
                        "User not found");
                 }
-                if(user.CustomerProfile.IsActive)
+                if(user.CustomerProfile != null && user.CustomerProfile.IsActive)
                 {
                     user.CustomerProfile.IsActive = false;
                 }
 
-                if(user.SellerProfile.IsActive)
+                if(user.SellerProfile != null && user.SellerProfile.IsActive)
                 {
                     user.SellerProfile.IsActive = false;
                 }
@@ -411,12 +411,12 @@ namespace DataAccessLayer.Repositories
                        "User not found");
                 }
 
-                if(!user.CustomerProfile.IsActive)
+                if(user.CustomerProfile != null &&  !user.CustomerProfile.IsActive)
                 {
                     user.CustomerProfile.IsActive = true;
                 }
 
-                if(!user.SellerProfile.IsActive)
+                if(user.SellerProfile!= null && !user.SellerProfile.IsActive)
                 {
                     user.SellerProfile.IsActive = true;
                 }
