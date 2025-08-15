@@ -103,7 +103,7 @@ namespace ECommerceWebApi.Controllers
 
 
             var ordersResult = await _orderRepository.GetOrdersByCustomerIdAsync(customerResult.Data.Id, pageNumber, pageSize, searchText, year);
-            if (!ordersResult.Success)
+            if (!ordersResult.Success || !ordersResult.Data.Items.Any())
             {
                 return Ok(new APIResponse { Status = 404, Message = "Failed to fetch orders" });
             }
@@ -165,7 +165,7 @@ namespace ECommerceWebApi.Controllers
             }
 
             var ordersResult = await _orderRepository.GetOrdersBySellerIdAsync(sellerResult.Data.Id, pageNumber, pageSize, searchText, filterByOrderStatus);
-            if (!ordersResult.Success)
+            if (!ordersResult.Success || !ordersResult.Data.Items.Any())
             {
                 return Ok(new APIResponse { Status = 404, Message = "No Orders Found" });
             }
@@ -266,7 +266,7 @@ namespace ECommerceWebApi.Controllers
 
             var orderItemsResult = await _orderRepository.GetPendingOrderItemsBySellerAsync(sellerResult.Data.Id, pageNumber, pageSize, searchText);
             
-            if(!orderItemsResult.Success)
+            if(!orderItemsResult.Success || !orderItemsResult.Data.Items.Any())
             {
                 return Ok(new APIResponse { Status = 404, Message = "No Pending Order Items Found" });
             }

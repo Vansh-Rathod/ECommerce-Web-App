@@ -34,7 +34,7 @@ namespace ECommerceWebApi.Controllers
         {
             var productsResult = await _productRepository.GetProductsAsync(pageNumber, pageSize, searchText, sortField, sortOrder, filterByPrice, filterByStatus);
 
-            if (!productsResult.Success)
+            if (!productsResult.Success || !productsResult.Data.Items.Any())
             {
                 return Ok(new APIResponse { Status = 404, Message = "No Products Found" });
             }
@@ -89,7 +89,7 @@ namespace ECommerceWebApi.Controllers
 
             var productsResult = await _productRepository.GetSellerProductsAsync(sellerResult.Data.Id, pageNumber, pageSize, searchText, sortField, sortOrder, filterByPrice, filterByStatus);
 
-            if (!productsResult.Success)
+            if (!productsResult.Success || !productsResult.Data.Items.Any())
             {
                 return Ok(new APIResponse { Status = 404, Message = "No products found for seller" });
             }
@@ -164,7 +164,7 @@ namespace ECommerceWebApi.Controllers
 
         // CREATE PRODUCT
         [Authorize(Roles = "Seller")]
-        [HttpPost("products")]
+        [HttpPost]
         public async Task<IActionResult> AddProduct([FromForm] AddProductDto addProductDto)
         {
             // validate fields from addProductDto, then call create product function 
@@ -532,7 +532,7 @@ namespace ECommerceWebApi.Controllers
             var sellerResult = userResult.Data.SellerProfile;
             if (sellerResult == null)
             {
-                return Ok(new APIResponse { Status = 400, Message = "Seller profile not found." });
+                return Ok(new APIResponse { Status = 404, Message = "Seller profile not found." });
             }
 
             // Find the product to delete

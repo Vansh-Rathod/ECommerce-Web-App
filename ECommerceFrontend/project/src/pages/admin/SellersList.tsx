@@ -25,6 +25,7 @@ import {
   Package,
   ShoppingCart,
   DollarSign,
+  UserX,
 } from "lucide-react";
 import { useUser } from "../../context/UserContext";
 import {
@@ -50,12 +51,22 @@ import {
 import { debounce, formatDate } from "../../utils/helpers";
 import { useSeller } from "../../context/SellerContext";
 import api from "../../services/api";
+import {
+  ApproveSeller,
+  GetSellerById,
+  GetSellers,
+  MakeSellerActive,
+  MakeSellerInactive,
+  RejectSeller,
+} from "../../services/SellerApiHelperService";
+import { CommonResponse } from "../../Types";
 
 const { Option } = Select;
 const { Title, Text } = Typography;
 
 const SellersList = () => {
-  const { sellers, getSellers } = useSeller();
+  const [sellers, setSellers] = useState<any>([]);
+  const [totalSellers, setTotalSellers] = useState<number>(0);
 
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -75,14 +86,26 @@ const SellersList = () => {
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [viewSeller, setViewSeller] = useState<any | null>(null);
 
-  const cities = ["Ahmedabad", "New York", "Gandhinagar", "Rajkot", "Surat", "Mumbai", "Pune", "Thane", "Kanpur", "Jaipur", "Udaipur"];
+  const cities = [
+    "Ahmedabad",
+    "New York",
+    "Gandhinagar",
+    "Rajkot",
+    "Surat",
+    "Mumbai",
+    "Pune",
+    "Thane",
+    "Kanpur",
+    "Jaipur",
+    "Udaipur",
+  ];
 
   // Initial fetch of sellers
   useEffect(() => {
-    const fetchSellers = async () => {
-      setLoading(true);
+    setLoading(true);
+    const handler = setTimeout(async () => {
       try {
-        await getSellers(
+        const result = await GetSellers(
           pagination.current,
           pagination.pageSize,
           searchText,
@@ -92,23 +115,27 @@ const SellersList = () => {
           filters.filterByApproval,
           filters.filterByCity
         );
+
+        if (result.success) {
+          setSellers(result.data.sellers);
+          setTotalSellers(result.data.totalSellers);
+        } else {
+          setSellers([]);
+          setTotalSellers(0);
+        }
       } catch (error) {
-        console.error("Failed to fetch sellers:", error);
-        notification.error({
-          message: "Error",
-          description: "Failed to fetch sellers. Please try again.",
-        });
+        message.error("Something went wrong while fetching sellers");
+        console.error("Something went wrong while fetching sellers: ", error);
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchSellers();
-  }, [pagination]);
+    }, 1500);
+    return () => clearTimeout(handler);
+  }, [pagination, searchText, filters]);
 
   // Statistics calculation
   const stats = {
-    totalSellers: sellers?.length || 0,
+    totalSellers: totalSellers || 0,
     activeSellers:
       sellers?.filter((seller: any) => seller.isActive)?.length || 0,
     inactiveSellers:
@@ -119,7 +146,8 @@ const SellersList = () => {
       sellers?.filter((seller: any) => !seller.isApproved)?.length || 0,
     totalProducts:
       sellers?.reduce(
-        (sum: number, seller: any) => sum + (seller.sellerProducts?.length || 0),
+        (sum: number, seller: any) =>
+          sum + (seller.sellerProducts?.length || 0),
         0
       ) || 0,
     totalOrders:
@@ -157,34 +185,16 @@ const SellersList = () => {
     return { text: "N/A", color: "text-gray-600 bg-gray-50" };
   };
 
-  // Debounced Search Function
-  const debouncedSearch = useCallback(
-    debounce(async (value: string) => {
-      await getSellers(
-        1,
-        10,
-        value,
-        filters.sortField,
-        filters.sortOrder,
-        filters.filterByStatus,
-        filters.filterByApproval,
-        filters.filterByCity
-      );
-      setLoading(false);
-    }, 1000),
-    []
-  );
-
   // Clear filters button
   const clearFilters = async () => {
-    if (
+    const isFiltersActive =
       searchText !== "" ||
-      filters.sortField !== "fullName" ||
+      filters.sortField !== "fullname" ||
       filters.sortOrder !== "asc" ||
       filters.filterByStatus !== "all" ||
       filters.filterByApproval !== "all" ||
-      filters.filterByCity !== "all"
-    ) {
+      filters.filterByCity !== "all";
+    if (isFiltersActive) {
       setSearchText("");
       setFilters({
         sortField: "fullName",
@@ -193,9 +203,7 @@ const SellersList = () => {
         filterByApproval: "all",
         filterByCity: "all",
       });
-      setLoading(true);
-      await getSellers(1, 10, "", "fullName", "asc", "all", "all", "all");
-      setLoading(false);
+      setPagination((prev) => ({ ...prev, current: 1, pageSize: 10 }));
     }
   };
 
@@ -207,63 +215,38 @@ const SellersList = () => {
     });
   };
 
-  // Get seller by sellerId
-  const getSellerById = async (sellerId: any) => {
-    if (sellerId) {
-      setLoading(true);
-      try {
-        const response = await api.get(`/seller/${sellerId}`);
-        if (response.data.status !== 200) {
-          notification.error({
-            message: "Error",
-            description: "Something went wrong while fetching seller details.",
-          });
-          return null;
-        }
-        return response.data.data;
-      } catch (error) {
-        console.error("Failed to fetch seller details:", error);
-        notification.error({
-          message: "Error",
-          description: "Failed to fetch seller details. Please try again.",
-        });
-        return null;
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
   // Toggle seller active status
   const toggleSellerStatus = async (seller: any) => {
-    const sellerData = await getSellerById(seller.sellerId);
-    if (sellerData !== null) {
-      setActionLoading(sellerData.sellerId);
-      try {
-        const endpoint = seller.isActive
-          ? `/seller/inactive/${sellerData.sellerId}`
-          : `/seller/active/${sellerData.sellerId}`;
+    console.log("seller data:", seller);
+    const sellerByIdData = await GetSellerById(seller.sellerId);
 
-        const response = await api.put(endpoint);
-        if (response.data.status !== 200) {
-          notification.error({
-            message: "Error",
-            description: seller.isActive
-              ? `Something went wrong while deactivating ${sellerData.sellerName}`
-              : `Something went wrong while activating ${sellerData.sellerName}`,
-          });
+    if (!sellerByIdData.success) {
+      message.error(sellerByIdData.error);
+      return;
+    }
+    setActionLoading(seller.sellerId);
+
+    if (sellerByIdData !== null && sellerByIdData.data !== null) {
+      try {
+        let result: CommonResponse<any>;
+
+        if (seller.isActive) {
+          // Deactivate Seller
+          result = await MakeSellerInactive(seller.sellerId);
+        } else {
+          // Activate Seller
+          result = await MakeSellerActive(seller.sellerId);
+        }
+
+        if (!result.success) {
+          message.error(result.error);
           return;
         }
 
-        notification.success({
-          message: "Success",
-          description: seller.isActive
-            ? `${sellerData.sellerName} has been deactivated successfully.`
-            : `${sellerData.sellerName} has been activated successfully.`,
-        });
+        message.success(result.message);
 
         // Refresh the sellers list
-        await getSellers(
+        const refreshedSellers = await GetSellers(
           pagination.current,
           pagination.pageSize,
           searchText,
@@ -273,45 +256,53 @@ const SellersList = () => {
           filters.filterByApproval,
           filters.filterByCity
         );
+
+        if (!refreshedSellers.success) {
+          message.error(refreshedSellers.error);
+          setSellers([]);
+          setTotalSellers(0);
+          return;
+        }
+
+        setSellers(refreshedSellers.data.sellers);
+        setTotalSellers(refreshedSellers.data.totalSellers);
       } catch (error) {
         console.error("Failed to toggle seller status:", error);
-        notification.error({
-          message: "Error",
-          description: "Failed to update seller status. Please try again.",
-        });
+        message.error("Failed to toggle seller status. Please try again.");
       } finally {
         setActionLoading(null);
       }
+    } else {
+      setActionLoading(null);
+      console.log(sellerByIdData.error);
+      message.error(sellerByIdData.error);
     }
   };
 
-  // Approve Seller
-  const approveSeller = async (seller: any) => {
-    const sellerData = await getSellerById(seller.sellerId);
-    if (sellerData !== null) {
-      setActionLoading(sellerData.sellerId);
+  // Handle seller approval
+  const handleApproveSeller = async (seller: any) => {
+    setActionLoading(seller.sellerId);
+    // console.log("sellerData: ", seller);
+    const sellerByIdResult = await GetSellerById(seller.sellerId);
+    if (!sellerByIdResult.success) {
+      message.error(sellerByIdResult.error);
+      return;
+    }
+    if (
+      sellerByIdResult !== null &&
+      seller.sellerId !== null &&
+      sellerByIdResult.data.sellerId !== null
+    ) {
       try {
-        const endpoint = `/seller/approve-seller/${sellerData.sellerId}`;
-          // ? `/seller/disapprove/${sellerData.sellerId}`
-
-        const response = await api.post(endpoint);
-        if (response.data.status !== 200) {
-          notification.error({
-            message: "Error",
-            description: `Something went wrong while approving ${sellerData.sellerName}`,
-              // ? `Something went wrong while disapproving ${sellerData.sellerName}`
-          });
+        const result = await ApproveSeller(seller.sellerId);
+        if (!result.success) {
+          message.error(result.error);
           return;
         }
-
-        notification.success({
-          message: "Success",
-          description: `${sellerData.sellerName} has been approved successfully.`,
-            // ? `${sellerData.sellerName} has been disapproved successfully.`
-        });
+        message.success(result.message);
 
         // Refresh the sellers list
-        await getSellers(
+        const refreshedSellers = await GetSellers(
           pagination.current,
           pagination.pageSize,
           searchText,
@@ -321,42 +312,49 @@ const SellersList = () => {
           filters.filterByApproval,
           filters.filterByCity
         );
+
+        if (!refreshedSellers.success) {
+          message.error(refreshedSellers.error);
+          setSellers([]);
+          setTotalSellers(0);
+          return;
+        }
+
+        setSellers(refreshedSellers.data.sellers);
+        setTotalSellers(refreshedSellers.data.totalSellers);
       } catch (error) {
-        console.error("Failed to toggle seller approval:", error);
-        notification.error({
-          message: "Error",
-          description: "Failed to approve seller. Please try again.",
-        });
+        console.error("Failed to approve seller: ", error);
+        message.error("Failed to approve seller. Please try again");
       } finally {
         setActionLoading(null);
       }
     }
   };
 
-   // Reject Seller
-   const rejectSeller = async (seller: any) => {
-    const sellerData = await getSellerById(seller.sellerId);
-    if (sellerData !== null) {
-      setActionLoading(sellerData.sellerId);
+  // Handle seller rejection
+  const handleRejectSeller = async (seller: any) => {
+    setActionLoading(seller.sellerId);
+    // console.log("sellerData: ", seller);
+    const sellerByIdResult = await GetSellerById(seller.sellerId);
+    if (!sellerByIdResult.success) {
+      message.error(sellerByIdResult.error);
+      return;
+    }
+    if (
+      sellerByIdResult !== null &&
+      seller.sellerId !== null &&
+      sellerByIdResult.data.sellerId !== null
+    ) {
       try {
-        const endpoint = `/seller/reject-seller/${sellerData.sellerId}`;
-
-        const response = await api.delete(endpoint);
-        if (response.data.status !== 200) {
-          notification.error({
-            message: "Error",
-            description: `Something went wrong while rejecting ${sellerData.sellerName}`,
-          });
+        const result = await RejectSeller(seller.sellerId);
+        if (!result.success) {
+          message.error(result.error);
           return;
         }
+        message.success(result.message);
 
-        notification.success({
-          message: "Success",
-          description: `${sellerData.sellerName} has been rejected successfully.`,
-        });
-        
         // Refresh the sellers list
-        await getSellers(
+        const refreshedSellers = await GetSellers(
           pagination.current,
           pagination.pageSize,
           searchText,
@@ -366,12 +364,19 @@ const SellersList = () => {
           filters.filterByApproval,
           filters.filterByCity
         );
+
+        if (!refreshedSellers.success) {
+          message.error(refreshedSellers.error);
+          setSellers([]);
+          setTotalSellers(0);
+          return;
+        }
+
+        setSellers(refreshedSellers.data.sellers);
+        setTotalSellers(refreshedSellers.data.totalSellers);
       } catch (error) {
-        console.error("Failed to toggle seller approval:", error);
-        notification.error({
-          message: "Error",
-          description: "Failed to reject seller. Please try again.",
-        });
+        console.error("Failed to reject seller: ", error);
+        message.error("Failed to reject seller. Please try again");
       } finally {
         setActionLoading(null);
       }
@@ -380,104 +385,139 @@ const SellersList = () => {
 
   // View seller details
   const handleViewDetails = async (seller: any) => {
-    const sellerData = await getSellerById(seller.sellerId);
-    if (sellerData) {
-      setViewSeller(sellerData);
-      setIsViewModalVisible(true);
+    setLoading(true);
+    const sellerByIdData = await GetSellerById(seller.sellerId);
+    if (!sellerByIdData.success) {
+      message.error(sellerByIdData.error);
+      return;
+    }
+    if (sellerByIdData !== null && sellerByIdData.data !== null) {
+      try {
+        setViewSeller(sellerByIdData.data);
+        setIsViewModalVisible(true);
+      } catch (error) {
+        console.log("Error: ", error);
+        message.error("Failed to fetch seller details. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
+      console.log(sellerByIdData.error);
+      message.error(sellerByIdData.error);
     }
   };
 
   // Action menu for each seller
-  const actionMenu = (record: any): MenuProps => ({
-    items: [
-      {
-        key: "view",
-        label: "View Details",
-        icon: <Eye size={14} />,
-        onClick: () => handleViewDetails(record),
-      },
-      {
-        key: "edit",
-        label: "Edit Seller",
-        icon: <Edit size={14} />,
-        // onClick: () => showModal(record),
-      },
-       // Conditionally show Activate/Deactivate only if seller is approved
-    ...(record.isApproved
-      ? [
-      {
-        key: "toggle",
-        label: record.isActive ? "Deactivate" : "Activate",
-        icon: record.isActive ? (
-          <ToggleLeft size={14} />
-        ) : (
-          <ToggleRight size={14} />
-        ),
-        onClick: () => {
-          Modal.confirm({
-            title: record.isActive
-              ? `Are you sure you want to Deactivate "${record.sellerName}"?`
-              : `Are you sure you want to Activate "${record.sellerName}"?`,
-            content: record.isActive
-              ? `You can later Activate "${record.sellerName}".`
-              : `You can later Deactivate "${record.sellerName}".`,
-            okText: record.isActive ? "Deactivate" : "Activate",
-            okType: "danger",
-            cancelText: "Cancel",
-            onOk: async () => await toggleSellerStatus(record),
-          });
-        },
-      },
-    ]
-    : []),
-        // Show "Approve" only if seller is NOT approved
-    ...(!record.isApproved
-      ? [
+  const actionMenu = (record: any): MenuProps => {
+    // Case 1: Not approved → view + approve + reject
+    if (!record.isApproved && record.isApproved != null) {
+      return {
+        items: [
+          {
+            key: "view",
+            label: "View Details",
+            icon: <Eye size={14} />,
+            // onClick: () => handleViewDetails(record),
+          },
           {
             key: "approve",
             label: "Approve",
             icon: <UserCheck size={14} />,
             onClick: () => {
               Modal.confirm({
-                title: `Are you sure you want to Approve "${record.sellerName}"?`,
+                title: `Are you sure you want to Approve "${record.name}"?`,
                 content: "This will grant them seller privileges.",
                 okText: "Approve",
                 okType: "primary",
                 cancelText: "Cancel",
-                // onOk: async () => await toggleSellerApproval(record),
-                onOk: () => approveSeller(record),
+                onOk: async () =>
+                  // message.success("Need To Implement The Functionality"),
+                  handleApproveSeller(record),
               });
             },
           },
           {
             key: "reject",
             label: "Reject",
-            icon: <Ban size={14} />,
+            icon: <UserX size={14} />,
+            danger: true,
             onClick: () => {
               Modal.confirm({
-                title: `Are you sure you want to Reject "${record.sellerName}"?`,
-                content: "This will remove them from pending seller approvals.",
+                title: `Are you sure you want to Reject "${record.name}"?`,
+                content: "They will not be able to act as a seller.",
                 okText: "Reject",
                 okType: "danger",
                 cancelText: "Cancel",
-                onOk: () => rejectSeller(record),
+                onOk: async () =>
+                  // message.success("Need To Implement Reject Functionality"),
+                  handleRejectSeller(record),
               });
             },
           },
-        ]
-      : []), // Nothing added when isApproved is true
-      {
-        type: "divider",
-      },
-      {
-        key: "delete",
-        label: "Delete",
-        icon: <Trash2 size={14} />,
-        danger: true,
-        // onClick: () => handleDelete(record),
-      },
-    ],
-  });
+        ],
+      };
+    }
+
+    // Case 2: Approved → full menu
+    return {
+      items: [
+        {
+          key: "edit",
+          label: "Edit Seller",
+          icon: <Edit size={14} />,
+          // onClick: () => showModal(record),
+        },
+        {
+          key: "toggle",
+          label: record.isActive ? "Deactivate" : "Activate",
+          icon: record.isActive ? (
+            <ToggleLeft size={14} />
+          ) : (
+            <ToggleRight size={14} />
+          ),
+          onClick: () => {
+            Modal.confirm({
+              title: record.isActive
+                ? `Are you sure you want to Deactivate "${record.name}'s seller profile"?`
+                : `Are you sure you want to Activate "${record.name}'s seller profile"?`,
+              content: record.isActive
+                ? `This action will make ${record.name}'s seller profile inactive. You can later activate it.`
+                : `This action will make ${record.name}'s seller profile active. You can later deactivate it.`,
+              okText: record.isActive ? "Deactivate" : "Activate",
+              okType: "danger",
+              cancelText: "Cancel",
+              onOk: () => toggleSellerStatus(record),
+            });
+          },
+        },
+        {
+          key: "view",
+          label: "View Details",
+          icon: <Eye size={14} />,
+          // onClick: () => handleViewDetails(record),
+          onClick: () => message.info("Need to implement functionality"),
+        },
+        { type: "divider" },
+        {
+          key: "delete",
+          label: "Delete",
+          icon: <Trash2 size={14} />,
+          danger: true,
+          onClick: () => {
+            Modal.confirm({
+              title: `Are you sure you want to delete "${record.sellerName}"?`,
+              content: "This action cannot be undone.",
+              okText: "Yes, Delete",
+              okType: "danger",
+              cancelText: "Cancel",
+              onOk: () => message.success("Need to implement functionality"),
+            });
+          },
+        },
+      ],
+    };
+  };
 
   // Table Columns
   const columns = [
@@ -550,7 +590,8 @@ const SellersList = () => {
             </span>
           </div>
           <div className="text-xs text-gray-500">
-            Active: {record.sellerProducts?.filter((p: any) => p.isActive)?.length || 0}
+            Active:{" "}
+            {record.sellerProducts?.filter((p: any) => p.isActive)?.length || 0}
           </div>
         </div>
       ),
@@ -568,7 +609,9 @@ const SellersList = () => {
             </span>
           </div>
           <div className="text-xs text-gray-500">
-            Completed: {record.sellerOrders?.filter((o: any) => o.status === 1)?.length || 0}
+            Completed:{" "}
+            {record.sellerOrders?.filter((o: any) => o.status === 1)?.length ||
+              0}
           </div>
         </div>
       ),
@@ -578,11 +621,12 @@ const SellersList = () => {
       key: "totalValue",
       width: 120,
       render: (_: any, record: any) => {
-        const totalValue = record.sellerProducts?.reduce(
-          (sum: number, product: any) =>
-            sum + product.price * product.stockQuantity,
-          0
-        ) || 0;
+        const totalValue =
+          record.sellerProducts?.reduce(
+            (sum: number, product: any) =>
+              sum + product.price * product.stockQuantity,
+            0
+          ) || 0;
         return (
           <div className="text-center">
             <div className="flex items-center justify-center space-x-1">
@@ -602,7 +646,9 @@ const SellersList = () => {
       render: (_: any, record: any) => (
         <div className="text-sm text-gray-900 flex items-center">
           <Calendar className="w-4 h-4 mr-1 text-gray-400" />
-          {record.sellerLastLogin ? formatDate(record.sellerLastLogin) : "Never"}
+          {record.sellerLastLogin
+            ? formatDate(record.sellerLastLogin)
+            : "Never"}
         </div>
       ),
     },
@@ -656,7 +702,7 @@ const SellersList = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
             <Statistic
               title="Total Sellers"
               value={stats.totalSellers}
@@ -664,7 +710,7 @@ const SellersList = () => {
               valueStyle={{ color: "#1890ff" }}
             />
           </Card>
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-lg">
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
             <Statistic
               title="Active Sellers"
               value={stats.activeSellers}
@@ -672,7 +718,7 @@ const SellersList = () => {
               valueStyle={{ color: "#52c41a" }}
             />
           </Card>
-          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 shadow-lg">
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
             <Statistic
               title="Pending Approval"
               value={stats.pendingSellers}
@@ -680,7 +726,7 @@ const SellersList = () => {
               valueStyle={{ color: "#fa8c16" }}
             />
           </Card>
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 shadow-lg">
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
             <Statistic
               title="Total Products"
               value={stats.totalProducts}
@@ -700,26 +746,8 @@ const SellersList = () => {
                 placeholder="Search sellers by name or store..."
                 value={searchText}
                 onChange={(e) => {
-                  setLoading(true);
-                  const value = e.target.value;
-                  setSearchText(value);
-                  if (value.trim() === "") {
-                    setTimeout(async () => {
-                      await getSellers(
-                        1,
-                        10,
-                        "",
-                        filters.sortField,
-                        filters.sortOrder,
-                        filters.filterByStatus,
-                        filters.filterByApproval,
-                        filters.filterByCity
-                      );
-                      setLoading(false);
-                    }, 1000);
-                  } else {
-                    debouncedSearch(value);
-                  }
+                  setSearchText(e.target.value);
+                  setPagination((prev) => ({ ...prev, current: 1 }));
                 }}
                 prefix={<Search size={18} className="text-gray-400" />}
                 allowClear
@@ -738,86 +766,50 @@ const SellersList = () => {
                     ...prev,
                     filterByStatus: newStatusFilter,
                   }));
-                  setLoading(true);
-                  await getSellers(
-                    1,
-                    10,
-                    searchText,
-                    filters.sortField,
-                    filters.sortOrder,
-                    newStatusFilter,
-                    filters.filterByApproval,
-                    filters.filterByCity
-                  );
-                  setLoading(false);
                 }}
                 style={{ width: 120 }}
                 size="large"
-                allowClear
+                // allowClear
                 className="shadow-lg"
               >
-                <Option value="all">All Status</Option>
-                <Option value="true">Active</Option>
-                <Option value="false">Inactive</Option>
+                <Option value="all">All</Option>
+                <Option value="active">Active</Option>
+                <Option value="inactive">Inactive</Option>
               </Select>
 
               <Select
                 placeholder="Approval"
-                value={filters.filterByApproval || undefined}
+                value={filters.filterByApproval}
                 onChange={async (value) => {
                   const newApprovalFilter = value || "all";
                   setFilters((prev) => ({
                     ...prev,
                     filterByApproval: newApprovalFilter,
                   }));
-                  setLoading(true);
-                  await getSellers(
-                    1,
-                    10,
-                    searchText,
-                    filters.sortField,
-                    filters.sortOrder,
-                    filters.filterByStatus,
-                    newApprovalFilter,
-                    filters.filterByCity
-                  );
-                  setLoading(false);
                 }}
                 style={{ width: 140 }}
                 size="large"
-                allowClear
+                // allowClear
                 className="shadow-lg"
               >
                 <Option value="all">All Approvals</Option>
-                <Option value="true">Approved</Option>
-                <Option value="false">Pending</Option>
+                <Option value="approved">Approved</Option>
+                <Option value="pending">Pending</Option>
               </Select>
 
               <Select
                 placeholder="City"
-                value={filters.filterByCity || undefined}
+                value={filters.filterByCity}
                 onChange={async (value) => {
                   const newCityFilter = value || "all";
                   setFilters((prev) => ({
                     ...prev,
                     filterByCity: newCityFilter,
                   }));
-                  setLoading(true);
-                  await getSellers(
-                    1,
-                    10,
-                    searchText,
-                    filters.sortField,
-                    filters.sortOrder,
-                    filters.filterByStatus,
-                    filters.filterByApproval,
-                    newCityFilter
-                  );
-                  setLoading(false);
                 }}
                 style={{ width: 140 }}
                 size="large"
-                allowClear
+                // allowClear
                 className="shadow-lg"
               >
                 <Option value="all">All Cities</Option>
@@ -868,14 +860,14 @@ const SellersList = () => {
               pagination={{
                 current: pagination.current,
                 pageSize: pagination.pageSize,
-                total: sellers?.length || 0,
+                total: totalSellers || 0,
                 showTotal: (total, range) =>
                   `${range[0]}-${range[1]} of ${total} sellers`,
                 showSizeChanger: true,
                 showQuickJumper: true,
                 pageSizeOptions: ["5", "10", "20", "50", "100"],
                 onChange: (page, pageSize) => {
-                  setPagination({ current: page, pageSize: pageSize || 5 });
+                  setPagination({ current: page, pageSize: pageSize || 10 });
                 },
               }}
               scroll={{ x: 1200 }}
@@ -883,7 +875,7 @@ const SellersList = () => {
             />
           </Card>
         )}
-        </div>
+      </div>
     </div>
   );
 };

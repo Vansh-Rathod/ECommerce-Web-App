@@ -28,7 +28,7 @@ namespace ECommerceWebApi.Controllers
         // GET ALL THE CART ITEMS
         [Authorize(Roles = "Customer")]
         [HttpGet]
-        public async Task<IActionResult> GetCartItems()
+        public async Task<IActionResult> GetCart()
         {
             var userId = User.FindFirst("userId")?.Value;
             if (!Guid.TryParse(userId, out var userGuid))

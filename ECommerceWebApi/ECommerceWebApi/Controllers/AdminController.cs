@@ -80,14 +80,14 @@ namespace ECommerceWebApi.Controllers
         public async Task<IActionResult> GetPendingApprovalRequests([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string sortField = "fullname", [FromQuery] string sortOrder = "asc", [FromQuery] DateTime? fromDate = null,
     [FromQuery] DateTime? toDate = null )
         {
-            var pendingUsersResult = await _userRepository.GetUnapprovedUsersAsync(pageNumber, pageSize, searchText, sortField, sortOrder, fromDate, toDate);
+            var result = await _userRepository.GetUnapprovedUsersAsync(pageNumber, pageSize, searchText, sortField, sortOrder, fromDate, toDate);
 
-            if (!pendingUsersResult.Success)
+            if (!result.Success  || !result.Data.Items.Any())
             {
-                return Ok(new APIResponse { Status = 400, Message = pendingUsersResult.Message, Data = null });
+                return Ok(new APIResponse { Status = 404, Message = result.Message, Data = null });
             }
 
-            var pendingUsers = pendingUsersResult.Data.Items.Select(userObj => new
+            var pendingUsers = result.Data.Items.Select(userObj => new
             {
                 UserId = userObj.Id,
                 Name = userObj.FullName,
@@ -113,7 +113,7 @@ namespace ECommerceWebApi.Controllers
             {
                 PageNumber = pageNumber,
                 PageSize = pageSize,
-                TotalUsers = pendingUsersResult.Data.TotalRecords,
+                TotalUsers = result.Data.TotalRecords,
                 Users = pendingUsers
             };
 

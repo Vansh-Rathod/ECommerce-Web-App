@@ -88,9 +88,9 @@ namespace ECommerceWebApi.Controllers
         public async Task<IActionResult> GetSellersAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string sortField = "fullname", [FromQuery] string sortOrder = "asc", [FromQuery] string filterByStatus = "all", [FromQuery] string filterByApproval = "all", [FromQuery] string filterByCity = "all")
         {
             var sellersResult = await _sellerRepository.GetSellersAsync(pageNumber, pageSize, searchText, sortField, sortOrder, filterByStatus, filterByApproval, filterByCity);
-            if (!sellersResult.Success)
+            if (!sellersResult.Success || !sellersResult.Data.Items.Any())
             {
-                return Ok(new APIResponse { Status = 400, Message = "No Sellers Found" });
+                return Ok(new APIResponse { Status = 404, Message = "No Sellers Found" });
             }
 
             var sellers = sellersResult.Data.Items.Select(sellerObj => new

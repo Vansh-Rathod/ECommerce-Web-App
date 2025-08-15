@@ -172,7 +172,7 @@ namespace ECommerceWebApi.Controllers
 
         // PAY FUNDS FROM WALLET
         [HttpPost("pay")]
-        public async Task<IActionResult> Pay([FromBody] PayDto payDto)
+        public async Task<IActionResult> PayFunds( [FromBody] PayDto payDto)
         {
             var userId = User.FindFirst("userId")?.Value;
             if (!Guid.TryParse(userId, out var userGuid))

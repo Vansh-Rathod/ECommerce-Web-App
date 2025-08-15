@@ -108,9 +108,9 @@ namespace ECommerceWebApi.Controllers
         public async Task<IActionResult> GetCustomersAsync([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string sortField = "fullname", [FromQuery] string sortOrder = "asc", [FromQuery] string filterByStatus = "all")
         {
             var result = await _customerRepository.GetCustomersAsync(pageNumber, pageSize, searchText, sortField, sortOrder, filterByStatus);
-            if (!result.Success)
+            if (!result.Success || !result.Data.Items.Any())
             {
-                return Ok(new APIResponse { Status = 400, Message = result.Message });
+                return Ok(new APIResponse { Status = 404, Message = result.Message });
             }
 
             var customers = result.Data.Items.Select(customerObj => new

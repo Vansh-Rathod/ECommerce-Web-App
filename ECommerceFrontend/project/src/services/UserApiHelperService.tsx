@@ -14,7 +14,7 @@ export const GetUsers = async (
   toDate?: string | null
 ): Promise<CommonResponse<any>> => {
   try {
-    const response = await api.get(`${userController}/users`, {
+    const response = await api.get(`/${userController}/users`, {
       params: {
         pageNumber,
         pageSize,
@@ -35,8 +35,12 @@ export const GetUsers = async (
     }
 
     if (response.data.status === 404) {
-        return { success: true, data: { users: [], totalUsers: 0 } , error: response.data.message };
-      }
+      return {
+        success: true,
+        data: { users: [], totalUsers: 0 },
+        error: response.data.message,
+      };
+    }
 
     if (response.data.status !== 200) {
       return { success: false, error: "No users found" };
@@ -61,7 +65,7 @@ export const GetUsers = async (
       error: "Something went wrong while fetching users",
     };
   } finally {
-    console.log("getUsers API call completed");
+    console.log("GetUsers API call completed");
   }
 };
 
@@ -69,48 +73,44 @@ export const GetUsers = async (
 export const GetUserById = async (
   userId: string
 ): Promise<CommonResponse<any>> => {
-  if (userId) {
-    // console.log("User ID: ", userId);
-    try {
-      const response = await api.get(`/${userController}/${userId}`);
-
-      if (!response.data) {
-        return {
-          success: false,
-          error:
-            "Network Error. Something went wrong while establishing connection with server",
-        };
-      }
-
-      if (response.data.status != 200) {
-        return { success: false, error: "User not found" };
-      }
-
-      const userByIdData = response.data.data;
-      if (!userByIdData) {
-        return { success: false, error: response.data.message };
-      }
-
-      return {
-        success: true,
-        data: userByIdData,
-        message: response.data.message,
-      };
-    } catch (error) {
-      console.error(
-        "Something went wrong while fetching user details: ",
-        error
-      );
-      return {
-        success: false,
-        error: "Something went wrong while fetching user details",
-      };
-    } finally {
-      console.log("getUserById API call completed");
-    }
-  } else {
+  console.log("User ID: ", userId);
+  if (!userId) {
     console.error("User Id not found");
     return { success: false, error: "User Id not found" };
+  }
+  try {
+    const response = await api.get(`/${userController}/${userId}`);
+
+    if (!response.data) {
+      return {
+        success: false,
+        error:
+          "Network Error. Something went wrong while establishing connection with server",
+      };
+    }
+
+    if (response.data.status != 200) {
+      return { success: false, error: "User not found" };
+    }
+
+    const userByIdData = response.data.data;
+    if (!userByIdData) {
+      return { success: false, error: response.data.message };
+    }
+
+    return {
+      success: true,
+      message: response.data.message,
+      data: userByIdData,
+    };
+  } catch (error) {
+    console.error("Something went wrong while fetching user details: ", error);
+    return {
+      success: false,
+      error: "Something went wrong while fetching user details",
+    };
+  } finally {
+    console.log("GetUserById API call completed");
   }
 };
 
@@ -118,40 +118,39 @@ export const GetUserById = async (
 export const DeleteUser = async (
   userId: string
 ): Promise<CommonResponse<any>> => {
-  if (userId) {
-    // console.log("User ID: ", userId);
-    try {
-      const response = await api.delete(`/${userController}/${userId}`);
-
-      if (!response.data) {
-        return {
-          success: false,
-          error:
-            "Network Error. Something went wrong while establishing connection with server",
-        };
-      }
-
-      if (response.data.status != 200) {
-        return { success: false, error: response.data.message };
-      }
-
-      return {
-        success: true,
-        data: response.data.data,
-        message: response.data.message,
-      };
-    } catch (error) {
-      console.error("Something went wrong while deleting user: ", error);
-      return {
-        success: false,
-        error: "Something went wrong while deleting user",
-      };
-    } finally {
-      console.log("deleteUser API call completed");
-    }
-  } else {
+  // console.log("User ID: ", userId);
+  if (!userId) {
     console.error("User Id not found");
     return { success: false, error: "User Id not found" };
+  }
+  try {
+    const response = await api.delete(`/${userController}/${userId}`);
+
+    if (!response.data) {
+      return {
+        success: false,
+        error:
+          "Network Error. Something went wrong while establishing connection with server",
+      };
+    }
+
+    if (response.data.status != 200) {
+      return { success: false, error: response.data.message };
+    }
+
+    return {
+      success: true,
+      data: response.data.data,
+      message: response.data.message,
+    };
+  } catch (error) {
+    console.error("Something went wrong while deleting user: ", error);
+    return {
+      success: false,
+      error: "Something went wrong while deleting user",
+    };
+  } finally {
+    console.log("DeleteUser API call completed");
   }
 };
 
@@ -159,40 +158,39 @@ export const DeleteUser = async (
 export const MakeUserInactive = async (
   userId: string
 ): Promise<CommonResponse<any>> => {
-  if (userId) {
-    // console.log("User ID: ", userId);
-    try {
-      const response = await api.put(`/${userController}/inactive/${userId}`);
-
-      if (!response.data) {
-        return {
-          success: false,
-          error:
-            "Network Error. Something went wrong while establishing connection with server",
-        };
-      }
-
-      if (response.data.status != 200) {
-        return { success: false, error: response.data.message };
-      }
-
-      return {
-        success: true,
-        data: response.data.data,
-        message: response.data.message,
-      };
-    } catch (error) {
-      console.error("Something went wrong while deactivating user: ", error);
-      return {
-        success: false,
-        error: "Something went wrong while deactivating user",
-      };
-    } finally {
-      console.log("makeUserInactive API call completed");
-    }
-  } else {
+  // console.log("User ID: ", userId);
+  if (!userId) {
     console.error("User Id not found");
     return { success: false, error: "User Id not found" };
+  }
+  try {
+    const response = await api.put(`/${userController}/inactive/${userId}`);
+
+    if (!response.data) {
+      return {
+        success: false,
+        error:
+          "Network Error. Something went wrong while establishing connection with server",
+      };
+    }
+
+    if (response.data.status != 200) {
+      return { success: false, error: response.data.message };
+    }
+
+    return {
+      success: true,
+      data: response.data.data,
+      message: response.data.message,
+    };
+  } catch (error) {
+    console.error("Something went wrong while deactivating user: ", error);
+    return {
+      success: false,
+      error: "Something went wrong while deactivating user",
+    };
+  } finally {
+    console.log("MakeUserInactive API call completed");
   }
 };
 
@@ -200,80 +198,78 @@ export const MakeUserInactive = async (
 export const MakeUserActive = async (
   userId: string
 ): Promise<CommonResponse<any>> => {
-  if (userId) {
-    // console.log("User ID: ", userId);
-    try {
-      const response = await api.put(`/${userController}/active/${userId}`);
-
-      if (!response.data) {
-        return {
-          success: false,
-          error:
-            "Network Error. Something went wrong while establishing connection with server",
-        };
-      }
-
-      if (response.data.status != 200) {
-        return { success: false, error: response.data.message };
-      }
-
-      return {
-        success: true,
-        data: response.data.data,
-        message: response.data.message,
-      };
-    } catch (error) {
-      console.error("Something went wrong while activating user: ", error);
-      return {
-        success: false,
-        error: "Something went wrong while activating user",
-      };
-    } finally {
-      console.log("makeUserActive API call completed");
-    }
-  } else {
+  // console.log("User ID: ", userId);
+  if (!userId) {
     console.error("User Id not found");
     return { success: false, error: "User Id not found" };
+  }
+  try {
+    const response = await api.put(`/${userController}/active/${userId}`);
+
+    if (!response.data) {
+      return {
+        success: false,
+        error:
+          "Network Error. Something went wrong while establishing connection with server",
+      };
+    }
+
+    if (response.data.status != 200) {
+      return { success: false, error: response.data.message };
+    }
+
+    return {
+      success: true,
+      data: response.data.data,
+      message: response.data.message,
+    };
+  } catch (error) {
+    console.error("Something went wrong while activating user: ", error);
+    return {
+      success: false,
+      error: "Something went wrong while activating user",
+    };
+  } finally {
+    console.log("MakeUserActive API call completed");
   }
 };
 
 // Change user 2FA Status
 export const ChangeUser2FAStatus = async (
-    status: boolean
-  ): Promise<CommonResponse<any>> => {
-    if (status !== null) {
-      // console.log("Status: ", status);
-      try {
-        const response = await api.put(`/${userController}/change2FAStatus`);
-  
-        if (!response.data) {
-          return {
-            success: false,
-            error:
-              "Network Error. Something went wrong while establishing connection with server",
-          };
-        }
-  
-        if (response.data.status != 200) {
-          return { success: false, error: response.data.message };
-        }
-  
-        return {
-          success: true,
-          data: response.data.data,
-          message: response.data.message,
-        };
-      } catch (error) {
-        console.error("Something went wrong while changing 2FA Status: ", error);
-        return {
-          success: false,
-          error: "Something went wrong while changing 2FA Status",
-        };
-      } finally {
-        console.log("changeUser2FAStatus API call completed");
-      }
-    } else {
-      console.error("Status not found");
-      return { success: false, error: "Status not found" };
+  status: boolean
+): Promise<CommonResponse<any>> => {
+  // console.log("Status: ", status);
+  if (!status || status === null) {
+    console.error("Status not found");
+    return { success: false, error: "Status not found" };
+  }
+  try {
+    const response = await api.put(`/${userController}/change2FAStatus`);
+
+    if (!response.data) {
+      return {
+        success: false,
+        error:
+          "Network Error. Something went wrong while establishing connection with server",
+      };
     }
-  };
+
+    if (response.data.status != 200) {
+      return { success: false, error: response.data.message };
+    }
+
+    return {
+      success: true,
+      data: response.data.data,
+      message: response.data.message,
+    };
+  } catch (error) {
+    console.error("Something went wrong while changing 2FA Status: ", error);
+    return {
+      success: false,
+      error: "Something went wrong while changing 2FA Status",
+    };
+  } finally {
+    console.log("ChangeUser2FAStatus API call completed");
+  }
+};

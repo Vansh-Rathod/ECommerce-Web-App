@@ -40,16 +40,24 @@ import {
   Typography,
   Modal,
   Spin,
+  message,
 } from "antd";
 import { debounce, formatDate } from "../../utils/helpers";
 import { useCustomer } from "../../context/CustomerContext";
 import api from "../../services/api";
+import {
+  GetCustomerById,
+  GetCustomers,
+  MakeCustomerInactive,
+} from "../../services/CustomerApiHelperService";
+import { CommonResponse } from "../../Types";
 
 const { Option } = Select;
 const { Title, Text } = Typography;
 
 const CustomersList = () => {
-  const { customers, getCustomers } = useCustomer();
+  const [customers, setCustomers] = useState<any>([]);
+  const [totalCustomers, setTotalCustomers] = useState<number>(0);
 
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -67,12 +75,12 @@ const CustomersList = () => {
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [viewCustomer, setViewCustomer] = useState<any | null>(null);
 
-  // Initial fetch of seller products
+  // Initial fetch of customers
   useEffect(() => {
-    const fetchCustomers = async () => {
-      setLoading(true);
+    setLoading(true);
+    const handler = setTimeout(async () => {
       try {
-        await getCustomers(
+        const result = await GetCustomers(
           pagination.current,
           pagination.pageSize,
           searchText,
@@ -80,23 +88,27 @@ const CustomersList = () => {
           filters.sortOrder,
           filters.filterByStatus
         );
+
+        if (result.success) {
+          setCustomers(result.data.customers);
+          setTotalCustomers(result.data.totalCustomers);
+        } else {
+          setCustomers([]);
+          setTotalCustomers(0);
+        }
       } catch (error) {
-        console.error("Failed to fetch customers:", error);
-        notification.error({
-          message: "Error",
-          description: "Failed to fetch customers. Please try again.",
-        });
+        message.error("Something went wrong while fetching customers");
+        console.error("Something went wrong while fetching customers: ", error);
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchCustomers();
-  }, [pagination]);
+    }, 1000);
+    return () => clearTimeout(handler);
+  }, [pagination, searchText, filters]);
 
   // Statistics calculation
   const stats = {
-    totalCustomers: customers?.length || 0,
+    totalCustomers: totalCustomers || 0,
     activeCustomers:
       customers?.filter((customerObj: any) => customerObj.isActive)?.length ||
       0,
@@ -129,37 +141,22 @@ const CustomersList = () => {
   //     return { text: 'N/A', color: 'text-gray-600 bg-gray-50' };
   //   };
 
-  // Debounced Search Function
-  const debouncedSearch = useCallback(
-    debounce(async (value: string) => {
-      await getCustomers(
-        1,
-        10,
-        value,
-        filters.sortField,
-        filters.sortOrder,
-        filters.filterByStatus
-      );
-      setLoading(false);
-    }, 1000),
-    [] // prevent recreating on every render
-  );
-
   // CLear filters button
   const clearFilters = async () => {
-    if (
+    const isFiltersActive =
       searchText !== "" ||
       filters.sortField !== "fullname" ||
       filters.sortOrder !== "asc" ||
-      filters.filterByStatus !== "all"
-    ) {
+      filters.filterByStatus !== "all";
+
+    if (isFiltersActive) {
       setSearchText("");
       setFilters({
         sortField: "fullname",
         sortOrder: "asc",
         filterByStatus: "all",
       });
-      await getCustomers(1, 10, "", "fullname", "asc", "all");
+      setPagination((prev) => ({ ...prev, current: 1, pageSize: 10 }));
     }
   };
 
@@ -172,65 +169,36 @@ const CustomersList = () => {
     });
   };
 
-  // Get customer by customerId
-  const getCustomerById = async (customerId: any) => {
-    if (customerId) {
-      // console.log("Customer ID: ", customerId);
-      setLoading(true);
-      try {
-        const response = await api.get(`/customer/${customerId}`);
-        // setSelectedProduct(response.data.data);
-        if (response.data.status != 200) {
-          notification.error({
-            message: "Error",
-            description:
-              "Something went wrong while fetching customer details.",
-          });
-          return null;
-        }
-        const customerByIdData = response.data.data;
-        return customerByIdData;
-      } catch (error) {
-        console.error("Failed to fetch customer details:", error);
-        notification.error({
-          message: "Error",
-          description: "Failed to fetch customer details. Please try again.",
-        });
-        return null;
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
   // Activate / Deactivate customer
   const toggleCustomerStatus = async (customer: any) => {
-    const customerByIdData = await getCustomerById(customer.customerId);
-    if (customerByIdData !== null) {
-      setActionLoading(customerByIdData.customerId);
+    console.log("customer data:", customer);
+    const customerByIdData = await GetCustomerById(customer.customerId);
+    if (!customerByIdData.success) {
+      message.error(customerByIdData.error);
+      return;
+    }
+    setActionLoading(customer.customerId);
+    if (customerByIdData !== null && customerByIdData.data !== null) {
       try {
-        const endpoint = customer.isActive
-          ? `/customer/inactive/${customerByIdData.customerId}`
-          : `/customer/active/${customerByIdData.customerId}`;
+        let result: CommonResponse<any>;
 
-        const response = await api.put(endpoint);
-        if (response.data.status !== 200) {
-          notification.error({
-            message: "Error",
-            description: customerByIdData.isActive
-              ? `Something went wrong while deactivating ${customerByIdData.customerName}`
-              : `Something went wrong while activating ${customerByIdData.customerName}`,
-          });
+        if (customer.isActive) {
+          // Deactivate Customer
+          result = await MakeCustomerInactive(customer.customerId);
+        } else {
+          // Activate Customer
+          result = await MakeCustomerInactive(customer.customerId);
         }
-        notification.success({
-          message: "Success",
-          description: customerByIdData.isActive
-            ? `${customerByIdData.customerName} has been deactivated successfully.`
-            : `${customerByIdData.customerName} has been activated successfully.`,
-        });
 
-        // Refresh the products list
-        await getCustomers(
+        if (!result.success) {
+          message.error(result.error);
+          return;
+        }
+
+        message.success(result.message);
+
+        // Refresh the customers list
+        const refreshedCustomers = await GetCustomers(
           pagination.current,
           pagination.pageSize,
           searchText,
@@ -238,20 +206,26 @@ const CustomersList = () => {
           filters.sortOrder,
           filters.filterByStatus
         );
+
+        if (!refreshedCustomers.success) {
+          message.error(refreshedCustomers.error);
+          setCustomers([]);
+          setTotalCustomers(0);
+          return;
+        }
+
+        setCustomers(refreshedCustomers.data.customers);
+        setTotalCustomers(refreshedCustomers.data.totalCustomers);
       } catch (error) {
         console.error("Failed to toggle customer status:", error);
-        notification.error({
-          message: "Error",
-          description: "Failed to update customer status. Please try again.",
-        });
+        message.error("Failed to toggle customer status. Please try again.");
       } finally {
         setActionLoading(null);
       }
     } else {
-      notification.error({
-        message: "Error",
-        description: "Failed to get customer data.",
-      });
+      setActionLoading(null);
+      console.log(customerByIdData.error);
+      message.error(customerByIdData.error);
     }
   };
 
@@ -269,6 +243,7 @@ const CustomersList = () => {
         label: "View Details",
         icon: <Eye size={14} />,
         // onClick: () => handleViewDetails(record),
+        onClick: () => message.info("Need to implement functionality"),
       },
       {
         key: "toggle",
@@ -281,8 +256,8 @@ const CustomersList = () => {
         onClick: () => {
           Modal.confirm({
             title: record.isActive
-              ? `Are you sure you want to Deactivate "${record.customerName}" customer profile`
-              : `Are you sure you want to Activate "${record.customerName}" customer profile`,
+              ? `Are you sure you want to Deactivate "${record.customerName}"'s customer profile`
+              : `Are you sure you want to Activate "${record.customerName}"'s customer profile`,
             content: record.isActive
               ? "You can later Activate it."
               : "You can later Deactivate it.",
@@ -301,16 +276,16 @@ const CustomersList = () => {
         label: "Delete",
         icon: <Trash2 size={14} />,
         danger: true,
-        // onClick: () => {
-        //   Modal.confirm({
-        //     title: `Are you sure you want to delete "${record.name}"`,
-        //     content: 'This action cannot be undone.',
-        //     okText: 'Yes, Delete',
-        //     okType: 'danger',
-        //     cancelText: 'Cancel',
-        //     onOk: () => handelDelete(record),
-        //   });
-        // },
+        onClick: () => {
+          Modal.confirm({
+            title: `Are you sure you want to delete "${record.name}'s Customer profile"`,
+            content: "This action cannot be undone.",
+            okText: "Yes, Delete",
+            okType: "danger",
+            cancelText: "Cancel",
+            onOk: () => message.success("Need to implement functionality"),
+          });
+        },
       },
     ],
   });
@@ -334,20 +309,20 @@ const CustomersList = () => {
           <div className="flex-shrink-0 h-10 w-10">
             <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
               <span className="text-sm font-medium text-white">
-                {record.customerName.charAt(0).toUpperCase()}
+                {record.name.charAt(0).toUpperCase()}
               </span>
             </div>
           </div>
           <div className="flex-1 min-w-0">
             <div className="font-semiblod text-gray-900 truncate">
-              {record.customerName}
+              {record.name}
             </div>
             <div className="text-sm text-gray-500 truncate flex items-center">
               <Mail className="w-4 h-4 mr-1" />
-              {record.customerEmail}
+              {record.email}
             </div>
             <div className="text-xs text-gray-400 mt-1">
-              Last login: {formatDate(record.customerLastLogin)}
+              Last login: {formatDate(record.lastLogin)}
             </div>
           </div>
         </div>
@@ -377,9 +352,7 @@ const CustomersList = () => {
       render: (_: any, record: any) =>
         record.customerId ? (
           <span className="text-sm text-gray-600">
-            {Array.isArray(record.customerOrders)
-              ? record.customerOrders.length
-              : 0}
+            {Array.isArray(record.orders) ? record.orders.length : 0}
           </span>
         ) : (
           <span className="text-sm text-gray-400">No Customer Profile</span>
@@ -436,7 +409,7 @@ const CustomersList = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
             <Statistic
               title="Total Customers"
               value={stats.totalCustomers}
@@ -444,7 +417,7 @@ const CustomersList = () => {
               valueStyle={{ color: "#1890ff" }}
             />
           </Card>
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
             <Statistic
               title="Active Customers"
               value={stats.activeCustomers}
@@ -452,7 +425,7 @@ const CustomersList = () => {
               valueStyle={{ color: "#52c41a" }}
             />
           </Card>
-          <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200">
+          <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
             <Statistic
               title="Inactive Customers"
               value={stats.inactiveCustomers}
@@ -488,27 +461,9 @@ const CustomersList = () => {
                 size="large"
                 placeholder="Search customers by name..."
                 value={searchText}
-                // onChange={handleSearch}
                 onChange={(e) => {
-                  setLoading(true);
-                  const value = e.target.value;
-                  setSearchText(value);
-                  if (value.trim() === "") {
-                    // Delay the fetch when clearing the input
-                    setTimeout(async () => {
-                      await getCustomers(
-                        1,
-                        10,
-                        "",
-                        filters.sortField,
-                        filters.sortOrder,
-                        filters.filterByStatus
-                      );
-                      setLoading(false);
-                    }, 1000); // Adjust the delay (ms) as needed
-                  } else {
-                    debouncedSearch(value);
-                  }
+                  setSearchText(e.target.value);
+                  setPagination((prev) => ({ ...prev, current: 1 }));
                 }}
                 prefix={<Search size={18} className="text-gray-400" />}
                 allowClear
@@ -520,28 +475,17 @@ const CustomersList = () => {
             <div className="flex flex-wrap gap-3">
               <Select
                 placeholder="Select Status"
-                value={filters.filterByStatus || undefined}
+                value={filters.filterByStatus}
                 onChange={async (value) => {
-                  const newStatusFilter = value || "";
+                  const newStatusFilter = value || "all";
                   setFilters((prev) => ({
                     ...prev,
                     filterByStatus: newStatusFilter,
                   }));
-
-                  setLoading(true);
-                  await getCustomers(
-                    1,
-                    10,
-                    searchText,
-                    filters.sortField,
-                    filters.sortOrder,
-                    newStatusFilter
-                  );
-                  setLoading(false);
                 }}
                 style={{ width: 140 }}
                 size="large"
-                allowClear
+                // allowClear
                 className="shadow-lg"
               >
                 <Option value="all">All</Option>
@@ -584,19 +528,19 @@ const CustomersList = () => {
             <Table
               dataSource={customers}
               columns={columns}
-              rowKey="userId"
+              rowKey="customerId"
               loading={loading}
               pagination={{
                 current: pagination.current,
                 pageSize: pagination.pageSize,
-                total: customers?.length || 0,
+                total: totalCustomers || 0,
                 showTotal: (total, range) =>
                   `${range[0]}-${range[1]} of ${total} customers`,
                 showSizeChanger: true,
                 showQuickJumper: true,
                 pageSizeOptions: ["5", "10", "20", "50", "100"],
                 onChange: (page, pageSize) => {
-                  setPagination({ current: page, pageSize: pageSize || 5 });
+                  setPagination({ current: page, pageSize: pageSize || 10 });
                 },
               }}
               scroll={{ x: 1000 }}

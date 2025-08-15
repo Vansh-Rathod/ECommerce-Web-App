@@ -70,17 +70,16 @@ import {
   MakeUserActive,
   ChangeUser2FAStatus,
 } from "../../services/UserApiHelperService";
+import { ApproveSeller, RejectSeller } from "../../services/SellerApiHelperService";
 
 const UsersList = () => {
-  const userController = import.meta.env.VITE_USER_CONTROLLER;
-  const sellerController = import.meta.env.VITE_SELLER_CONTROLLER;
 
   const [users, setUsers] = useState<any>([]);
   const [totalUsers, setTotalUsers] = useState<number>(0);
 
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [pagination, setPagination] = useState({ current: 1, pageSize: 5 });
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
   const [searchText, setSearchText] = useState("");
   const [filters, setFilters] = useState({
     sortField: "fullname",
@@ -124,359 +123,9 @@ const UsersList = () => {
       } finally {
         setLoading(false); // Stop loading after API call
       }
-    }, 1000);
+    }, 1500);
     return () => clearTimeout(handler);
   }, [pagination, searchText, filters, dateRange]);
-
-  // Get all users
-  // const getUsers = async (
-  //   pageNumber = 1,
-  //   pageSize = 10,
-  //   searchText: string,
-  //   sortField: string,
-  //   sortOrder: string,
-  //   fromDate?: string | null,
-  //   toDate?: string | null
-  // ): Promise<CommonResponse<any>> => {
-  //   // setLoading(true);
-  //   try {
-  //     const response = await api.get(`${userController}/users`, {
-  //       params: {
-  //         pageNumber,
-  //         pageSize,
-  //         searchText,
-  //         sortField,
-  //         sortOrder,
-  //         fromDate,
-  //         toDate,
-  //       },
-  //     });
-
-  //     if (!response.data) {
-  //       // message.error("Network Error. Something went wrong while establishing connection with server");
-  //       return {
-  //         success: false,
-  //         error:
-  //           "Network Error. Something went wrong while establishing connection with server",
-  //       };
-  //     }
-
-  //     if (response.data.status != 200) {
-  //       // message.error("User not found")
-  //       return { success: false, error: "No users found" };
-  //     }
-
-  //     const usersResponse = response.data.data;
-  //     if (!usersResponse) {
-  //       // message.error(response.data.message);
-  //       return { success: false, error: response.data.message };
-  //     }
-
-  //     const usersData = response.data.data.users;
-  //     const totalUsersData = response.data.data.totalUsers;
-  //     // setUsers(usersData);
-  //     // setTotalUsers(totalUsersData);
-
-  //     return {
-  //       success: true,
-  //       data: { users: usersData, totalUsers: totalUsersData },
-  //     };
-  //   } catch (error) {
-  //     console.error("Something went wrong while fetching users: ", error);
-  //     return {
-  //       success: false,
-  //       error: "Something went wrong while fetching users",
-  //     };
-  //   } finally {
-  //     // setLoading(false);
-  //     console.log("getUsers API call completed");
-  //   }
-  // };
-
-  // Get user by userId
-  // const getUserById = async (userId: string): Promise<CommonResponse<any>> => {
-  //   if (userId) {
-  //     // console.log("User ID: ", userId);
-  //     // setLoading(true);
-  //     try {
-  //       const response = await api.get(`/${userController}/${userId}`);
-
-  //       if (!response.data) {
-  //         // message.error("Network Error. Something went wrong while establishing connection with server");
-  //         return {
-  //           success: false,
-  //           error:
-  //             "Network Error. Something went wrong while establishing connection with server",
-  //         };
-  //       }
-
-  //       // setSelectedProduct(response.data.data);
-  //       if (response.data.status != 200) {
-  //         // message.error("User not found")
-  //         return { success: false, error: "User not found" };
-  //       }
-
-  //       const userByIdData = response.data.data;
-  //       if (!userByIdData) {
-  //         // message.error(response.data.message);
-  //         return { success: false, error: response.data.message };
-  //       }
-
-  //       return { success: true, data: userByIdData };
-  //     } catch (error) {
-  //       // message.error("Something went wrong while user details");
-  //       console.error(
-  //         "Something went wrong while fetching user details: ",
-  //         error
-  //       );
-  //       return {
-  //         success: false,
-  //         error: "Something went wrong while fetching user details",
-  //       };
-  //     } finally {
-  //       // setLoading(false);
-  //       console.log("getUserById API call completed");
-  //     }
-  //   } else {
-  //     console.log("User Id not found");
-  //     return { success: false, error: "User Id not found" };
-  //   }
-  // };
-
-  // Delete user by userId
-  // const deleteUser = async (userId: string): Promise<CommonResponse<any>> => {
-  //   if (userId) {
-  //     // console.log("User ID: ", userId);
-  //     // setLoading(true);
-  //     try {
-  //       const response = await api.delete(`/${userController}/${userId}`);
-
-  //       if (!response.data) {
-  //         // message.error("Network Error. Something went wrong while establishing connection with server");
-  //         return {
-  //           success: false,
-  //           error:
-  //             "Network Error. Something went wrong while establishing connection with server",
-  //         };
-  //       }
-
-  //       // setSelectedProduct(response.data.data);
-  //       if (response.data.status != 200) {
-  //         // message.error("User not found")
-  //         return { success: false, error: response.data.message };
-  //       }
-
-  //       return {
-  //         success: true,
-  //         data: response.data.data,
-  //         message: response.data.message,
-  //       };
-  //     } catch (error) {
-  //       // message.error("Something went wrong while user details");
-  //       console.error("Something went wrong while deleting user: ", error);
-  //       return {
-  //         success: false,
-  //         error: "Something went wrong while deleting user",
-  //       };
-  //     } finally {
-  //       // setLoading(false);
-  //       console.log("deleteUser API call completed");
-  //     }
-  //   } else {
-  //     console.log("User Id not found");
-  //     return { success: false, error: "User Id not found" };
-  //   }
-  // };
-
-  // Make user inactive
-  // const deactivateUser = async (
-  //   userId: string
-  // ): Promise<CommonResponse<any>> => {
-  //   if (userId) {
-  //     // console.log("User ID: ", userId);
-  //     // setLoading(true);
-  //     try {
-  //       const response = await api.put(`/${userController}/inactive/${userId}`);
-
-  //       if (!response.data) {
-  //         // message.error("Network Error. Something went wrong while establishing connection with server");
-  //         return {
-  //           success: false,
-  //           error:
-  //             "Network Error. Something went wrong while establishing connection with server",
-  //         };
-  //       }
-
-  //       // setSelectedProduct(response.data.data);
-  //       if (response.data.status != 200) {
-  //         // message.error("User not found")
-  //         return { success: false, error: response.data.message };
-  //       }
-
-  //       return {
-  //         success: true,
-  //         data: response.data.data,
-  //         message: response.data.message,
-  //       };
-  //     } catch (error) {
-  //       // message.error("Something went wrong while user details");
-  //       console.error("Something went wrong while deactivating user: ", error);
-  //       return {
-  //         success: false,
-  //         error: "Something went wrong while deactivating user",
-  //       };
-  //     } finally {
-  //       // setLoading(false);
-  //       console.log("inactivateUser API call completed");
-  //     }
-  //   } else {
-  //     console.log("User Id not found");
-  //     return { success: false, error: "User Id not found" };
-  //   }
-  // };
-
-  // Make user active
-  // const activateUser = async (userId: string): Promise<CommonResponse<any>> => {
-  //   if (userId) {
-  //     // console.log("User ID: ", userId);
-  //     // setLoading(true);
-  //     try {
-  //       const response = await api.put(`/${userController}/active/${userId}`);
-
-  //       if (!response.data) {
-  //         // message.error("Network Error. Something went wrong while establishing connection with server");
-  //         return {
-  //           success: false,
-  //           error:
-  //             "Network Error. Something went wrong while establishing connection with server",
-  //         };
-  //       }
-
-  //       // setSelectedProduct(response.data.data);
-  //       if (response.data.status != 200) {
-  //         // message.error("User not found")
-  //         return { success: false, error: response.data.message };
-  //       }
-
-  //       return {
-  //         success: true,
-  //         data: response.data.data,
-  //         message: response.data.message,
-  //       };
-  //     } catch (error) {
-  //       // message.error("Something went wrong while user details");
-  //       console.error("Something went wrong while activating user: ", error);
-  //       return {
-  //         success: false,
-  //         error: "Something went wrong while activating user",
-  //       };
-  //     } finally {
-  //       // setLoading(false);
-  //       console.log("activateUser API call completed");
-  //     }
-  //   } else {
-  //     console.log("User Id not found");
-  //     return { success: false, error: "User Id not found" };
-  //   }
-  // };
-
-  // Approve user
-  const approveSeller = async (
-    sellerId: string
-  ): Promise<CommonResponse<any>> => {
-    if (sellerId) {
-      // console.log("Seller ID: ", sellerId);
-      // setLoading(true);
-      try {
-        const response = await api.post(
-          `/${sellerController}/approve-seller/${sellerId}`
-        );
-
-        if (!response.data) {
-          // message.error("Network Error. Something went wrong while establishing connection with server");
-          return {
-            success: false,
-            error:
-              "Network Error. Something went wrong while establishing connection with server",
-          };
-        }
-
-        // setSelectedProduct(response.data.data);
-        if (response.data.status != 200) {
-          // message.error("User not found")
-          return { success: false, error: response.data.message };
-        }
-
-        return {
-          success: true,
-          data: response.data.data,
-          message: response.data.message,
-        };
-      } catch (error) {
-        // message.error("Something went wrong while user details");
-        console.error("Something went wrong while approving seller: ", error);
-        return {
-          success: false,
-          error: "Something went wrong while approving seller",
-        };
-      } finally {
-        // setLoading(false);
-        console.log("approveSeller API call completed");
-      }
-    } else {
-      console.log("Seller Id not found");
-      return { success: false, error: "Seller Id not found" };
-    }
-  };
-
-  // Approve user
-  const rejectSeller = async (
-    sellerId: string
-  ): Promise<CommonResponse<any>> => {
-    if (sellerId) {
-      // console.log("Seller ID: ", sellerId);
-      // setLoading(true);
-      try {
-        const response = await api.delete(
-          `/${sellerController}/reject-seller/${sellerId}`
-        );
-
-        if (!response.data) {
-          // message.error("Network Error. Something went wrong while establishing connection with server");
-          return {
-            success: false,
-            error:
-              "Network Error. Something went wrong while establishing connection with server",
-          };
-        }
-
-        // setSelectedProduct(response.data.data);
-        if (response.data.status != 200) {
-          // message.error("User not found")
-          return { success: false, error: response.data.message };
-        }
-
-        return {
-          success: true,
-          data: response.data.data,
-          message: response.data.message,
-        };
-      } catch (error) {
-        // message.error("Something went wrong while user details");
-        console.error("Something went wrong while rejecting seller: ", error);
-        return {
-          success: false,
-          error: "Something went wrong while rejecting seller",
-        };
-      } finally {
-        // setLoading(false);
-        console.log("rejectSeller API call completed");
-      }
-    } else {
-      console.log("Seller Id not found");
-      return { success: false, error: "Seller Id not found" };
-    }
-  };
 
   // Statistics calculation
   const stats = {
@@ -531,23 +180,7 @@ const UsersList = () => {
     return { text: "N/A", color: "text-gray-600 bg-gray-50" };
   };
 
-  // // CLear filters button
-  // const clearFilters = () => {
-  //   if (
-  //     searchText !== "" ||
-  //     filters.sortField !== "fullname" ||
-  //     filters.sortOrder !== "asc"
-  //   ) {
-  //     setSearchText("");
-  //     setFilters({
-  //       sortField: "fullname",
-  //       sortOrder: "asc",
-  //     });
-  //     setPagination(prev => ({ ...prev, current: 1 }));
-  //   }
-  // };
-
-  // CLear filters button
+  // Clear filters button
   const clearFilters = () => {
     const isFiltersActive =
       searchText !== "" ||
@@ -562,7 +195,7 @@ const UsersList = () => {
         sortOrder: "asc",
       });
       setDateRange(null); // reset dateRange
-      setPagination((prev) => ({ ...prev, current: 1 }));
+      setPagination((prev) => ({ ...prev, current: 1, pageSize: 10 }));
     }
   };
 
@@ -582,23 +215,20 @@ const UsersList = () => {
       message.error(userByIdData.error);
       return;
     }
-    if (userByIdData !== null) {
+    if (userByIdData !== null && userByIdData.data !== null) {
       try {
         setViewUser(userByIdData.data);
         setIsViewModalVisible(true);
       } catch (error) {
-        notification.error({
-          message: "Error",
-          description: "Failed to fetch user details. Please try again.",
-        });
+        console.log("Error: ", error);
+        message.error("Failed to fetch user details. Please try again.");
       } finally {
         setLoading(false);
       }
     } else {
-      notification.error({
-        message: "Error",
-        description: "Failed to get user data.",
-      });
+      setLoading(false);
+      console.log(userByIdData.error);
+      message.error(userByIdData.error);
     }
   };
 
@@ -607,41 +237,41 @@ const UsersList = () => {
     if (user) {
       // Edit user click
       setLoading(true);
-      try {
-        // Fetch detailed product info if needed
-        const response = await api.get(`/user/${user.userId}`);
-        const userByIdData = response.data.data;
-        setSelectedUser(userByIdData);
 
-        form.setFieldsValue({
-          name: userByIdData.name,
-          email: userByIdData.email,
-          storeName: userByIdData.storeName || "",
-          city: userByIdData.city || "",
-          isApproved: userByIdData.isApproved || false,
-          sellerProfileStatus: userByIdData.sellerProfileStatus || false,
-          customerProfileStatus: userByIdData.customerProfileStatus || false,
-        });
-        setIsModalVisible(true);
-      } catch (error) {
-        console.error("Failed to fetch user details:", error);
-        // setSelectedProduct(product);
-        // form.setFieldsValue({
-        //   name: product.name,
-        //   description: product.description,
-        //   price: product.price,
-        //   stockQuantity: product.stockQuantity,
-        //   isActive: product.isActive,
-        // });
-        notification.error({
-          message: "Error",
-          description: "Failed to fetch user details. Please try again.",
-        });
-      } finally {
+      const userByIdData = await GetUserById(user.userId);
+      if (!userByIdData.success) {
+        message.error(userByIdData.error);
+        return;
+      }
+
+      if (userByIdData !== null && userByIdData.data !== null) {
+        try {
+          setSelectedUser(userByIdData.data);
+
+          form.setFieldsValue({
+            name: userByIdData.data.name,
+            email: userByIdData.data.email,
+            storeName: userByIdData.data.storeName || "",
+            city: userByIdData.data.city || "",
+            isApproved: userByIdData.data.isApproved || false,
+            sellerProfileStatus: userByIdData.data.sellerProfileStatus || false,
+            customerProfileStatus:
+              userByIdData.data.customerProfileStatus || false,
+          });
+          setIsModalVisible(true);
+        } catch (error) {
+          console.error("Failed to fetch user details: ", error);
+          message.error("Failed to fetch user details. Please try again.");
+        } finally {
+          setLoading(false);
+        }
+      } else {
         setLoading(false);
+        console.log(userByIdData.error);
+        message.error(userByIdData.error);
       }
     } else {
-      // Add product click
+      // Add User click
       setSelectedUser(null);
       form.resetFields();
       form.setFieldsValue({
@@ -750,7 +380,7 @@ const UsersList = () => {
   // Handle delete product
   const handleDelete = async (user: any) => {
     setActionLoading(user.userId);
-    console.log("userData: ", user);
+    // console.log("userData: ", user);
     const userByIdData = await GetUserById(user.userId);
     if (!userByIdData.success) {
       message.error(userByIdData.error);
@@ -798,7 +428,7 @@ const UsersList = () => {
   // Handle seller approval
   const handleApproveSeller = async (user: any) => {
     setActionLoading(user.userId);
-    console.log("userData: ", user);
+    // console.log("userData: ", user);
     const userByIdResult = await GetUserById(user.userId);
     if (!userByIdResult.success) {
       message.error(userByIdResult.error);
@@ -810,7 +440,7 @@ const UsersList = () => {
       userByIdResult.data.sellerId !== null
     ) {
       try {
-        const result = await approveSeller(user.sellerId);
+        const result = await ApproveSeller(user.sellerId);
         if (!result.success) {
           message.error(result.error);
           return;
@@ -820,7 +450,7 @@ const UsersList = () => {
         const fromDate = dateRange?.[0] ? dateRange[0].toISOString() : null;
         const toDate = dateRange?.[1] ? dateRange[1].toISOString() : null;
 
-        // Refresh the products list
+        // Refresh the sellers list
         const refreshedUsers = await GetUsers(
           pagination.current,
           pagination.pageSize,
@@ -850,7 +480,7 @@ const UsersList = () => {
   // Handle seller rejection
   const handleRejectSeller = async (user: any) => {
     setActionLoading(user.userId);
-    console.log("userData: ", user);
+    // console.log("userData: ", user);
     const userByIdResult = await GetUserById(user.userId);
     if (!userByIdResult.success) {
       message.error(userByIdResult.error);
@@ -862,7 +492,7 @@ const UsersList = () => {
       userByIdResult.data.sellerId !== null
     ) {
       try {
-        const result = await rejectSeller(user.sellerId);
+        const result = await RejectSeller(user.sellerId);
         if (!result.success) {
           message.error(result.error);
           return;
@@ -910,50 +540,56 @@ const UsersList = () => {
 
     setActionLoading(user.userId);
 
-    try {
-      let result: CommonResponse<any>;
+    if (userByIdData !== null && userByIdData.data !== null) {
+      try {
+        let result: CommonResponse<any>;
 
-      if (user.sellerProfileStatus || user.customerProfileStatus) {
-        // Deactivate user
-        result = await MakeUserInactive(user.userId);
-      } else {
-        // Activate user
-        result = await MakeUserActive(user.userId);
+        if (user.sellerProfileStatus || user.customerProfileStatus) {
+          // Deactivate user
+          result = await MakeUserInactive(user.userId);
+        } else {
+          // Activate user
+          result = await MakeUserActive(user.userId);
+        }
+
+        if (!result.success) {
+          message.error(result.error);
+          return;
+        }
+
+        message.success(result.message);
+
+        const fromDate = dateRange?.[0] ? dateRange[0].toISOString() : null;
+        const toDate = dateRange?.[1] ? dateRange[1].toISOString() : null;
+
+        // Refresh the users list
+        const refreshedUsers = await GetUsers(
+          pagination.current,
+          pagination.pageSize,
+          searchText,
+          filters.sortField,
+          filters.sortOrder,
+          fromDate,
+          toDate
+        );
+
+        if (!refreshedUsers.success) {
+          message.error(refreshedUsers.error);
+          return;
+        }
+
+        setUsers(refreshedUsers.data.users);
+        setTotalUsers(refreshedUsers.data.totalUsers);
+      } catch (error) {
+        console.error("Failed to toggle user status:", error);
+        message.error("Failed to toggle user status. Please try again.");
+      } finally {
+        setActionLoading(null);
       }
-
-      if (!result.success) {
-        message.error(result.error);
-        return;
-      }
-
-      message.success(result.message);
-
-      const fromDate = dateRange?.[0] ? dateRange[0].toISOString() : null;
-      const toDate = dateRange?.[1] ? dateRange[1].toISOString() : null;
-
-      // Refresh the users list
-      const refreshedUsers = await GetUsers(
-        pagination.current,
-        pagination.pageSize,
-        searchText,
-        filters.sortField,
-        filters.sortOrder,
-        fromDate,
-        toDate
-      );
-
-      if (!refreshedUsers.success) {
-        message.error(refreshedUsers.error);
-        return;
-      }
-
-      setUsers(refreshedUsers.data.users);
-      setTotalUsers(refreshedUsers.data.totalUsers);
-    } catch (error) {
-      console.error("Failed to toggle user status:", error);
-      message.error("Failed to toggle user status. Please try again.");
-    } finally {
+    } else {
       setActionLoading(null);
+      console.log(userByIdData.error);
+      message.error(userByIdData.error);
     }
   };
 
@@ -1241,7 +877,7 @@ const UsersList = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
             <Statistic
               title="Total Users"
               value={stats.totalUsers}
@@ -1249,7 +885,7 @@ const UsersList = () => {
               valueStyle={{ color: "#1890ff" }}
             />
           </Card>
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-lg">
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
             <Statistic
               title="Active Sellers"
               value={stats.activeSellers}
@@ -1257,7 +893,7 @@ const UsersList = () => {
               valueStyle={{ color: "#52c41a" }}
             />
           </Card>
-          <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 shadow-lg">
+          <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-gray-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
             <Statistic
               title="Customers"
               value={stats.totalCustomers}
@@ -1265,7 +901,7 @@ const UsersList = () => {
               valueStyle={{ color: "#8c8c8c" }}
             />
           </Card>
-          <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 shadow-lg">
+          <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
             <Statistic
               title="Pending Approvals"
               value={stats.pendingApprovals}
@@ -1363,7 +999,7 @@ const UsersList = () => {
                 showQuickJumper: true,
                 pageSizeOptions: ["5", "10", "20", "50", "100"],
                 onChange: (page, pageSize) => {
-                  setPagination({ current: page, pageSize: pageSize || 5 });
+                  setPagination({ current: page, pageSize: pageSize || 10 });
                 },
               }}
               scroll={{ x: 1000 }}
