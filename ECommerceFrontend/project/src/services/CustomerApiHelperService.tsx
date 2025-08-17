@@ -157,7 +157,7 @@ export const MakeCustomerInactive = async (
   customerId: string
 ): Promise<CommonResponse<any>> => {
   // console.log("Customer ID: ", customerId);
-  if (customerId) {
+  if (!customerId) {
     console.error("Customer Id not found");
     return { success: false, error: "Customer Id not found" };
   }
@@ -199,7 +199,7 @@ export const MakeCustomerActive = async (
   customerId: string
 ): Promise<CommonResponse<any>> => {
   // console.log("Customer ID: ", customerId);
-  if (customerId) {
+  if (!customerId) {
     console.error("Customer Id not found");
     return { success: false, error: "Customer Id not found" };
   }

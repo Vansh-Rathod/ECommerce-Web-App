@@ -60,6 +60,7 @@ import {
   RejectSeller,
 } from "../../services/SellerApiHelperService";
 import { CommonResponse } from "../../Types";
+import { cities } from "../../Constants";
 
 const { Option } = Select;
 const { Title, Text } = Typography;
@@ -85,20 +86,6 @@ const SellersList = () => {
   const [form] = Form.useForm();
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [viewSeller, setViewSeller] = useState<any | null>(null);
-
-  const cities = [
-    "Ahmedabad",
-    "New York",
-    "Gandhinagar",
-    "Rajkot",
-    "Surat",
-    "Mumbai",
-    "Pune",
-    "Thane",
-    "Kanpur",
-    "Jaipur",
-    "Udaipur",
-  ];
 
   // Initial fetch of sellers
   useEffect(() => {
@@ -610,8 +597,11 @@ const SellersList = () => {
           </div>
           <div className="text-xs text-gray-500">
             Completed:{" "}
-            {record.sellerOrders?.filter((o: any) => o.status === 1)?.length ||
-              0}
+            {
+    record.sellerOrders?.filter((order: any) =>
+      order.orderItems.every((item: any) => item.status !== 0)
+    ).length || 0
+  }
           </div>
         </div>
       ),

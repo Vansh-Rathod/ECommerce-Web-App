@@ -73,7 +73,7 @@ namespace ECommerceWebApi.Controllers
         // GET SELLER PRODUCTS
         [Authorize(Roles = "Seller")]
         [HttpGet("seller-products")]
-        public async Task<IActionResult> GetSellerProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string sortField = "name", [FromQuery] string sortOrder = "asc", [FromQuery] string filterByPrice = "", [FromQuery] string filterByStatus = "all" )
+        public async Task<IActionResult> GetSellerProducts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string sortField = "name", [FromQuery] string sortOrder = "asc", [FromQuery] string filterByPrice = "all", [FromQuery] string filterByStatus = "all" )
         {
             var userId = User.FindFirst("userId")?.Value;
             if (!Guid.TryParse(userId, out var userGuid))

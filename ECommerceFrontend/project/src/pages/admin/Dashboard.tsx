@@ -95,7 +95,7 @@ const AdminDashboard = () => {
       
       <Row gutter={[16, 16]} className="mb-6">
         <Col xs={24} sm={12} lg={6}>
-          <Card>
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
             <Statistic 
               title="Total Revenue" 
               value={15420.50}
@@ -108,7 +108,7 @@ const AdminDashboard = () => {
         </Col>
         
         <Col xs={24} sm={12} lg={6}>
-          <Card>
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
             <Statistic 
               title="Total Orders" 
               value={254}
@@ -119,7 +119,7 @@ const AdminDashboard = () => {
         </Col>
         
         <Col xs={24} sm={12} lg={6}>
-          <Card>
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
             <Statistic 
               title="Total Customers" 
               value={1245}
@@ -130,7 +130,7 @@ const AdminDashboard = () => {
         </Col>
         
         <Col xs={24} sm={12} lg={6}>
-          <Card>
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
             <Statistic 
               title="Conversion Rate" 
               value={5.6}

@@ -227,6 +227,7 @@ namespace ECommerceWebApi.Controllers
                 OrderDate = orderResult.Data.OrderDate,
                 EstimatedDeliveryTime = orderResult.Data.EstimatedDeliveryTime,
                 TotalAmount = orderResult.Data.TotalAmount,
+                OrderStatus = orderResult.Data.Status,
 
                 OrderedItems = orderResult.Data?.OrderItems.Select(orderItemObj => new
                 {

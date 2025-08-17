@@ -10,11 +10,14 @@ import {
   Skeleton,
   Empty,
   notification,
+  Form,
+  message,
 } from "antd";
 import { ShoppingCart, Search, SlidersHorizontal } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import ProductCard from "../../components/product/ProductCard";
 import { useProduct } from "../../context/ProductContext";
+import { GetProducts } from "../../services/ProductApiHelperService";
 
 const { Search: SearchInput } = Input;
 const { Option } = Select;
@@ -33,20 +36,31 @@ interface Product {
 const ProductList = () => {
   // const { addItem } = useCart();
   // const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
   // const [searchQuery, setSearchQuery] = useState("");
   // const [category, setCategory] = useState("all");
   // const [sortBy, setSortBy] = useState("popular");
-
-  const { allActiveProducts, fetchAllActiveProducts } = useProduct();
-
+  
+  // const { allActiveProducts, fetchAllActiveProducts } = useProduct();
+  
+  const [products, setProducts] = useState<any>([]);
+  const [totalProducts, setTotalProducts] = useState<number>(0);
+  
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
+  const [searchText, setSearchText] = useState("");
   const [filters, setFilters] = useState({
-    searchText: "",
     sortField: "name",
     sortOrder: "asc",
-    priceFilter: "",
+    filterByPrice: "all",
+    filterByStatus: "active",
   });
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
+  const [form] = Form.useForm();
+  const [isViewModalVisible, setIsViewModalVisible] = useState(false);
+  const [viewProduct, setViewProduct] = useState<any | null>(null);
 
   // useEffect(() => {
   //   // Simulate API call to fetch products
@@ -80,28 +94,62 @@ const ProductList = () => {
   //   fetchProducts();
   // }, []);
 
+  // -----------------------------------------------------------------
+
+  // useEffect(() => {
+  //   // Simulate API call to fetch products
+  //   const fetchProducts = async () => {
+  //     setLoading(true);
+  //     try {
+  //       await fetchAllActiveProducts(
+  //         pagination.current,
+  //         pagination.pageSize,
+  //         filters.searchText,
+  //         filters.sortField,
+  //         filters.sortOrder,
+  //         filters.priceFilter
+  //       );
+  //     } catch (error) {
+  //       console.log("Failed to fetch products");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   fetchProducts();
+  // }, [pagination, filters]);
+
+  // Initial fetch of customers
   useEffect(() => {
-    // Simulate API call to fetch products
-    const fetchProducts = async () => {
-      setLoading(true);
+    setLoading(true);
+    const handler = setTimeout(async () => {
       try {
-        await fetchAllActiveProducts(
+        const result = await GetProducts(
           pagination.current,
           pagination.pageSize,
-          filters.searchText,
+          searchText,
           filters.sortField,
           filters.sortOrder,
-          filters.priceFilter
+          filters.filterByPrice,
+          filters.filterByStatus
         );
+
+        if (result.success) {
+          setProducts(result.data.products);
+          setTotalProducts(result.data.totalProducts);
+        } else {
+          setProducts([]);
+          setTotalProducts(0);
+        }
       } catch (error) {
-        console.log("Failed to fetch products");
+        message.error("Something went wrong while fetching products");
+        console.error("Something went wrong while fetching products: ", error);
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchProducts();
-  }, [pagination, filters]);
+    }, 1500);
+    return () => clearTimeout(handler);
+  }, [pagination, searchText, filters]);
 
   // const handleAddToCart = (product: Product) => {
   //   addItem({
@@ -145,14 +193,13 @@ const ProductList = () => {
         <div className="flex-1">
           <SearchInput
             placeholder="Search products..."
-            onChange={(e) =>
-              setFilters((prev) => ({
-                ...prev,
-                searchText: e.target.value,
-              }))
-            }
+            onChange={(e) => {
+              setSearchText(e.target.value);
+              setPagination((prev) => ({ ...prev, current: 1, pageSize: 10 }));
+            }}
             className="w-full"
             prefix={<Search size={18} className="text-gray-400" />}
+            allowClear
           />
         </div>
         <div className="flex gap-2 flex-wrap">
@@ -193,10 +240,10 @@ const ProductList = () => {
             </Col>
           ))}
         </Row>
-      ) : allActiveProducts.length > 0 ? (
+      ) : products.length > 0 ? (
         <>
           <Row gutter={[16, 16]}>
-            {allActiveProducts.map((product: Product) => (
+            {products.map((product: any) => (
               <Col xs={24} sm={12} md={8} lg={6} key={product.productId}>
                 <ProductCard
                   product={{
@@ -217,7 +264,7 @@ const ProductList = () => {
             <Pagination
               current={pagination.current}
               pageSize={pagination.pageSize}
-              total={allActiveProducts.length}
+              total={totalProducts}
               onChange={(page, pageSize) =>
                 setPagination((prev) => ({
                   ...prev,

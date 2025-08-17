@@ -28,6 +28,6 @@ namespace SharedReference.ProductDTOs
         public bool IsActive { get; set; } = true;
 
 
-        public IFormFile Image { get; set; }
+        public IFormFile? Image { get; set; }
     }
 }

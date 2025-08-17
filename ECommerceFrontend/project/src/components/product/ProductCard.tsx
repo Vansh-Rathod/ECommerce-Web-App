@@ -3,6 +3,9 @@ import { ShoppingCart, Heart } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "../../context/CartContext";
 import SkeletonImage from "antd/es/skeleton/Image";
+import { GetProductById } from "../../services/ProductApiHelperService";
+import { AddProductToCart } from "../../services/CartApiHelperService";
+import { responsiveArray } from "antd/es/_util/responsiveObserver";
 
 const { Text, Title } = Typography;
 
@@ -21,9 +24,10 @@ interface ProductCardProps {
 
 const ProductCard = ({ product }: ProductCardProps) => {
 
-  const {addItemToCart} = useCart();
+  const { addItemToCart } = useCart();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -33,18 +37,34 @@ const ProductCard = ({ product }: ProductCardProps) => {
     setIsFavorite(!isFavorite);
   };
 
-  const onAddToCart = async (productId: any, quantity: any) => {
-    setLoading(true);
-    try{
-      await addItemToCart(productId);
-      message.success("Item added to cart successfully");
+  const handleAddToCart = async (productId: any, quantity: number) => {
+    setActionLoading(true);
+    const productByIdData = await GetProductById(productId);
+    if (!productByIdData.success) {
+      message.error(productByIdData.error);
+      return;
     }
-    catch(error: any){
-      console.log("Failed to add item");
-      message.success("Failed to add item to cart");
+    if (productByIdData !== null && productByIdData.data !== null) {
+      try {
+        const result = await AddProductToCart(productId, quantity);
+        if (!result.success) {
+          message.error(result.error);
+          return;
+        }
+        message.success(result.message);
+      }
+      catch (error: any) {
+        console.log("Failed to add product to cart: ", error);
+        message.success("Failed to add product to cart");
+      }
+      finally {
+        setActionLoading(false);
+      }
     }
-    finally{
-      setLoading(false);
+    else {
+      setActionLoading(false);
+      console.log(productByIdData.error);
+      message.error(productByIdData.error);
     }
   }
 
@@ -65,9 +85,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
             <img
               alt={product.name}
               src={product.image}
-              className={`w-full h-full object-cover transition-all duration-500 ${
-                isHovered ? "scale-110" : "scale-100"
-              }`}
+              className={`w-full h-full object-cover transition-all duration-500 ${isHovered ? "scale-110" : "scale-100"
+                }`}
             />
           </div>
           <button
@@ -76,9 +95,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
           >
             <Heart
               size={16}
-              className={`${
-                isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"
-              }`}
+              className={`${isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"
+                }`}
             />
           </button>
         </div>
@@ -118,15 +136,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
         <Button
           type="primary"
-          icon={<ShoppingCart size={16} />}
+          icon={!actionLoading && <ShoppingCart size={16} />}
           onClick={(e) => {
             e.preventDefault();
-            onAddToCart(product.id, 1);
+            handleAddToCart(product.id, 1);
           }}
           className="w-full mt-2"
-          // loading={loading}
+        loading={actionLoading}
         >
-          Add to Cart
+          {actionLoading ? "Adding..." : "Add to Cart"}
         </Button>
       </div>
     </Card>

@@ -386,7 +386,7 @@ const UsersList = () => {
       message.error(userByIdData.error);
       return;
     }
-    if (userByIdData !== null) {
+    if (userByIdData !== null && userByIdData.data !== null) {
       try {
         const result = await DeleteUser(user.userId);
         if (!result.success) {
@@ -398,7 +398,7 @@ const UsersList = () => {
         const fromDate = dateRange?.[0] ? dateRange[0].toISOString() : null;
         const toDate = dateRange?.[1] ? dateRange[1].toISOString() : null;
 
-        // Refresh the products list
+        // Refresh the users list
         const refreshedUsers = await GetUsers(
           pagination.current,
           pagination.pageSize,
@@ -593,7 +593,7 @@ const UsersList = () => {
     }
   };
 
-  // Edit, Activate/Deactivate, View, Duplicate , Delete Prodcut Options
+  // Edit, Activate/Deactivate, View, Duplicate , Delete User Options
   const actionMenu = (record: any): MenuProps => {
     const isAdmin =
       record.customerProfileStatus === null &&

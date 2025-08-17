@@ -10,6 +10,7 @@ import {
   message,
   Tag,
   Modal,
+  Spin,
 } from "antd";
 import {
   ShoppingBag,
@@ -29,58 +30,73 @@ import { useAuth } from "../../context/AuthContext";
 import { useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
 import { useCustomer } from "../../context/CustomerContext";
+import { GetCustomerProfile } from "../../services/CustomerApiHelperService";
+import { GetOrderById } from "../../services/OrderApiHelperService";
+import { orderStatusMap, orderItemStatusMap } from "../../Constants";
 
 const { Title, Text } = Typography;
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const { customer, getCustomerProfile } = useCustomer();
+  // const { customer, getCustomerProfile } = useCustomer();
 
+  const [customer, setCustomer] = useState<any>();
+
+  const [loading, setLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
+
+  // Initial fetch of customer profile
   useEffect(() => {
-    const fetchCustomerProfile = async () => {
+    setLoading(true);
+    const handler = setTimeout(async () => {
       try {
-        const isCustomerFetched = await getCustomerProfile();
-        if (!isCustomerFetched) {
-          message.error("Something went wrong while fetching customer profile");
+        const result = await GetCustomerProfile();
+
+        if (result.success) {
+          setCustomer(result.data);
+        } else {
+          setCustomer([]);
         }
       } catch (error) {
-        console.error("Error while fethcing customer profile: ", error);
+        message.error("Something went wrong while fetching customer profile");
+        console.error("Something went wrong while fetching customer profile: ", error);
+      } finally {
+        setLoading(false);
       }
-    };
-
-    fetchCustomerProfile();
+    }, 1000);
+    return () => clearTimeout(handler);
   }, []);
 
-  // console.log("Customer: " + customer);
+  // Mock recent activity data
+  const recentActivity = [
+    {
+      action: "Viewed Product",
+      item: "Wireless Headphones",
+      time: "2 hours ago",
+    },
+    { action: "Added to Wishlist", item: "Smart Watch", time: "1 day ago" },
+    { action: "Reviewed", item: "Laptop Backpack", time: "3 days ago" },
+  ];
 
-  const totalOrders = customer?.customerOrders?.length || 0;
-
-  const totalApprovedOrder =
-    customer?.customerOrders?.filter((order: any) => order.orderStatus === 2)
-      .length || 0;
-
-  const pendingDeliveries = useMemo(() => {
-    return (
-      customer?.customerOrders?.filter((order: any) =>
+  // Statistics calculation
+  const stats = {
+    totalOrders: customer?.orders?.length || 0,
+    totalApprovedOrder:
+      customer?.orders?.filter((order: any) => order.orderStatus === 2)
+        .length || 0,
+    pendingDeliveries:
+      customer?.orders?.filter((order: any) =>
         [0, 1, 2].includes(order.orderStatus)
-      ).length || 0
-    );
-  }, [customer]);
-
-  const totalSpent = useMemo(() => {
-    return (
-      customer?.customerWallet?.transactions
+      ).length || 0,
+    totalSpent:
+      customer?.wallet?.transactions
         ?.filter((tx: any) => tx.transactionType === "Debit")
-        .reduce((acc: any, tx: any) => acc + tx.transactionAmount, 0) || 0
-    );
-  }, [customer]);
+        .reduce((acc: any, tx: any) => acc + tx.transactionAmount, 0) || 0,
 
-  const recentOrders = useMemo(() => {
-    return (
-      customer?.customerOrders
+    recentOrders:
+      customer?.orders
         ?.sort(
           (a: any, b: any) =>
             new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime()
@@ -94,18 +110,17 @@ const Dashboard = () => {
           estimatedDeliveryTime: order.estimatedDeliveryTime,
           orderDate: order.orderDate,
           orderItems: order.orderItems,
-        })) || []
-    );
-  }, [customer]);
-
-  const orderStatusMap = {
-    0: { label: "Pending", color: "text-warning-500" },
-    1: { label: "Partially Approved", color: "text-orange-500" },
-    2: { label: "Approved", color: "text-primary-500" },
-    3: { label: "Rejected", color: "text-red-500" },
-    4: { label: "Cancelled", color: "text-gray-500" },
-    5: { label: "Delivered", color: "text-success-500" },
+        })) || [],
   };
+
+  // const orderStatusMap: Record<number, { label: string; color: string; tagColor?: string }> = {
+  //   0: { label: "Pending", color: "text-warning-500", tagColor: "orange" },
+  //   1: { label: "Partially Approved", color: "text-orange-500", tagColor: "orange" },
+  //   2: { label: "Approved", color: "text-primary-500", tagColor: "green" },
+  //   3: { label: "Rejected", color: "text-red-500", tagColor: "red" },
+  //   4: { label: "Cancelled", color: "text-gray-500", tagColor: "default" },
+  //   5: { label: "Delivered", color: "text-success-500", tagColor: "success" },
+  // };
 
   // Map for order status
   const orderItemStatusMap = {
@@ -127,9 +142,34 @@ const Dashboard = () => {
     });
   };
 
-  const handleViewDetails = (order: any) => {
-    setSelectedOrder(order);
-    setModalVisible(true);
+  const handleViewDetails = async (order: any) => {
+    // setSelectedOrder(order);
+    // setModalVisible(true);
+
+    console.log("Item: ", order);
+
+
+    setLoading(true);
+    const orderByIdData = await GetOrderById(order.id);
+    if (!orderByIdData.success) {
+      message.error(orderByIdData.error);
+      return;
+    }
+    if (orderByIdData !== null && orderByIdData.data !== null) {
+      try {
+        setSelectedOrder(orderByIdData.data);
+        setModalVisible(true);
+      } catch (error) {
+        console.log("Error: ", error);
+        message.error("Failed to fetch order details. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
+      console.log(orderByIdData.error);
+      message.error(orderByIdData.error);
+    }
   };
 
   const onClose = () => {
@@ -137,18 +177,8 @@ const Dashboard = () => {
     setSelectedOrder(null);
   };
 
-  // Mock recent activity data
-  const recentActivity = [
-    {
-      action: "Viewed Product",
-      item: "Wireless Headphones",
-      time: "2 hours ago",
-    },
-    { action: "Added to Wishlist", item: "Smart Watch", time: "1 day ago" },
-    { action: "Reviewed", item: "Laptop Backpack", time: "3 days ago" },
-  ];
-
   return (
+    <Spin spinning={loading} size="large">
     <>
       <div>
         <div className="mb-6">
@@ -160,10 +190,10 @@ const Dashboard = () => {
 
         <Row gutter={[16, 16]} className="mb-6">
           <Col xs={24} sm={12} lg={6}>
-            <Card>
+            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
               <Statistic
                 title="Total Orders"
-                value={totalOrders}
+                value={stats.totalOrders}
                 prefix={
                   <ShoppingBag className="mr-2 text-primary-500" size={18} />
                 }
@@ -171,19 +201,19 @@ const Dashboard = () => {
             </Card>
           </Col>
           <Col xs={24} sm={12} lg={6}>
-            <Card>
+            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
               <Statistic
                 title="Pending Delivery"
-                value={pendingDeliveries}
+                value={stats.pendingDeliveries}
                 prefix={<Clock className="mr-2 text-warning-500" size={18} />}
               />
             </Card>
           </Col>
           <Col xs={24} sm={12} lg={6}>
-            <Card>
+            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
               <Statistic
                 title="Total Spent"
-                value={totalSpent}
+                value={stats.totalSpent}
                 precision={2}
                 prefix={
                   <CreditCard className="mr-2 text-success-500" size={18} />
@@ -202,10 +232,10 @@ const Dashboard = () => {
           </Card>
         </Col> */}
           <Col xs={24} sm={12} lg={6}>
-            <Card>
+            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 shadow-lg transition-transform duration-300 ease-in-out hover:scale-105 hover:shadow-xl cursor-pointer">
               <Statistic
                 title="Approved Orders"
-                value={totalApprovedOrder}
+                value={stats.totalApprovedOrder}
                 prefix={
                   <CheckCircle className="mr-2 text-error-500" size={18} />
                 }
@@ -221,7 +251,7 @@ const Dashboard = () => {
               extra={<Link to="/orders">View All</Link>}
             >
               <List
-                dataSource={recentOrders}
+                dataSource={stats.recentOrders}
                 renderItem={(item: any) => (
                   <List.Item
                     key={item.id}
@@ -249,10 +279,10 @@ const Dashboard = () => {
                       <br />
                       <Text
                         className={`text-xs ${
-                          orderStatusMap[item.status]?.color || "text-gray-400"
+                          orderStatusMap[item.status]?.tagColor || "text-gray-400"
                         }`}
                       >
-                        {orderStatusMap[item.status]?.label || "Unknown"}
+                        {orderStatusMap[item.status]?.text || "Unknown"}
                       </Text>
                     </div>
                   </List.Item>
@@ -305,7 +335,7 @@ const Dashboard = () => {
 
       {selectedOrder && (
         <Modal
-          title={`Order Details - ${selectedOrder.id}`}
+          title={`Order Details - ${selectedOrder.orderId}`}
           visible={modalVisible}
           onCancel={onClose}
           footer={null}
@@ -330,69 +360,74 @@ const Dashboard = () => {
             <div>
               <Text strong>Status:</Text>
               <Tag
-                color={orderStatusMap[selectedOrder.status]?.tagColor || "default"}
+                color={
+                  orderStatusMap[selectedOrder.orderStatus as keyof typeof orderStatusMap]?.color || "default"
+                }
                 className="ml-2"
               >
-                {orderStatusMap[selectedOrder.status]?.label || "Unknown"}
+                {orderStatusMap[selectedOrder.orderStatus as keyof typeof orderStatusMap]?.text || "Unknown"}
               </Tag>
             </div>
 
             <Divider orientation="left">Order Items</Divider>
 
-{selectedOrder.orderItems && selectedOrder.orderItems.length > 0 ? (
-            <List
-              dataSource={selectedOrder.orderItems}
-              renderItem={(item: any) => (
-                <List.Item
-                  actions={[
-                    <Tag
-                       color={
+            {selectedOrder.orderedItems && selectedOrder.orderedItems.length > 0 ? (
+              <List
+                dataSource={selectedOrder.orderedItems}
+                renderItem={(item: any) => (
+                  <List.Item
+                    actions={[
+                      <Tag
+                        color={
                           item.orderItemStatus === 0
                             ? "orange"
                             : item.orderItemStatus === 1
                             ? "green"
                             : "red"
                         }
-                    >
-                      {item.orderItemStatus === 0
+                      >
+                        {item.orderItemStatus === 0
                           ? "Pending"
                           : item.orderItemStatus === 1
                           ? "Approved"
                           : "Rejected"}
-                    </Tag>,
-                  ]}
-                >
-                  <List.Item.Meta
-                    title={`Product ID: ${item.productId}`}
-                    description={
-                      <div className="grid grid-cols-4 gap-4">
-                        <div>
-                          <Text strong>Name:</Text>
-                          <Text className="block">{item.productName}</Text>
+                      </Tag>,
+                    ]}
+                  >
+                    <List.Item.Meta
+                      title={`Product ID: ${item.productId}`}
+                      description={
+                        <div className="grid grid-cols-4 gap-4">
+                          <div>
+                            <Text strong>Name:</Text>
+                            <Text className="block">{item.productName}</Text>
+                          </div>
+                          <div>
+                            <Text strong>Quantity:</Text>
+                            <Text className="block">{item.orderedQuantity}</Text>
+                          </div>
+                          <div>
+                            <Text strong>Price:</Text>
+                            <Text className="block">
+                              ${item.priceAtPurchase.toFixed(2)}
+                            </Text>
+                          </div>
+                          <div>
+                            <Text strong>Total:</Text>
+                            <Text className="block">
+                              $
+                              {(item.orderedQuantity * item.priceAtPurchase).toFixed(
+                                2
+                              )}
+                            </Text>
+                          </div>
                         </div>
-                        <div>
-                          <Text strong>Quantity:</Text>
-                          <Text className="block">{item.quantity}</Text>
-                        </div>
-                        <div>
-                          <Text strong>Price:</Text>
-                          <Text className="block">
-                            ${item.priceAtPurchase.toFixed(2)}
-                          </Text>
-                        </div>
-                        <div>
-                          <Text strong>Total:</Text>
-                          <Text className="block">
-                            ${(item.quantity * item.priceAtPurchase).toFixed(2)}
-                          </Text>
-                        </div>
-                      </div>
-                    }
-                  />
-                </List.Item>
-              )}
-            />
-             ) : (
+                      }
+                    />
+                  </List.Item>
+                )}
+              />
+            ) : (
               <Text>No items found for this order.</Text>
             )}
 
@@ -400,13 +435,14 @@ const Dashboard = () => {
 
             <div className="text-right">
               <Text strong className="text-lg">
-                Order Total: ${selectedOrder.total.toFixed(2)}
+                Order Total: ${selectedOrder.totalAmount.toFixed(2)}
               </Text>
             </div>
           </div>
         </Modal>
       )}
     </>
+    </Spin>
   );
 };
 

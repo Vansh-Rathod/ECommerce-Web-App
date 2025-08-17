@@ -33,7 +33,7 @@ namespace ECommerceWebApi.Controllers
             }
 
             var customerResult = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
-            if (customerResult.Success)
+            if (!customerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Customer for Wallet Not found" });
             }

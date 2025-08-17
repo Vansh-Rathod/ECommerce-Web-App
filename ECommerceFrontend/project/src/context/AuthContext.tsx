@@ -161,13 +161,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return { success: false, error: "Network Error. Something went wrong while establishing connection with server" };
       }
 
-      if (response.data.status !== 200) {
-        return { success: false, error: "Invalid email or password" };
-      }
-
       const userData = response.data.data;
-
-      if (!userData) {
+      if (response.data.status !== 200 && !userData && userData === null) {
         return { success: false, error: response.data.message };
       }
 

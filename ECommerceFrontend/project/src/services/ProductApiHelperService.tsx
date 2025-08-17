@@ -124,7 +124,7 @@ export const GetProductById = async (
   productId: string
 ): Promise<CommonResponse<any>> => {
   // console.log("Product ID: ", productId);
-  if (productId) {
+  if (!productId) {
     console.error("Product Id not found");
     return { success: false, error: "Product Id not found" };
   }
@@ -175,11 +175,19 @@ export const AddProduct = async (
   stockQuantity: number,
   imageFile: File
 ): Promise<CommonResponse<any>> => {
-  if (!name || !price || !stockQuantity || !imageFile) {
+  if (!name || price === null || stockQuantity === null || !imageFile) {
     console.log("Name, Price, StockQuantity & Image are required fields");
     return {
       success: false,
       error: "Name, Price, StockQuantity & Image are required fields",
+    };
+  }
+
+  if (price <= 0 || stockQuantity <= 0) {
+    console.log("Price & StockQuantity must be positive & greater than 0");
+    return {
+      success: false,
+      error: "Price & StockQuantity must be positive & greater than 0",
     };
   }
   try {
@@ -238,18 +246,26 @@ export const UpdateProduct = async (
   description: string,
   price: number,
   stockQuantity: number,
-  imageFile: File
+  imageFile?: File
 ): Promise<CommonResponse<any>> => {
   // console.log("ProductId ID: ", productId);
   if (!productId) {
     console.error("Product Id not found");
     return { success: false, error: "Product Id not found" };
   }
-  if (!name || !price || !stockQuantity || !imageFile) {
+  if (!name || price === null || stockQuantity === null) {
     console.log("Name, Price, StockQuantity & Image are required fields");
     return {
       success: false,
-      error: "Name, Price, StockQuantity & Image are required fields",
+      error: "Name, Price, & StockQuantity are required fields",
+    };
+  }
+
+  if (price <= 0 || stockQuantity <= 0) {
+    console.log("Price & StockQuantity must be positive & greater than 0");
+    return {
+      success: false,
+      error: "Price & StockQuantity must be positive & greater than 0",
     };
   }
   try {
@@ -259,7 +275,10 @@ export const UpdateProduct = async (
     formData.append("Description", description || "");
     formData.append("Price", price.toString());
     formData.append("StockQuantity", stockQuantity.toString());
-    formData.append("Image", imageFile);
+    // Append image only if it's a real File object
+    if (imageFile instanceof File) {
+      formData.append("Image", imageFile);
+    }
 
     // Send as multipart/form-data
     const response = await api.put(

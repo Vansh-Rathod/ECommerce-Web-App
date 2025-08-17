@@ -64,7 +64,8 @@ export const AddProductToCart = async (
       };
     }
 
-    if (response.data.status !== 200) {
+    const addToCartData = response.data.data
+    if (response.data.status !== 200 && !addToCartData && addToCartData === null) {
       return { success: false, error: response.data.message };
     }
 

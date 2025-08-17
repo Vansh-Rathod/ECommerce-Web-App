@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using SharedReference;
 using SharedReference.Entities;
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -272,7 +273,7 @@ namespace DataAccessLayer.Repositories
                                 .Where(order => order.OrderItems.Any(item => item.SellerId == sellerId));
 
                 // Filter by status if provided
-                if(!string.IsNullOrWhiteSpace(filterByOrderStatus) && filterByOrderStatus.ToLower() != "all")
+                if(!string.IsNullOrWhiteSpace(filterByOrderStatus) && !filterByOrderStatus.Equals("all", StringComparison.OrdinalIgnoreCase))
                 {
                     Enum.TryParse<OrderStatus>(filterByOrderStatus, true, out var parsedStatus);
                     {
@@ -282,14 +283,34 @@ namespace DataAccessLayer.Repositories
                     }
                 }
 
-                // Filter by search text on customer name or product name
-                if(!string.IsNullOrWhiteSpace(searchText))
+                // Filter by search text on customer name or product name or order price
+                //if(!string.IsNullOrWhiteSpace(searchText))
+                //{
+                //    searchText = searchText.ToLower();
+                //    query = query.Where(order =>
+                //        order.TotalAmount.ToString().Contains(searchText) ||
+                //        order.Customer.User.FullName.ToLower().Contains(searchText) ||
+                //        order.OrderItems.Any(orderItemObj => orderItemObj.Product.Name.ToLower().Contains(searchText)));
+                //}
+
+                decimal searchValue;
+                if(decimal.TryParse(searchText, out searchValue))
                 {
-                    searchText = searchText.ToLower();
                     query = query.Where(order =>
-                        //order.Customer.User.FullName.ToLower().Contains(searchText) ||
-                        order.OrderItems.Any(orderItemObj => orderItemObj.Product.Name.ToLower().Contains(searchText)));
+                        order.TotalAmount == searchValue ||
+                        order.TotalAmount.ToString().Contains(searchText) ||
+                        order.Customer.User.FullName.ToLower().Contains(searchText) ||
+                        order.OrderItems.Any(o => o.Product.Name.ToLower().Contains(searchText))
+                    );
                 }
+                else
+                {
+                    query = query.Where(order =>
+                        order.Customer.User.FullName.ToLower().Contains(searchText) ||
+                        order.OrderItems.Any(o => o.Product.Name.ToLower().Contains(searchText))
+                    );
+                }
+
 
                 var totalRecords = await query.CountAsync();
 
@@ -382,8 +403,8 @@ namespace DataAccessLayer.Repositories
                 {
                     query = query.Where(orderItem =>
                         orderItem.Product.Name.Contains(searchText));
-                        //orderItem.Order.Customer.User.FullName.Contains(searchText) ||
-                        //orderItem.Order.Customer.User.Email.Contains(searchText));
+                    //orderItem.Order.Customer.User.FullName.Contains(searchText) ||
+                    //orderItem.Order.Customer.User.Email.Contains(searchText));
                 }
 
                 var totalRecords = await query.CountAsync();
@@ -563,7 +584,7 @@ namespace DataAccessLayer.Repositories
                     //await _emailNotificationService.SendCustomerOrderApprovedEmail(order.Customer.User, approvedItems);
 
                     // TODO: Make INVOCIE PDF Here and send it in attachments
-                    var htmlBodyResult = _emailTemplateService.GenerateOrderApprovedEmailTemplate(order.Customer.User.FullName, approvedItems,order.Id);
+                    var htmlBodyResult = _emailTemplateService.GenerateOrderApprovedEmailTemplate(order.Customer.User.FullName, approvedItems, order.Id);
                     await _emailService.SendEmailAsync(order.Customer.User.Email, "Your Order has been Approved", htmlBodyResult.Data, null);
                 }
                 else

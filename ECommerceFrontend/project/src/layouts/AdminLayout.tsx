@@ -25,7 +25,7 @@ const AdminLayout = () => {
           { key: "users", label: "Users", path: "/admin/users", icon: "Users" },
           { key: "customers", label: "Customers", path: "/admin/customers", icon: "Users" },
           { key: "sellers", label: "Sellers", path: "/admin/sellers", icon: "Users" },
-          // { key: "approvals", label: "Approvals", path: "/admin/approvals", icon: "Users" },
+          { key: "approvals", label: "Approvals", path: "/admin/approvals", icon: "Users" },
           // {
           //   key: "products",
           //   label: "Products",

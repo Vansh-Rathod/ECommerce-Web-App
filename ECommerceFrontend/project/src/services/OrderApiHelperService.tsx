@@ -157,7 +157,7 @@ export const GetOrderById = async (
   orderId: string
 ): Promise<CommonResponse<any>> => {
   // console.log("Order ID: ", orderId);
-  if (orderId) {
+  if (!orderId) {
     console.error("Order Id not found");
     return { success: false, error: "Order Id not found" };
   }
@@ -262,7 +262,7 @@ export const ApproveOrderItem = async (
   orderItemId: string
 ): Promise<CommonResponse<any>> => {
   // console.log("OrderItem ID: ", orderItemId);
-  if (orderItemId) {
+  if (!orderItemId) {
     console.error("OrderItem Id not found");
     return { success: false, error: "OrderItem Id not found" };
   }
@@ -310,7 +310,7 @@ export const RejectOrderItem = async (
   orderItemId: string
 ): Promise<CommonResponse<any>> => {
   // console.log("OrderItem ID: ", orderItemId);
-  if (orderItemId) {
+  if (!orderItemId) {
     console.error("OrderItem Id not found");
     return { success: false, error: "OrderItem Id not found" };
   }

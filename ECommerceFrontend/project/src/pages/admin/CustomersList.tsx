@@ -48,6 +48,7 @@ import api from "../../services/api";
 import {
   GetCustomerById,
   GetCustomers,
+  MakeCustomerActive,
   MakeCustomerInactive,
 } from "../../services/CustomerApiHelperService";
 import { CommonResponse } from "../../Types";
@@ -171,7 +172,7 @@ const CustomersList = () => {
 
   // Activate / Deactivate customer
   const toggleCustomerStatus = async (customer: any) => {
-    console.log("customer data:", customer);
+    // console.log("customer data:", customer);
     const customerByIdData = await GetCustomerById(customer.customerId);
     if (!customerByIdData.success) {
       message.error(customerByIdData.error);
@@ -187,7 +188,7 @@ const CustomersList = () => {
           result = await MakeCustomerInactive(customer.customerId);
         } else {
           // Activate Customer
-          result = await MakeCustomerInactive(customer.customerId);
+          result = await MakeCustomerActive(customer.customerId);
         }
 
         if (!result.success) {
