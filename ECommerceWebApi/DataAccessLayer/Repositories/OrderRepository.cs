@@ -107,7 +107,7 @@ namespace DataAccessLayer.Repositories
                 {
                     var product = cartItem.Product;
 
-                    product.StockQuantity -= cartItem.Quantity;
+                    //product.StockQuantity -= cartItem.Quantity;
 
                     var item = new OrderItem
                     {
@@ -442,6 +442,7 @@ namespace DataAccessLayer.Repositories
                 var item = await _dbContext.OrderItems
             .Include(orderItem => orderItem.Order)
                 .ThenInclude(order => order.OrderItems)
+                    .ThenInclude(orderItemObj => orderItemObj.Product)
             .Include(orderItem => orderItem.Product)
             .Include(orderItem => orderItem.Order.Customer)
                 .ThenInclude(customer => customer.User)
@@ -462,6 +463,10 @@ namespace DataAccessLayer.Repositories
                 }
 
                 item.Status = OrderItemStatus.Approved;
+
+                // Deduct the stock quantity of the product
+                item.Product.StockQuantity -= item.Quantity;
+
                 await _dbContext.SaveChangesAsync();
 
                 // Finalize order if all items are either approved or rejected
@@ -479,7 +484,6 @@ namespace DataAccessLayer.Repositories
             }
         }
 
-
         public async Task<CommonResponse<OrderItem>> RejectOrderItemAsync( Guid orderItemId )
         {
             try
@@ -488,6 +492,7 @@ namespace DataAccessLayer.Repositories
             .Include(oi => oi.Product)
             .Include(oi => oi.Order)
                 .ThenInclude(o => o.OrderItems)
+                    .ThenInclude(orderItemObj => orderItemObj.Product)
             .Include(oi => oi.Order.Customer)
                 .ThenInclude(c => c.Wallet)
             .Include(oi => oi.Order.Customer)
@@ -512,7 +517,7 @@ namespace DataAccessLayer.Repositories
                 item.Status = OrderItemStatus.Rejected;
 
                 // Restore stock quantity
-                item.Product.StockQuantity += item.Quantity;
+                //item.Product.StockQuantity += item.Quantity;
 
                 // Save changes to item and product
                 await _dbContext.SaveChangesAsync();
@@ -534,7 +539,6 @@ namespace DataAccessLayer.Repositories
             }
 
         }
-
 
         private async Task FinalizeOrderIfAllItemsProcessed( Order order )
         {

@@ -36,8 +36,6 @@ const { Title, Text } = Typography;
 const { Option } = Select;
 const { TabPane } = Tabs;
 
-
-
 // Status mapping functions
 const mapOrderStatus = (status: number): string => {
   switch (status) {
@@ -260,12 +258,27 @@ const SellerOrdersPage = () => {
       key: "orderDate",
       render: (date: string) => new Date(date).toLocaleDateString(),
     },
+    // {
+    //   title: "Total Amount",
+    //   dataIndex: "orderAmount",
+    //   key: "orderAmount",
+    //   render: (amount: number) => `$${amount.toFixed(2)}`,
+    // },
+
     {
       title: "Total Amount",
-      dataIndex: "orderAmount",
-      key: "orderAmount",
-      render: (amount: number) => `$${amount.toFixed(2)}`,
+      key: "totalAmount",
+      render: (_: any, record: any) => {
+        const totalAmount = record.orderItems?.reduce(
+          (sum: number, item: any) =>
+            sum + item.orderItemQuantity * item.priceAtPurchase,
+          0
+        );
+
+        return `$${totalAmount?.toFixed(2)}`;
+      },
     },
+
     // {
     //   title: "Status",
     //   key: "status",
@@ -282,11 +295,43 @@ const SellerOrdersPage = () => {
     //     );
     //   },
     // },
+
+    // {
+    //   title: "Status",
+    //   dataIndex: "orderStatus",
+    //   render: (orderStatus: number) => {
+    //     const cfg = orderStatusMap[orderStatus] || orderStatusMap[0];
+    //     return (
+    //       <Tag color={cfg.color} className="flex items-center gap-1">
+    //         {cfg.icon}
+    //         {cfg.text}
+    //       </Tag>
+    //     );
+    //   },
+    // },
+
     {
       title: "Status",
-      dataIndex: "orderStatus",
-      render: (orderStatus: number) => {
-        const cfg = orderStatusMap[orderStatus] || orderStatusMap[0];
+      key: "status",
+      render: (_: any, record: any) => {
+        const itemStatuses = record.orderItems?.map(
+          (item: any) => item.orderItemStatus
+        );
+
+        let finalStatus = 0; // Default: Pending
+
+        if (itemStatuses?.every((s: number) => s === 1)) {
+          finalStatus = 2; // Approved
+        } else if (itemStatuses?.every((s: number) => s === 2)) {
+          finalStatus = 3; // Rejected
+        } else if (itemStatuses?.some((s: number) => s === 1)) {
+          finalStatus = 1; // Partially Approved
+        } else {
+          finalStatus = 0; // Pending
+        }
+
+        const cfg = orderStatusMap[finalStatus];
+
         return (
           <Tag color={cfg.color} className="flex items-center gap-1">
             {cfg.icon}

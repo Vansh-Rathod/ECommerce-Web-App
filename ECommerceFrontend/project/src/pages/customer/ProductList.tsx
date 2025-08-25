@@ -62,64 +62,7 @@ const ProductList = () => {
   const [isViewModalVisible, setIsViewModalVisible] = useState(false);
   const [viewProduct, setViewProduct] = useState<any | null>(null);
 
-  // useEffect(() => {
-  //   // Simulate API call to fetch products
-  //   const fetchProducts = async () => {
-  //     setLoading(true);
-  //     try {
-  //       // Replace with actual API call
-  //       await new Promise(resolve => setTimeout(resolve, 800));
-
-  //       // Mock data
-  //       const mockProducts = Array.from({ length: 12 }, (_, i) => ({
-  //         id: `product-${i + 1}`,
-  //         name: `Product ${i + 1}`,
-  //         price: Math.floor(Math.random() * 100) + 10,
-  //         image: `https://picsum.photos/seed/${i + 1}/300/300`,
-  //         category: ['Electronics', 'Clothing', 'Home', 'Beauty'][Math.floor(Math.random() * 4)],
-  //         rating: Math.floor(Math.random() * 5) + 1,
-  //       }));
-
-  //       setProducts(mockProducts);
-  //     } catch (error) {
-  //       notification.error({
-  //         message: 'Error',
-  //         description: 'Failed to load products',
-  //       });
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchProducts();
-  // }, []);
-
-  // -----------------------------------------------------------------
-
-  // useEffect(() => {
-  //   // Simulate API call to fetch products
-  //   const fetchProducts = async () => {
-  //     setLoading(true);
-  //     try {
-  //       await fetchAllActiveProducts(
-  //         pagination.current,
-  //         pagination.pageSize,
-  //         filters.searchText,
-  //         filters.sortField,
-  //         filters.sortOrder,
-  //         filters.priceFilter
-  //       );
-  //     } catch (error) {
-  //       console.log("Failed to fetch products");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchProducts();
-  // }, [pagination, filters]);
-
-  // Initial fetch of customers
+  // Initial fetch of products
   useEffect(() => {
     setLoading(true);
     const handler = setTimeout(async () => {
@@ -151,34 +94,6 @@ const ProductList = () => {
     return () => clearTimeout(handler);
   }, [pagination, searchText, filters]);
 
-  // const handleAddToCart = (product: Product) => {
-  //   addItem({
-  //     id: product.productId,
-  //     name: product.name,
-  //     price: product.price,
-  //     image: product.image,
-  //   });
-
-  //   notification.success({
-  //     message: "Added to Cart",
-  //     description: `${product.name} has been added to your cart.`,
-  //     placement: "bottomRight",
-  //   });
-  // };
-
-  // const filteredProducts = products
-  //   .filter(
-  //     (product) =>
-  //       (category === "all" || product.category === category) &&
-  //       product.name.toLowerCase().includes(searchQuery.toLowerCase())
-  //   )
-  //   .sort((a, b) => {
-  //     if (sortBy === "price-low") return a.price - b.price;
-  //     if (sortBy === "price-high") return b.price - a.price;
-  //     return 0; // Default sort by popularity
-  //   });
-
-  // console.log("Active Products: " + allActiveProducts);
 
   return (
     <div className="section">

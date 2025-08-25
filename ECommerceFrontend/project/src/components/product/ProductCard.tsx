@@ -6,6 +6,7 @@ import SkeletonImage from "antd/es/skeleton/Image";
 import { GetProductById } from "../../services/ProductApiHelperService";
 import { AddProductToCart } from "../../services/CartApiHelperService";
 import { responsiveArray } from "antd/es/_util/responsiveObserver";
+import { useCommon } from "../../context/CommonContext";
 
 const { Text, Title } = Typography;
 
@@ -24,7 +25,7 @@ interface ProductCardProps {
 
 const ProductCard = ({ product }: ProductCardProps) => {
 
-  const { addItemToCart } = useCart();
+  const { GetTotalCartItems } = useCommon();
 
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
@@ -52,6 +53,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
           return;
         }
         message.success(result.message);
+
+        GetTotalCartItems(); // Refresh badge in the header
       }
       catch (error: any) {
         console.log("Failed to add product to cart: ", error);

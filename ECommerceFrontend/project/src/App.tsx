@@ -10,6 +10,7 @@ import { OrderProvider } from "./context/OrderContext";
 import { UserProvider } from "./context/UserContext";
 import { SellerProvider } from "./context/SellerContext";
 import { AdminProvider } from "./context/AdminContext";
+import { CommonProvider } from "./context/CommonContext";
 
 const App = () => {
   return (
@@ -22,23 +23,25 @@ const App = () => {
       }}
     >
       <AuthProvider>
-      <AdminProvider>
-        <UserProvider>
-          <CustomerProvider>
-          <SellerProvider>
-            <ProductProvider>
-              <CartProvider>
-                <WalletProvider>
-                  <OrderProvider>
-                    <AppRoutes />
-                  </OrderProvider>
-                </WalletProvider>
-              </CartProvider>
-            </ProductProvider>
-          </SellerProvider>
-          </CustomerProvider>
-        </UserProvider>
-      </AdminProvider>
+        {/* <AdminProvider>
+          <UserProvider>
+            <CustomerProvider>
+              <SellerProvider>
+                <ProductProvider>
+                  <CartProvider>
+                    <WalletProvider>
+                      <OrderProvider> */}
+                        <CommonProvider>
+                          <AppRoutes />
+                        </CommonProvider>
+                      {/* </OrderProvider>
+                    </WalletProvider>
+                  </CartProvider>
+                </ProductProvider>
+              </SellerProvider>
+            </CustomerProvider>
+          </UserProvider>
+        </AdminProvider> */}
       </AuthProvider>
     </ConfigProvider>
   );

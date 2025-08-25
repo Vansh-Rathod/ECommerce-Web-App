@@ -71,8 +71,11 @@ import {
   ChangeUser2FAStatus,
 } from "../../services/UserApiHelperService";
 import { ApproveSeller, RejectSeller } from "../../services/SellerApiHelperService";
+import { useAuth } from "../../context/AuthContext";
 
 const UsersList = () => {
+
+  const { user } = useAuth();
 
   const [users, setUsers] = useState<any>([]);
   const [totalUsers, setTotalUsers] = useState<number>(0);
@@ -1004,6 +1007,15 @@ const UsersList = () => {
               }}
               scroll={{ x: 1000 }}
               className="custom-table"
+              rowClassName={(record) => {
+                if (user?.id === record.userId) {
+                  if (user?.isAdmin && user?.roles.includes("admin")) {
+                    return "highlight-admin-row";
+                  }
+                  return "highlight-user-row";
+                }
+                return "";
+              }}
             />
           </Card>
         )}

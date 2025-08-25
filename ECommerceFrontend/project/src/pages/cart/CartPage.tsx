@@ -2,14 +2,15 @@ import { useState, useEffect } from 'react';
 import { Card, Table, InputNumber, Button, Empty, Typography, Divider, Tooltip, notification, message, Spin } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
-import { CartItem, useCart } from '../../context/CartContext';
 import { AddProductToCart, ClearCart, GetCart, RemoveProductFromCart } from '../../services/CartApiHelperService';
 import { GetProductById } from '../../services/ProductApiHelperService';
+import { useCommon } from '../../context/CommonContext';
 
 const { Title, Text } = Typography;
 
 const CartPage = () => {
   // const { items, totalPrice, clearCart, addItemToCart, removeItemFromCart, fetchCartItems } = useCart();
+  const { GetTotalCartItems } = useCommon();
   const navigate = useNavigate();
 
   const [cartItems, setCartItems] = useState<any>([]);
@@ -30,7 +31,7 @@ const CartPage = () => {
           setTotalCartItems(result.data.cartItems.length);
 
           // Calculate totals
-          const newTotal = cartItems.reduce((acc: number, item: any) =>
+          const newTotal = result.data.cartItems.reduce((acc: number, item: any) =>
             acc + (item.productPrice * item.cartItemQuantity), 0);
 
           // const newCount = cartItems.reduce((acc: number, item: any) => 
@@ -80,6 +81,8 @@ const CartPage = () => {
         }
         message.success(result.message);
 
+        GetTotalCartItems(); // Refresh badge in the header
+
         // Refresh the cart
         const refreshedCart = await GetCart();
 
@@ -95,7 +98,7 @@ const CartPage = () => {
         setTotalCartItems(refreshedCart.data.cartItems.length);
 
         // Calculate totals
-        const newTotal = cartItems.reduce((acc: number, item: any) =>
+        const newTotal = refreshedCart.data.cartItems.reduce((acc: number, item: any) =>
           acc + (item.productPrice * item.cartItemQuantity), 0);
 
         // const newCount = cartItems.reduce((acc: number, item: any) => 
@@ -134,6 +137,8 @@ const CartPage = () => {
         }
         message.success(result.message);
 
+        GetTotalCartItems(); // Refresh badge in the header
+
         // Refresh the cart
         const refreshedCart = await GetCart();
 
@@ -149,7 +154,7 @@ const CartPage = () => {
         setTotalCartItems(refreshedCart.data.cartItems.length);
 
         // Calculate totals
-        const newTotal = cartItems.reduce((acc: number, item: any) =>
+        const newTotal = refreshedCart.data.cartItems.reduce((acc: number, item: any) =>
           acc + (item.productPrice * item.cartItemQuantity), 0);
 
         // const newCount = cartItems.reduce((acc: number, item: any) => 
@@ -181,6 +186,7 @@ const CartPage = () => {
         return;
       }
       message.success(result.message);
+      GetTotalCartItems();  // Refresh badge in the header
       setCartItems([]);
     } catch (error) {
       console.error("Failed to clear cart: ", error);
@@ -319,7 +325,7 @@ const CartPage = () => {
               <div className="flex justify-between mb-2">
                 <Text>Shipping</Text>
                 {/* <Text>{totalPrice > 0 ? '$5.00' : '$0.00'}</Text> */}
-                <Text>{0}</Text>
+                <Text>${0}</Text>
               </div>
 
               <div className="flex justify-between mb-2">

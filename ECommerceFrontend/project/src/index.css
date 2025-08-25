@@ -33,3 +33,13 @@ body {
     @apply my-6;
   }
 }
+
+/* highlight for logged-in user */
+.highlight-user-row {
+  @apply bg-blue-50;
+}
+
+/* highlight for admin user */
+.highlight-admin-row {
+  @apply bg-yellow-50 border-l-4 border-yellow-400;
+}

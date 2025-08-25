@@ -41,7 +41,8 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
 import api from "../../services/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useCommon } from "../../context/CommonContext";
 
 const { Header: AntHeader } = Layout;
 const { Title } = Typography;
@@ -159,13 +160,19 @@ const Header = ({
 }: HeaderProps) => {
   const navigate = useNavigate();
   const { user, logout, activeRole, setActiveRole } = useAuth();
-  const { totalItems } = useCart();
+  const { totalCartItems, GetTotalCartItems } = useCommon();
 
   // Modal state
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(false);
   const [currentRole, setCurrentRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (activeRole === "customer") {
+      GetTotalCartItems(); // Refresh when switching to customer role
+    }
+  }, [activeRole]);
 
   // console.log(user)
 
@@ -904,7 +911,7 @@ const Header = ({
 
           {activeRole === "customer" && (
             <Link to="/cart">
-              <Badge count={totalItems} size="small">
+              <Badge count={totalCartItems} size="small">
                 <Button
                   type="text"
                   icon={<ShoppingCart size={20} className="text-gray-600" />}

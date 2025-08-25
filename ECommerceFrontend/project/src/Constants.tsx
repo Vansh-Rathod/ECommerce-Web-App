@@ -35,3 +35,25 @@ number,
 1: { color: "green", text: "Approved", icon: <ThumbsUp size={14} /> },
 2: { color: "red", text: "Rejected", icon: <ThumbsDown size={14} /> },
 };
+
+export const ShippingDefaultValues = {
+  first_name: "Vansh",
+  last_name: "Rathod",
+  email: "vansh@gmail.com",
+  phone: "1234567890",
+  address: "14 Siddeshwar Park, Nigam Road, Ghodasar, Ahmedabad",
+  address2: "14",
+  city: "Ahmedabad",
+  state: "Gujarat",
+  zip: "360050",
+  country: "India",
+  shipping_method: "standard",
+};
+
+export const PaymentDefaultValues = {
+  payment_method: "credit_card",
+  card_number: "6574 4783 1584 2349",
+  expiry: "06/45",
+  cvv: "451",
+  card_name: "VANSH RATHOD",
+};

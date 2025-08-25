@@ -208,12 +208,12 @@ const OrdersPage = () => {
                   rowKey="orderItemId"
                   columns={[
                     {
-                      title: 'Product ID',
-                      dataIndex: 'productId',
-                      key: 'productId',
-                      render: (productId: string) => (
-                        <Tooltip title={productId}>
-                          <Text>{productId.slice(0, 8)}...</Text>
+                      title: 'Product Name',
+                      dataIndex: 'productName',
+                      key: 'productName',
+                      render: (productName: string) => (
+                        <Tooltip title={productName}>
+                          <Text>{productName.slice(0, 20)}...</Text>
                         </Tooltip>
                       ),
                     },

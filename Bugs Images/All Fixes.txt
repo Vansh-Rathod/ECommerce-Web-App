@@ -1,0 +1,3 @@
+1. just think of the logic for delivery of the product (for the customer dashboard in orders page)
+2. Fix the summary cards in every role dashboard
+10. Fix the logic for Approve & Reject of ordered products based on the availbale stock (just disable the approve button if product stock is not available)

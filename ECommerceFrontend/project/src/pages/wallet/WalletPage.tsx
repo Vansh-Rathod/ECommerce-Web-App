@@ -66,28 +66,13 @@ const WalletPage = () => {
         }
       } catch (error) {
         message.error("Something went wrong while fetching wallet");
-        console.error("Something went wrong while fetching sellwalleters: ", error);
+        console.error("Something went wrong while fetching wallet: ", error);
       } finally {
         setLoading(false);
       }
     }, 1500);
     return () => clearTimeout(handler);
   }, []);
-
-  // useEffect(() => {
-  //   const fetchWallet = async () => {
-  //     setLoading(true);
-  //     try {
-  //       await getWallet();
-  //     } catch (error) {
-  //       console.log("Failed to fetch wallet");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchWallet();
-  // }, []);
 
   // Update transactions to use actual wallet data
   const transactions =

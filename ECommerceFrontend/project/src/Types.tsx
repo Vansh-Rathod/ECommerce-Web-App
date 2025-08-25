@@ -159,4 +159,26 @@ export interface PagedResponse<T> {
 //     cart?: Cart;
 //     product?: Product;
 //   }
+
+export interface ShippingData {
+  firstName: string,
+  lastName: string,
+  email: string,
+  phone: string,
+  address: string,
+  address2: string,
+  city: string,
+  state: string,
+  zip: string,
+  country: string,
+  shippingMethod: string,
+}
+
+export interface PaymentData {
+  paymentMethod: string,
+  cardNumber?: string;
+  expiry?: string;
+  cvv?: string;
+  cardName?: string;
+}
   
