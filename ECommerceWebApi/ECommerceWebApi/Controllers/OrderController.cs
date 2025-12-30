@@ -19,7 +19,7 @@ namespace ECommerceWebApi.Controllers
         private readonly ISellerRepository _sellerRepository;
 
 
-        public OrderController(IOrderRepository orderRepository, ICustomerRepository customerRepository, ISellerRepository sellerRepository)
+        public OrderController( IOrderRepository orderRepository, ICustomerRepository customerRepository, ISellerRepository sellerRepository )
         {
             _orderRepository = orderRepository;
             _customerRepository = customerRepository;
@@ -33,20 +33,20 @@ namespace ECommerceWebApi.Controllers
         public async Task<IActionResult> PlaceOrder()
         {
             var userId = User.FindFirst("userId")?.Value;
-            if (!Guid.TryParse(userId, out var userGuid))
+            if(!Guid.TryParse(userId, out var userGuid))
             {
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
             var customerResult = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
-            if (!customerResult.Success)
+            if(!customerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Customer Not found" });
             }
 
 
             var orderResult = await _orderRepository.PlaceOrderAsync(customerResult.Data.Id);
-            if (!orderResult.Success)
+            if(!orderResult.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Failed to place order" });
             }
@@ -90,20 +90,20 @@ namespace ECommerceWebApi.Controllers
             int year = filterByYear ?? DateTime.Now.Year;
 
             var userId = User.FindFirst("userId")?.Value;
-            if (!Guid.TryParse(userId, out var userGuid))
+            if(!Guid.TryParse(userId, out var userGuid))
             {
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
             var customerResult = await _customerRepository.GetCustomerByUserIdAsync(userGuid);
-            if (!customerResult.Success)
+            if(!customerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Customer Not found" });
             }
 
 
             var ordersResult = await _orderRepository.GetOrdersByCustomerIdAsync(customerResult.Data.Id, pageNumber, pageSize, searchText, year);
-            if (!ordersResult.Success || !ordersResult.Data.Items.Any())
+            if(!ordersResult.Success || !ordersResult.Data.Items.Any())
             {
                 return Ok(new APIResponse { Status = 404, Message = "Failed to fetch orders" });
             }
@@ -119,6 +119,9 @@ namespace ECommerceWebApi.Controllers
                 EstimatedDeliveryTime = orderObj.EstimatedDeliveryTime,
                 OrderStatus = orderObj.Status,
                 TotalAmount = orderObj.TotalAmount,
+                IsDelivered = orderObj.EstimatedDeliveryTime.HasValue
+    ? orderObj.EstimatedDeliveryTime.Value <= DateTime.UtcNow
+    : false,
 
                 OrderedItems = orderObj?.OrderItems.Select(orderItemObj => new
                 {
@@ -132,7 +135,7 @@ namespace ECommerceWebApi.Controllers
                     OrderedQuantity = orderItemObj?.Quantity,
                     PriceAtPurchase = orderItemObj?.PriceAtPurchase,
                     OrderItemStatus = orderItemObj?.Status
-                })
+                }),
 
             });
 
@@ -153,19 +156,19 @@ namespace ECommerceWebApi.Controllers
         public async Task<IActionResult> GetSellerOrders( [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "", [FromQuery] string filterByOrderStatus = "all" )
         {
             var userId = User.FindFirst("userId")?.Value;
-            if (!Guid.TryParse(userId, out var userGuid))
+            if(!Guid.TryParse(userId, out var userGuid))
             {
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
             var sellerResult = await _sellerRepository.GetSellerByUserIdAsync(userGuid);
-            if (!sellerResult.Success)
+            if(!sellerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Seller Not found" });
             }
 
             var ordersResult = await _orderRepository.GetOrdersBySellerIdAsync(sellerResult.Data.Id, pageNumber, pageSize, searchText, filterByOrderStatus);
-            if (!ordersResult.Success || !ordersResult.Data.Items.Any())
+            if(!ordersResult.Success || !ordersResult.Data.Items.Any())
             {
                 return Ok(new APIResponse { Status = 404, Message = "No Orders Found" });
             }
@@ -209,10 +212,10 @@ namespace ECommerceWebApi.Controllers
 
         [Authorize(Roles = "Admin,Seller,Customer")]
         [HttpGet("{orderId}")]
-        public async Task<IActionResult> GetOrder(Guid orderId)
+        public async Task<IActionResult> GetOrder( Guid orderId )
         {
             var orderResult = await _orderRepository.GetOrderByIdAsync(orderId);
-            if (!orderResult.Success)
+            if(!orderResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Order Not found" });
             }
@@ -254,19 +257,19 @@ namespace ECommerceWebApi.Controllers
         public async Task<IActionResult> GetPendingOrderItems( [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10, [FromQuery] string searchText = "" )
         {
             var userId = User.FindFirst("userId")?.Value;
-            if (!Guid.TryParse(userId, out var userGuid))
+            if(!Guid.TryParse(userId, out var userGuid))
             {
                 return Ok(new APIResponse { Status = 401, Message = "Token is Invalid or Forbidden. Cannot find User Id" });
             }
 
             var sellerResult = await _sellerRepository.GetSellerByUserIdAsync(userGuid);
-            if (!sellerResult.Success)
+            if(!sellerResult.Success)
             {
                 return Ok(new APIResponse { Status = 404, Message = "Seller Not found" });
             }
 
             var orderItemsResult = await _orderRepository.GetPendingOrderItemsBySellerAsync(sellerResult.Data.Id, pageNumber, pageSize, searchText);
-            
+
             if(!orderItemsResult.Success || !orderItemsResult.Data.Items.Any())
             {
                 return Ok(new APIResponse { Status = 404, Message = "No Pending Order Items Found" });
@@ -276,7 +279,7 @@ namespace ECommerceWebApi.Controllers
             {
                 OrderItemId = itemObj.Id,
                 OrderId = itemObj.OrderId,
-                
+
                 ProductId = itemObj.ProductId,
                 ProductName = itemObj.Product.Name,
 
@@ -308,10 +311,10 @@ namespace ECommerceWebApi.Controllers
 
         [Authorize(Roles = "Seller")]
         [HttpPut("approve/{orderItemId}")]
-        public async Task<IActionResult> ApproveOrderItem(Guid orderItemId)
+        public async Task<IActionResult> ApproveOrderItem( Guid orderItemId )
         {
             var orderItemResult = await _orderRepository.ApproveOrderItemAsync(orderItemId);
-            if (!orderItemResult.Success)
+            if(!orderItemResult.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Failed to approve order" });
             }
@@ -338,10 +341,10 @@ namespace ECommerceWebApi.Controllers
 
         [Authorize(Roles = "Seller")]
         [HttpPut("reject/{orderItemId}")]
-        public async Task<IActionResult> RejectOrderItem(Guid orderItemId)
+        public async Task<IActionResult> RejectOrderItem( Guid orderItemId )
         {
             var orderItemResult = await _orderRepository.RejectOrderItemAsync(orderItemId);
-            if (!orderItemResult.Success)
+            if(!orderItemResult.Success)
             {
                 return Ok(new APIResponse { Status = 400, Message = "Failed to reject order item" });
             }

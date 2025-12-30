@@ -12,6 +12,7 @@ namespace SharedReference
         public int PageSize { get; set; }
         public List<T> Items { get; set; }
         public int TotalRecords { get; set; }
+        public T? CustomeData { get; set; }
 
         public T? CustomField1 { get; set; }
         public T? CustomField2 { get; set; }

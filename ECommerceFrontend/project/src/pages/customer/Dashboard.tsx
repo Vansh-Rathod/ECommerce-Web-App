@@ -87,9 +87,9 @@ const Dashboard = () => {
       customer?.orders?.filter((order: any) => order.orderStatus === 2)
         .length || 0,
     pendingDeliveries:
-      customer?.orders?.filter((order: any) =>
-        [0, 1, 2].includes(order.orderStatus)
-      ).length || 0,
+    customer?.orders?.filter((order: any) =>
+      [1, 2].includes(order.orderStatus) && !order.estimatedDeliveryTime
+    ).length || 0,
     totalSpent:
       customer?.wallet?.transactions
         ?.filter((tx: any) => tx.transactionType === "Debit")
@@ -248,7 +248,7 @@ const Dashboard = () => {
           <Col xs={24} lg={16}>
             <Card
               title="Recent Orders"
-              extra={<Link to="/orders">View All</Link>}
+              extra={<Link to="/customer/orders">View All</Link>}
             >
               <List
                 dataSource={stats.recentOrders}

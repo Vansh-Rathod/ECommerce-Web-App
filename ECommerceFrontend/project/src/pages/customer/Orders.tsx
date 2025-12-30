@@ -5,6 +5,7 @@ import { useCustomer } from '../../context/CustomerContext';
 import { ClockCircleOutlined, CheckCircleOutlined, TruckOutlined } from '@ant-design/icons';
 import { GetOrders } from '../../services/OrderApiHelperService';
 import { orderItemStatusMap, orderStatusMap } from '../../Constants';
+import { ThumbsDown } from 'lucide-react';
 
 const { Title, Text } = Typography;
 
@@ -167,15 +168,28 @@ const OrdersPage = () => {
       title: 'Delivery',
       dataIndex: 'estimatedDeliveryTime',
       key: 'estimatedDeliveryTime',
-      render: (estimatedDeliveryTime: string) => {
-        const date = new Date(estimatedDeliveryTime);
-        const now = new Date();
-        const isDelivered = date < now;
-        
+      render: (_: string, record: any) => {
+        const { isDelivered, estimatedDeliveryTime, orderStatus } = record;
+    
         if (isDelivered) {
           return <Tag color="green">Delivered</Tag>;
         }
-        
+
+        if (!estimatedDeliveryTime && !isDelivered && orderStatus === 3) {
+          return (
+            <Tag color="red" className="inline-flex items-center gap-1">
+              <ThumbsDown size={14} />
+              Order Rejected
+            </Tag>
+          );
+        }
+    
+        if (!estimatedDeliveryTime) {
+          return <Tag color="default"> Waiting For Approval</Tag>;
+        }
+    
+        const date = new Date(estimatedDeliveryTime);
+    
         return (
           <Tooltip title={`Estimated: ${date.toLocaleString()}`}>
             <Space>

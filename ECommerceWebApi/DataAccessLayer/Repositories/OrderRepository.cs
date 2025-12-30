@@ -99,7 +99,7 @@ namespace DataAccessLayer.Repositories
                     OrderDate = DateTime.UtcNow,
                     Status = OrderStatus.Pending,
                     OrderItems = new List<OrderItem>(),
-                    EstimatedDeliveryTime = DateTime.UtcNow.AddMinutes(new Random().Next(30, 61)),
+                    //EstimatedDeliveryTime = DateTime.UtcNow.AddMinutes(new Random().Next(30, 61)),
                     TotalAmount = 0
                 };
 
@@ -273,13 +273,63 @@ namespace DataAccessLayer.Repositories
                                 .Where(order => order.OrderItems.Any(item => item.SellerId == sellerId));
 
                 // Filter by status if provided
-                if(!string.IsNullOrWhiteSpace(filterByOrderStatus) && !filterByOrderStatus.Equals("all", StringComparison.OrdinalIgnoreCase))
-                {
-                    Enum.TryParse<OrderStatus>(filterByOrderStatus, true, out var parsedStatus);
-                    {
-                        int statusValue = (int)parsedStatus;
-                        query = query.Where(order => (int)order.Status == statusValue);
+                //if(!string.IsNullOrWhiteSpace(filterByOrderStatus) && !filterByOrderStatus.Equals("all", StringComparison.OrdinalIgnoreCase))
+                //{
+                //    Enum.TryParse<OrderStatus>(filterByOrderStatus, true, out var parsedStatus);
+                //    {
+                //        int statusValue = (int)parsedStatus;
+                //        query = query.Where(order => (int)order.Status == statusValue);
 
+                //    }
+                //}
+
+                // Filter by status if provided
+                if(!string.IsNullOrWhiteSpace(filterByOrderStatus) &&
+            !filterByOrderStatus.Equals("all", StringComparison.OrdinalIgnoreCase))
+                {
+                    switch(filterByOrderStatus.ToLower())
+                    {
+                        case "pending":
+                            // If any order item is pending
+                            //query = query.Where(order =>
+                            //    order.OrderItems.Any(item => item.SellerId == sellerId && item.Status == OrderItemStatus.Pending));
+                            //break;
+
+                            query = query.Where(order =>
+            order.OrderItems
+                .Where(item => item.SellerId == sellerId)
+                .Any(item => item.Status == OrderItemStatus.Pending));
+                            break;
+
+                        case "approved":
+                            // If all order items are approved
+                            query = query.Where(order =>
+            order.OrderItems
+                .Where(item => item.SellerId == sellerId)
+                .All(item => item.Status == OrderItemStatus.Approved));
+                            break;
+
+                        case "rejected":
+                            // If all order items are rejected
+                            query = query.Where(order =>
+            order.OrderItems
+                .Where(item => item.SellerId == sellerId)
+                .All(item => item.Status == OrderItemStatus.Rejected));
+                            break;
+
+                        case "partiallyapproved":
+                            // If order has at least one Approved and one Rejected, but no Pending
+                            query = query.Where(order =>
+           order.OrderItems
+               .Where(item => item.SellerId == sellerId)
+               .Any(item => item.Status == OrderItemStatus.Approved) &&
+           order.OrderItems
+               .Where(item => item.SellerId == sellerId)
+               .Any(item => item.Status == OrderItemStatus.Rejected) &&
+           !order.OrderItems
+               .Where(item => item.SellerId == sellerId)
+               .Any(item => item.Status == OrderItemStatus.Pending));
+                            break;
                     }
                 }
 
@@ -578,12 +628,10 @@ namespace DataAccessLayer.Repositories
                 {
                     // update order status
                     order.Status = OrderStatus.Approved;
+                    order.EstimatedDeliveryTime = DateTime.UtcNow.AddMinutes(new Random().Next(30, 61));
                     await _dbContext.SaveChangesAsync();
 
                     // All items approved
-
-                    //order.EstimatedDeliveryTime = DateTime.UtcNow.AddMinutes(new Random().Next(30, 61));
-                    //await _dbContext.SaveChangesAsync();
 
                     //await _emailNotificationService.SendCustomerOrderApprovedEmail(order.Customer.User, approvedItems);
 
@@ -595,6 +643,7 @@ namespace DataAccessLayer.Repositories
                 {
                     // update order status
                     order.Status = OrderStatus.PartiallyApproved;
+                    order.EstimatedDeliveryTime = DateTime.UtcNow.AddMinutes(new Random().Next(30, 61));
                     await _dbContext.SaveChangesAsync();
 
                     // Partial approval (some approved, some rejected)
